@@ -78,29 +78,6 @@
             max-width: 500px;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
-        /* 드롭다운 메뉴 스타일 */
-        .dropdown-menu {
-            position: absolute;
-            right: 0;
-            top: 100%;
-            background-color: white;
-            border: 1px solid #e0e0e0;
-            border-radius: 0.375rem;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-            z-index: 50;
-            min-width: 120px;
-            padding: 0.5rem 0;
-        }
-        .dropdown-menu button {
-            width: 100%;
-            text-align: left;
-            padding: 0.5rem 1rem;
-            color: #333;
-            font-size: 0.875rem;
-        }
-        .dropdown-menu button:hover {
-            background-color: #f0f0f0;
-        }
     </style>
 </head>
 <body class="min-h-screen flex flex-col">
@@ -115,28 +92,24 @@
             </div>
 
             <div class="flex items-center w-full md:w-auto">
-                <div class="relative flex-grow md:flex-grow-0 mr-2">
-                    <input type="text" placeholder="검색어를 입력하세요" class="w-full pl-3 pr-10 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
-                    <button class="absolute right-0 top-0 mt-2 mr-2 text-gray-500 hover:text-blue-600">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-                    </button>
-                </div>
-                <button id="loginBtn" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition duration-200 text-sm mr-2">로그인</button>
-                <button id="signupBtn" class="bg-gray-200 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-300 transition duration-200 text-sm">회원가입</button>
+                <div id="authControls" class="flex items-center">
+                    <button id="loginBtn" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition duration-200 text-sm mr-2">로그인</button>
+                    <button id="signupBtn" class="bg-gray-200 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-300 transition duration-200 text-sm">회원가입</button>
 
-                <div id="userProfileArea" class="relative hidden">
-                    <button id="userProfileBtn" class="bg-gray-100 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-200 transition duration-200 text-sm flex items-center">
-                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
-                        <span id="userDisplayName">안녕하세요, 사용자님!</span>
-                        <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-                    </button>
-                    <div id="userDropdownMenu" class="dropdown-menu hidden">
-                        <button id="logoutBtn" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">로그아웃</button>
+                    <div id="loggedInUserContainer" class="relative hidden">
+                        <button id="userDropdownToggle" class="flex items-center text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md transition duration-200 text-sm">
+                            <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+                            <span id="loggedInUserId">로딩 중...</span>
+                            <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </button>
+                        <div id="logoutDropdown" class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 hidden z-20">
+                            <button id="logoutBtn" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">로그아웃</button>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-    </header>
+        </header>
 
     <nav class="dc-menubar-bg py-2 px-4 md:px-8">
         <div class="container mx-auto flex flex-wrap justify-center md:justify-start text-sm font-medium">
@@ -211,7 +184,7 @@
                 <h3 class="text-lg font-semibold mb-3">인기 갤러리</h3>
                 <ul class="space-y-2 text-sm">
                     <li><a href="#" class="text-gray-700 hover:text-blue-600">주식 갤러리</a></li>
-                    <li><a href="#" class="text-700 hover:text-blue-600">비트코인 갤러리</a></li>
+                    <li><a href="#" class="text-gray-700 hover:text-blue-600">비트코인 갤러리</a></li>
                     <li><a href="#" class="text-gray-700 hover:text-blue-600">연예인 갤러리</a></li>
                     <li><a href="#" class="text-gray-700 hover:text-blue-600">게임 갤러리</a></li>
                     <li><a href="#" class="text-gray-700 hover:text-blue-600">음악 갤러리</a></li>
@@ -291,80 +264,70 @@
     <script type="module">
         // Firebase SDK imports
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, addDoc, onSnapshot, query, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-        import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-analytics.js";
+
+        // Firebase configuration (사용자님께서 제공해주신 정확한 설정)
+        const firebaseConfig = {
+            apiKey: "AIzaSyDLzrMR2QVK4rWNDIg4bQv4rlYTkchnU58",
+            authDomain: "uniz-a.firebaseapp.com",
+            projectId: "uniz-a",
+            storageBucket: "uniz-a.firebasestorage.app",
+            messagingSenderId: "389183402425",
+            appId: "1:389183402425:web:1272bcca61cdf9720c0668",
+            measurementId: "G-RTWDXH8GKQ"
+        };
 
         // Global Firebase variables
         let app;
         let db;
         let auth;
-        let userId = null;
+        let userId = null; // Initialize as null
         let postsCollectionRef;
         let isAuthReady = false;
-
-        // Get DOM elements for header UI
-        const loginBtn = document.getElementById('loginBtn');
-        const signupBtn = document.getElementById('signupBtn');
-        const userProfileArea = document.getElementById('userProfileArea');
-        const userProfileBtn = document.getElementById('userProfileBtn');
-        const userDisplayName = document.getElementById('userDisplayName');
-        const userDropdownMenu = document.getElementById('userDropdownMenu');
-        const logoutBtn = document.getElementById('logoutBtn');
 
         // Initialize Firebase and Auth
         const initFirebase = async () => {
             try {
-                // Use global variables for Firebase config and app ID
-                const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
-                const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-                const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
-
                 app = initializeApp(firebaseConfig);
                 db = getFirestore(app);
                 auth = getAuth(app);
-                const analytics = getAnalytics(app);
 
-                // Define the Firestore collection path for public posts using the provided appId
+                // Define the Firestore collection path for public posts
+                const appId = firebaseConfig.projectId; // Using projectId as appId for consistency
                 postsCollectionRef = collection(db, `artifacts/${appId}/public/data/posts`);
-
-                // Attempt to sign in with custom token if available, otherwise sign in anonymously
-                // This ensures an authentication state is established early
-                if (initialAuthToken) {
-                    await signInWithCustomToken(auth, initialAuthToken);
-                    console.log("Signed in with custom token.");
-                } else {
-                    await signInAnonymously(auth);
-                    console.log("Signed in anonymously.");
-                }
 
                 // Listen for authentication state changes
                 onAuthStateChanged(auth, (user) => {
+                    const loginBtn = document.getElementById('loginBtn');
+                    const signupBtn = document.getElementById('signupBtn');
+                    const loggedInUserContainer = document.getElementById('loggedInUserContainer');
+                    const loggedInUserIdSpan = document.getElementById('loggedInUserId');
+                    const logoutDropdown = document.getElementById('logoutDropdown');
+
                     if (user) {
                         userId = user.uid;
-                        const displayId = userId.substring(0, 8); // Display first 8 characters of UID
-                        userDisplayName.textContent = `안녕하세요, ${displayId}님!`;
+                        loggedInUserIdSpan.textContent = user.displayName || `익명${user.uid.substring(0, 4)}`;
                         loginBtn.classList.add('hidden');
                         signupBtn.classList.add('hidden');
-                        userProfileArea.classList.remove('hidden');
-                        isAuthReady = true;
+                        loggedInUserContainer.classList.remove('hidden');
                         console.log("Firebase initialized and user authenticated:", userId);
                     } else {
                         userId = null;
                         loginBtn.classList.remove('hidden');
                         signupBtn.classList.remove('hidden');
-                        userProfileArea.classList.add('hidden');
-                        userDropdownMenu.classList.add('hidden'); // Hide dropdown if user logs out
-                        isAuthReady = true; // Auth state is known (no user, or anonymous user)
-                        console.log("User is not logged in or anonymous sign-in pending/failed.");
+                        loggedInUserContainer.classList.add('hidden');
+                        logoutDropdown.classList.add('hidden'); // Ensure dropdown is hidden on logout
+                        console.log("User is not logged in.");
                     }
-                    // Setup post listener only after auth state is determined
+                    isAuthReady = true;
+                    console.log("Authentication ready, setting up post listener. isAuthReady:", isAuthReady);
                     setupPostListener();
                 });
 
             } catch (error) {
                 console.error("Error initializing Firebase:", error);
-                // No UI message for this error, just console log
+                // userIdDisplay는 authControls 내부에 통합되어 더 이상 직접 접근하지 않음
             }
         };
 
@@ -420,19 +383,21 @@
                 console.log("Authentication not ready, skipping post listener setup.");
                 return;
             }
+            console.log("Attempting to set up onSnapshot listener for posts...");
             // Use onSnapshot to listen for real-time updates
             onSnapshot(postsCollectionRef, (snapshot) => {
                 const posts = [];
                 snapshot.forEach((doc) => {
                     posts.push({ id: doc.id, ...doc.data() });
                 });
+                console.log("Posts fetched successfully. Number of posts:", posts.length);
                 renderPosts(posts);
             }, (error) => {
                 console.error("Error fetching posts:", error);
                 document.getElementById('postsTableBody').innerHTML = `
                     <tr>
                         <td colspan="6" class="text-center py-4 text-red-500">
-                            게시물을 불러오는 데 실패했습니다.
+                            게시물을 불러오는 데 실패했습니다. 오류: ${error.message}
                         </td>
                     </tr>
                 `;
@@ -441,6 +406,7 @@
 
         // Function to create a new post
         const createPost = async (title, content) => {
+            // isAnonymous 속성 대신 user 객체 자체의 존재 여부와 uid를 확인하여 로그인 여부 판단
             if (!auth.currentUser || !auth.currentUser.uid) {
                 console.error("User not authenticated. Cannot create post.");
                 showPostModal(); // Re-show modal with login required message
@@ -451,8 +417,8 @@
                     title: title,
                     content: content,
                     authorId: auth.currentUser.uid,
-                    authorName: auth.currentUser.displayName || `익명${auth.currentUser.uid.substring(0, 4)}`,
-                    createdAt: serverTimestamp(),
+                    authorName: auth.currentUser.displayName || `익명${auth.currentUser.uid.substring(0, 4)}`, // Use display name if available
+                    createdAt: serverTimestamp(), // Use server timestamp
                     views: 0,
                     recommendations: 0,
                     comments: 0
@@ -478,10 +444,14 @@
         const postContentInput = document.getElementById('postContent');
         const goToLoginBtn = document.getElementById('goToLoginBtn');
         const closeLoginRequiredBtn = document.getElementById('closeLoginRequiredBtn');
+        const userDropdownToggle = document.getElementById('userDropdownToggle');
+        const logoutDropdown = document.getElementById('logoutDropdown');
+        const logoutBtn = document.getElementById('logoutBtn');
 
 
         // Show post creation modal or login required message
         const showPostModal = () => {
+            // isAnonymous 속성 대신 user 객체 자체의 존재 여부와 uid를 확인하여 로그인 여부 판단
             if (auth.currentUser && auth.currentUser.uid) {
                 // User is logged in, show post creation form
                 modalTitle.textContent = "새 게시물 작성";
@@ -507,7 +477,7 @@
         writePostBtn.addEventListener('click', showPostModal);
         bottomWritePostBtn.addEventListener('click', showPostModal);
         cancelPostBtn.addEventListener('click', hidePostModal);
-        closeLoginRequiredBtn.addEventListener('click', hidePostModal);
+        closeLoginRequiredBtn.addEventListener('click', hidePostModal); // Close button for login required message
 
         submitPostBtn.addEventListener('click', () => {
             const title = postTitleInput.value.trim();
@@ -520,27 +490,27 @@
             }
         });
 
-        // Toggle user dropdown menu
-        userProfileBtn.addEventListener('click', (event) => {
-            event.stopPropagation(); // Prevent document click from closing immediately
-            userDropdownMenu.classList.toggle('hidden');
+        // Event listener for userDropdownToggle (로그인된 사용자 드롭다운 토글)
+        userDropdownToggle.addEventListener('click', (event) => {
+            event.stopPropagation(); // Prevent click from bubbling up to window and closing immediately
+            logoutDropdown.classList.toggle('hidden');
         });
 
-        // Close dropdown when clicking outside
-        document.addEventListener('click', (event) => {
-            if (!userProfileArea.contains(event.target) && !userDropdownMenu.classList.contains('hidden')) {
-                userDropdownMenu.classList.add('hidden');
-            }
-        });
-
-        // Logout functionality
+        // Event listener for logoutBtn (로그아웃 버튼)
         logoutBtn.addEventListener('click', async () => {
             try {
                 await signOut(auth);
-                console.log("User logged out.");
+                console.log("User logged out successfully!");
                 // UI will be updated by onAuthStateChanged listener
             } catch (error) {
-                console.error("Error signing out:", error);
+                console.error("Error logging out:", error);
+            }
+        });
+
+        // Close dropdown if clicked outside (드롭다운 외부 클릭 시 닫기)
+        window.addEventListener('click', (event) => {
+            if (logoutDropdown && userDropdownToggle && !userDropdownToggle.contains(event.target) && !logoutDropdown.contains(event.target)) {
+                logoutDropdown.classList.add('hidden');
             }
         });
 
