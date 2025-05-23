@@ -10,14 +10,13 @@
         /* Inter 폰트 설정 및 기본 스타일 */
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #ffffff; /* 배경색 흰색으로 변경 */
+            background-color: #ffffff;
             color: #333;
-            /* 하단 고정 내비게이션 바가 있을 경우, 콘텐츠가 가려지지 않도록 패딩 추가 */
-            padding-bottom: 64px; /* 하단 내비게이션 바 높이만큼 패딩 */
+            padding-bottom: 64px;
         }
         /* 디시인사이드 로고 색상 (예시) */
         .dc-logo-color {
-            color: #007bff; /* 파란색 계열 */
+            color: #007bff;
         }
         /* 디시인사이드 헤더 배경색 (예시) */
         .dc-header-bg {
@@ -261,53 +260,55 @@
     <script type="module">
         // Firebase SDK imports
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, addDoc, onSnapshot, query, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Firebase configuration (use your actual project config here for deployment)
+        const firebaseConfig = {
+            apiKey: "AIzaSyDLzrMR2QVK4rWNDIg4bQv4rlYTkchnU58",
+            authDomain: "uniz-a.firebaseapp.com",
+            projectId: "uniz-a",
+            storageBucket: "uniz-a.firebasestorage.app",
+            messagingSenderId: "389183402425",
+            appId: "1:389183402425:web:1272bcca61cdf9720c0668",
+            measurementId: "G-RTWDXH8GKQ"
+        };
 
         // Global Firebase variables
         let app;
         let db;
         let auth;
-        let userId;
+        let userId = null; // Initialize as null
         let postsCollectionRef;
         let isAuthReady = false;
 
         // Initialize Firebase and Auth
         const initFirebase = async () => {
             try {
-                // Use __firebase_config from the Canvas environment
-                const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
-                const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-
                 app = initializeApp(firebaseConfig);
                 db = getFirestore(app);
                 auth = getAuth(app);
 
                 // Define the Firestore collection path for public posts
+                // Use a fixed appId for deployment, or derive it from firebaseConfig.projectId if needed
+                const appId = firebaseConfig.projectId; // Using projectId as appId for consistency
                 postsCollectionRef = collection(db, `artifacts/${appId}/public/data/posts`);
 
                 // Listen for authentication state changes
-                onAuthStateChanged(auth, async (user) => {
+                onAuthStateChanged(auth, (user) => {
                     if (user) {
                         userId = user.uid;
                         document.getElementById('userIdDisplay').textContent = `사용자 ID: ${userId}`;
                         isAuthReady = true;
                         console.log("Firebase initialized and user authenticated:", userId);
-                        // Once authenticated, set up the real-time listener for posts
-                        setupPostListener();
                     } else {
-                        // Sign in anonymously if no user is logged in
-                        if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                            await signInWithCustomToken(auth, __initial_auth_token);
-                        } else {
-                            await signInAnonymously(auth);
-                        }
-                        userId = auth.currentUser?.uid || crypto.randomUUID(); // Fallback for anonymous
-                        document.getElementById('userIdDisplay').textContent = `사용자 ID: ${userId} (로그인 필요)`;
-                        isAuthReady = true; // Auth state is known, even if anonymous
-                        setupPostListener(); // Still load posts for anonymous users
-                        console.log("Attempting anonymous sign-in or user not logged in.");
+                        userId = null; // User is not logged in
+                        document.getElementById('userIdDisplay').textContent = `사용자 ID: 로그인 필요`;
+                        isAuthReady = true; // Auth state is known
+                        console.log("User is not logged in.");
                     }
+                    // Setup post listener regardless of login status to display public posts
+                    setupPostListener();
                 });
 
             } catch (error) {
@@ -334,7 +335,7 @@
 
             // Sort posts by createdAt in descending order (newest first)
             const sortedPosts = posts.sort((a, b) => {
-                const dateA = a.createdAt ? a.createdAt.toDate() : new Date(0); // Handle null/undefined
+                const dateA = a.createdAt ? a.createdAt.toDate() : new Date(0);
                 const dateB = b.createdAt ? b.createdAt.toDate() : new Date(0);
                 return dateB - dateA;
             });
@@ -391,7 +392,7 @@
         const createPost = async (title, content) => {
             if (!auth.currentUser || auth.currentUser.isAnonymous) { // Check if user is logged in and not anonymous
                 console.error("User not authenticated. Cannot create post.");
-                showLoginRequiredMessage(); // Show login required message
+                showPostModal(); // Re-show modal with login required message
                 return;
             }
             try {
@@ -473,19 +474,13 @@
 
         // Redirect to the new authentication page
         document.getElementById('loginBtn').addEventListener('click', () => {
-            console.log("로그인 페이지로 이동합니다. (새 캔버스 확인)");
-            // In a real application, you would navigate to a new page like:
-            // window.location.href = 'auth.html';
+            window.location.href = 'auth.html'; // Redirect to auth.html
         });
         document.getElementById('signupBtn').addEventListener('click', () => {
-            console.log("회원가입 페이지로 이동합니다. (새 캔버스 확인)");
-            // In a real application, you would navigate to a new page like:
-            // window.location.href = 'auth.html';
+            window.location.href = 'auth.html'; // Redirect to auth.html
         });
         goToLoginBtn.addEventListener('click', () => {
-            console.log("로그인 페이지로 이동합니다. (새 캔버스 확인)");
-            // In a real application, you would navigate to a new page like:
-            // window.location.href = 'auth.html';
+            window.location.href = 'auth.html'; // Redirect to auth.html
             hidePostModal(); // Close the current modal
         });
 
