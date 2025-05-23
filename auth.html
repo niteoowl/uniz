@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>로그인 / 회원가입</title>
+    <title>UNIZ - 계정</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
     <style>
@@ -193,7 +193,7 @@
                 showSuccessMessage(loginSuccessMsg, '로그인 성공! 메인 페이지로 돌아갑니다.');
                 console.log("Login successful!");
                 // Redirect to the main page after successful login
-                window.location.href = 'index.html'; // Assuming main page is index.html
+                window.location.href = 'community.html'; // Assuming main page is index.html
             } catch (error) {
                 let errorMessage = '로그인 실패. 다시 시도해주세요.';
                 switch (error.code) {
