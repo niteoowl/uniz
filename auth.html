@@ -100,8 +100,16 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
 
-        // Firebase configuration (using Canvas provided globals)
-        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
+        // Firebase configuration (use your actual project config here for deployment)
+        const firebaseConfig = {
+            apiKey: "AIzaSyDLzrMR2QVK4rWNDIg4bQv4rlYTkchnU58",
+            authDomain: "uniz-a.firebaseapp.com",
+            projectId: "uniz-a",
+            storageBucket: "uniz-a.firebasestorage.app",
+            messagingSenderId: "389183402425",
+            appId: "1:389183402425:web:1272bcca61cdf9720c0668",
+            measurementId: "G-RTWDXH8GKQ"
+        };
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
 
@@ -182,10 +190,10 @@
 
             try {
                 await signInWithEmailAndPassword(auth, email, password);
-                showSuccessMessage(loginSuccessMsg, '로그인 성공! 메인 페이지로 돌아가세요.');
+                showSuccessMessage(loginSuccessMsg, '로그인 성공! 메인 페이지로 돌아갑니다.');
                 console.log("Login successful!");
-                // In a real app, you would redirect to the main page here:
-                // window.location.href = 'index.html';
+                // Redirect to the main page after successful login
+                window.location.href = 'index.html'; // Assuming main page is index.html
             } catch (error) {
                 let errorMessage = '로그인 실패. 다시 시도해주세요.';
                 switch (error.code) {
@@ -239,14 +247,10 @@
                 await updateProfile(userCredential.user, {
                     displayName: email.split('@')[0] // Use part of email as display name
                 });
-                showSuccessMessage(signupSuccessMsg, '회원가입 성공! 이제 로그인할 수 있습니다.');
+                showSuccessMessage(signupSuccessMsg, '회원가입 성공! 이제 로그인 페이지로 이동합니다.');
                 console.log("Signup successful!");
-                // Optionally switch to login form after successful signup
-                authTitle.textContent = '로그인';
-                signupForm.classList.add('hidden');
-                loginForm.classList.remove('hidden');
-                loginEmailInput.value = email; // Pre-fill email for convenience
-                loginPasswordInput.value = '';
+                // Redirect to the main page after successful signup
+                window.location.href = 'index.html'; // Assuming main page is index.html
             } catch (error) {
                 let errorMessage = '회원가입 실패. 다시 시도해주세요.';
                 switch (error.code) {
