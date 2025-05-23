@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>디시인사이드 클론</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        /* Inter 폰트 설정 및 기본 스타일 */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #ffffff; /* 배경색 흰색으로 변경 */
+            color: #333;
+            /* 하단 고정 내비게이션 바가 있을 경우, 콘텐츠가 가려지지 않도록 패딩 추가 */
+            padding-bottom: 64px; /* 하단 내비게이션 바 높이만큼 패딩 */
+        }
+        /* 디시인사이드 로고 색상 (예시) */
+        .dc-logo-color {
+            color: #007bff; /* 파란색 계열 */
+        }
+        /* 디시인사이드 헤더 배경색 (예시) */
+        .dc-header-bg {
+            background-color: #fff;
+        }
+        /* 디시인사이드 메뉴바 배경색 (예시) */
+        .dc-menubar-bg {
+            background-color: #f8f8f8;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        /* 디시인사이드 게시물 목록 배경색 */
+        .dc-post-list-bg {
+            background-color: #fff;
+        }
+        /* 디시인사이드 사이드바 배경색 */
+        .dc-sidebar-bg {
+            background-color: #fff;
+        }
+        /* 링크 색상 */
+        a {
+            color: #007bff;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        /* 로딩 스피너 스타일 */
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        /* 모달 배경 */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        /* 모달 내용 */
+        .modal-content {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 0.5rem;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+    <header class="dc-header-bg py-3 px-4 md:px-8 border-b border-gray-200">
+        <div class="container mx-auto flex flex-col md:flex-row items-center justify-between">
+            <div class="flex items-center mb-3 md:mb-0">
+                <a href="#" class="text-2xl font-bold dc-logo-color">
+                    <span class="text-gray-700">DC</span> <span class="text-blue-600">Inside</span>
+                </a>
+                <span class="ml-4 text-sm text-gray-500">커뮤니티 포털</span>
+            </div>
+
+            <div class="flex items-center w-full md:w-auto">
+                <div class="relative flex-grow md:flex-grow-0 mr-2">
+                    <input type="text" placeholder="검색어를 입력하세요" class="w-full pl-3 pr-10 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
+                    <button class="absolute right-0 top-0 mt-2 mr-2 text-gray-500 hover:text-blue-600">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                    </button>
+                </div>
+                <button id="loginBtn" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition duration-200 text-sm mr-2">로그인</button>
+                <button id="signupBtn" class="bg-gray-200 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-300 transition duration-200 text-sm">회원가입</button>
+            </div>
+        </div>
+        <div id="userIdDisplay" class="container mx-auto text-right text-sm text-gray-600 mt-2">
+            사용자 ID: 로딩 중...
+        </div>
+    </header>
+
+    <nav class="dc-menubar-bg py-2 px-4 md:px-8">
+        <div class="container mx-auto flex flex-wrap justify-center md:justify-start text-sm font-medium">
+            <a href="#" class="px-3 py-1 text-gray-700 hover:text-blue-600 rounded-md transition duration-200">갤러리</a>
+            <a href="#" class="px-3 py-1 text-gray-700 hover:text-blue-600 rounded-md transition duration-200">마이너 갤러리</a>
+            <a href="#" class="px-3 py-1 text-gray-700 hover:text-blue-600 rounded-md transition duration-200">미니 갤러리</a>
+            <a href="#" class="px-3 py-1 text-gray-700 hover:text-blue-600 rounded-md transition duration-200">이슈</a>
+            <a href="#" class="px-3 py-1 text-gray-700 hover:text-blue-600 rounded-md transition duration-200">뉴스</a>
+            <a href="#" class="px-3 py-1 text-gray-700 hover:text-blue-600 rounded-md transition duration-200">이벤트</a>
+        </div>
+    </nav>
+
+    <main class="flex-grow container mx-auto mt-6 px-4 md:px-8 flex flex-col lg:flex-row gap-6">
+        <section class="lg:w-3/4 w-full">
+            <div class="dc-post-list-bg p-4 rounded-lg border border-gray-200 mb-4">
+                <h2 class="text-xl font-semibold mb-2">갤러리 이름</h2>
+                <p class="text-gray-600 text-sm">이 갤러리는 다양한 주제에 대한 이야기를 나눌 수 있는 공간입니다.</p>
+            </div>
+
+            <div class="dc-post-list-bg rounded-lg overflow-hidden border border-gray-200">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/12">번호</th>
+                            <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-6/12">제목</th>
+                            <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-2/12">글쓴이</th>
+                            <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/12">날짜</th>
+                            <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/12">조회</th>
+                            <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/12">추천</th>
+                        </tr>
+                    </thead>
+                    <tbody id="postsTableBody" class="bg-white divide-y divide-gray-200">
+                        <tr>
+                            <td colspan="6" class="text-center py-4">
+                                <div class="loader mx-auto"></div>
+                                <p class="text-gray-500 mt-2">게시물을 불러오는 중...</p>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="flex justify-center mt-6">
+                <nav class="relative z-0 inline-flex rounded-md border border-gray-200 -space-x-px" aria-label="Pagination">
+                    <a href="#" class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                        <span class="sr-only">Previous</span>
+                        <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                            <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" />
+                        </svg>
+                    </a>
+                    <a href="#" aria-current="page" class="z-10 bg-blue-50 border-blue-500 text-blue-600 relative inline-flex items-center px-4 py-2 border text-sm font-medium">1</a>
+                    <a href="#" class="bg-white border-gray-300 text-gray-700 hover:bg-gray-50 relative inline-flex items-center px-4 py-2 border text-sm font-medium">2</a>
+                    <a href="#" class="bg-white border-gray-300 text-gray-700 hover:bg-gray-50 relative inline-flex items-center px-4 py-2 border text-sm font-medium">3</a>
+                    <span class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700">...</span>
+                    <a href="#" class="bg-white border-gray-300 text-gray-700 hover:bg-gray-50 relative inline-flex items-center px-4 py-2 border text-sm font-medium">10</a>
+                    <a href="#" class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                        <span class="sr-only">Next</span>
+                        <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                            <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+                        </svg>
+                    </a>
+                </nav>
+            </div>
+
+            <div class="flex justify-end mt-6">
+                <button id="writePostBtn" class="bg-blue-600 text-white px-6 py-3 rounded-md hover:bg-blue-700 transition duration-200 text-lg font-semibold">글쓰기</button>
+            </div>
+        </section>
+
+        <aside class="lg:w-1/4 w-full flex flex-col gap-6">
+            <div class="dc-sidebar-bg p-4 rounded-lg border border-gray-200">
+                <h3 class="text-lg font-semibold mb-3">인기 갤러리</h3>
+                <ul class="space-y-2 text-sm">
+                    <li><a href="#" class="text-gray-700 hover:text-blue-600">주식 갤러리</a></li>
+                    <li><a href="#" class="text-gray-700 hover:text-blue-600">비트코인 갤러리</a></li>
+                    <li><a href="#" class="text-gray-700 hover:text-blue-600">연예인 갤러리</a></li>
+                    <li><a href="#" class="text-gray-700 hover:text-blue-600">게임 갤러리</a></li>
+                    <li><a href="#" class="text-gray-700 hover:text-blue-600">음악 갤러리</a></li>
+                </ul>
+            </div>
+
+            <div class="dc-sidebar-bg p-4 rounded-lg border border-gray-200">
+                <h3 class="text-lg font-semibold mb-3">실시간 인기글</h3>
+                <ul class="space-y-2 text-sm" id="realtimePopularPosts">
+                    <li><p class="text-gray-500">로딩 중...</p></li>
+                </ul>
+            </div>
+
+            <div class="dc-sidebar-bg p-4 rounded-lg text-center border border-gray-200">
+                <h3 class="text-lg font-semibold mb-3">광고</h3>
+                <img src="https://placehold.co/250x250/cccccc/333333?text=Advertisement" alt="광고 배너" class="mx-auto rounded-md">
+            </div>
+        </aside>
+    </main>
+
+    <footer class="bg-gray-800 text-white py-6 mt-10">
+        <div class="container mx-auto text-center text-sm">
+            <p>&copy; 2025 DC Inside Clone. All rights reserved.</p>
+            <div class="flex justify-center space-x-4 mt-2">
+                <a href="#" class="hover:underline">이용약관</a>
+                <a href="#" class="hover:underline">개인정보처리방침</a>
+                <a href="#" class="hover:underline">청소년보호정책</a>
+                <a href="#" class="hover:underline">광고문의</a>
+            </div>
+        </div>
+    </footer>
+
+    <nav class="fixed bottom-0 left-0 right-0 bg-white py-2 z-50 border-t border-gray-200">
+        <div class="flex justify-around items-center h-full">
+            <a href="#" class="flex flex-col items-center text-gray-700 hover:text-blue-600 text-xs font-medium">
+                <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2 2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
+                <span>홈</span>
+            </a>
+            <a href="#" class="flex flex-col items-center text-gray-700 hover:text-blue-600 text-xs font-medium">
+                <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
+                <span>갤러리</span>
+            </a>
+            <a href="#" id="bottomWritePostBtn" class="flex flex-col items-center text-white bg-blue-600 rounded-full p-3 -mt-8 hover:bg-blue-700 transition duration-200">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
+                <span class="sr-only">글쓰기</span>
+            </a>
+            <a href="#" class="flex flex-col items-center text-gray-700 hover:text-blue-600 text-xs font-medium">
+                <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path></svg>
+                <span>알림</span>
+            </a>
+            <a href="#" class="flex flex-col items-center text-gray-700 hover:text-blue-600 text-xs font-medium">
+                <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+                <span>마이페이지</span>
+            </a>
+        </div>
+    </nav>
+
+    <div id="postModal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <h2 id="modalTitle" class="text-xl font-semibold mb-4">새 게시물 작성</h2>
+            <div id="postFormContent">
+                <input type="text" id="postTitle" placeholder="제목을 입력하세요" class="w-full p-2 border border-gray-300 rounded-md mb-3 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <textarea id="postContent" placeholder="내용을 입력하세요" rows="8" class="w-full p-2 border border-gray-300 rounded-md mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+                <div class="flex justify-end space-x-3">
+                    <button id="cancelPostBtn" class="bg-gray-300 text-gray-800 px-4 py-2 rounded-md hover:bg-gray-400 transition duration-200">취소</button>
+                    <button id="submitPostBtn" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition duration-200">작성</button>
+                </div>
+            </div>
+            <div id="loginRequiredMessage" class="hidden text-center">
+                <p class="text-lg text-gray-700 mb-4">글을 작성하려면 로그인해야 합니다.</p>
+                <button id="goToLoginBtn" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition duration-200">로그인 페이지로 이동</button>
+                <button id="closeLoginRequiredBtn" class="bg-gray-300 text-gray-800 px-4 py-2 rounded-md hover:bg-gray-400 transition duration-200 ml-2">닫기</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        // Firebase SDK imports
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, onSnapshot, query, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Global Firebase variables
+        let app;
+        let db;
+        let auth;
+        let userId;
+        let postsCollectionRef;
+        let isAuthReady = false;
+
+        // Initialize Firebase and Auth
+        const initFirebase = async () => {
+            try {
+                // Use __firebase_config from the Canvas environment
+                const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
+                const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+
+                app = initializeApp(firebaseConfig);
+                db = getFirestore(app);
+                auth = getAuth(app);
+
+                // Define the Firestore collection path for public posts
+                postsCollectionRef = collection(db, `artifacts/${appId}/public/data/posts`);
+
+                // Listen for authentication state changes
+                onAuthStateChanged(auth, async (user) => {
+                    if (user) {
+                        userId = user.uid;
+                        document.getElementById('userIdDisplay').textContent = `사용자 ID: ${userId}`;
+                        isAuthReady = true;
+                        console.log("Firebase initialized and user authenticated:", userId);
+                        // Once authenticated, set up the real-time listener for posts
+                        setupPostListener();
+                    } else {
+                        // Sign in anonymously if no user is logged in
+                        if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                            await signInWithCustomToken(auth, __initial_auth_token);
+                        } else {
+                            await signInAnonymously(auth);
+                        }
+                        userId = auth.currentUser?.uid || crypto.randomUUID(); // Fallback for anonymous
+                        document.getElementById('userIdDisplay').textContent = `사용자 ID: ${userId} (로그인 필요)`;
+                        isAuthReady = true; // Auth state is known, even if anonymous
+                        setupPostListener(); // Still load posts for anonymous users
+                        console.log("Attempting anonymous sign-in or user not logged in.");
+                    }
+                });
+
+            } catch (error) {
+                console.error("Error initializing Firebase:", error);
+                document.getElementById('userIdDisplay').textContent = `사용자 ID: 오류 발생`;
+            }
+        };
+
+        // Function to render posts to the table
+        const renderPosts = (posts) => {
+            const postsTableBody = document.getElementById('postsTableBody');
+            postsTableBody.innerHTML = ''; // Clear existing posts
+
+            if (posts.length === 0) {
+                postsTableBody.innerHTML = `
+                    <tr>
+                        <td colspan="6" class="text-center py-4 text-gray-500">
+                            게시물이 없습니다. 첫 게시물을 작성해보세요!
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            // Sort posts by createdAt in descending order (newest first)
+            const sortedPosts = posts.sort((a, b) => {
+                const dateA = a.createdAt ? a.createdAt.toDate() : new Date(0); // Handle null/undefined
+                const dateB = b.createdAt ? b.createdAt.toDate() : new Date(0);
+                return dateB - dateA;
+            });
+
+
+            sortedPosts.forEach((post, index) => {
+                const row = document.createElement('tr');
+                const postNumber = sortedPosts.length - index; // Calculate descending number
+
+                // Format timestamp
+                const date = post.createdAt ? new Date(post.createdAt.seconds * 1000) : new Date();
+                const formattedDate = `${(date.getMonth() + 1).toString().padStart(2, '0')}.${date.getDate().toString().padStart(2, '0')}`;
+
+                row.innerHTML = `
+                    <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-900">${postNumber}</td>
+                    <td class="px-4 py-2 whitespace-nowrap text-sm font-medium text-gray-900">
+                        <a href="#" class="hover:underline">${post.title} <span class="text-blue-500 text-xs">[${post.comments || 0}]</span></a>
+                    </td>
+                    <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-700">${post.authorName || '익명'}</td>
+                    <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-500">${formattedDate}</td>
+                    <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-500">${post.views || 0}</td>
+                    <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-500">${post.recommendations || 0}</td>
+                `;
+                postsTableBody.appendChild(row);
+            });
+        };
+
+        // Function to set up real-time listener for posts
+        const setupPostListener = () => {
+            if (!isAuthReady) {
+                console.log("Authentication not ready, skipping post listener setup.");
+                return;
+            }
+            // Use onSnapshot to listen for real-time updates
+            onSnapshot(postsCollectionRef, (snapshot) => {
+                const posts = [];
+                snapshot.forEach((doc) => {
+                    posts.push({ id: doc.id, ...doc.data() });
+                });
+                renderPosts(posts);
+            }, (error) => {
+                console.error("Error fetching posts:", error);
+                document.getElementById('postsTableBody').innerHTML = `
+                    <tr>
+                        <td colspan="6" class="text-center py-4 text-red-500">
+                            게시물을 불러오는 데 실패했습니다.
+                        </td>
+                    </tr>
+                `;
+            });
+        };
+
+        // Function to create a new post
+        const createPost = async (title, content) => {
+            if (!auth.currentUser || auth.currentUser.isAnonymous) { // Check if user is logged in and not anonymous
+                console.error("User not authenticated. Cannot create post.");
+                showLoginRequiredMessage(); // Show login required message
+                return;
+            }
+            try {
+                await addDoc(postsCollectionRef, {
+                    title: title,
+                    content: content,
+                    authorId: auth.currentUser.uid,
+                    authorName: auth.currentUser.displayName || `익명${auth.currentUser.uid.substring(0, 4)}`, // Use display name if available
+                    createdAt: serverTimestamp(), // Use server timestamp
+                    views: 0,
+                    recommendations: 0,
+                    comments: 0
+                });
+                console.log("Post added successfully!");
+                hidePostModal(); // Hide modal after successful post
+            } catch (error) {
+                console.error("Error adding post:", error);
+                // Display error message to user
+            }
+        };
+
+        // Get DOM elements for modal
+        const postModal = document.getElementById('postModal');
+        const modalTitle = document.getElementById('modalTitle');
+        const postFormContent = document.getElementById('postFormContent');
+        const loginRequiredMessage = document.getElementById('loginRequiredMessage');
+        const writePostBtn = document.getElementById('writePostBtn');
+        const bottomWritePostBtn = document.getElementById('bottomWritePostBtn');
+        const cancelPostBtn = document.getElementById('cancelPostBtn');
+        const submitPostBtn = document.getElementById('submitPostBtn');
+        const postTitleInput = document.getElementById('postTitle');
+        const postContentInput = document.getElementById('postContent');
+        const goToLoginBtn = document.getElementById('goToLoginBtn');
+        const closeLoginRequiredBtn = document.getElementById('closeLoginRequiredBtn');
+
+
+        // Show post creation modal or login required message
+        const showPostModal = () => {
+            if (auth.currentUser && !auth.currentUser.isAnonymous) {
+                // User is logged in, show post creation form
+                modalTitle.textContent = "새 게시물 작성";
+                postFormContent.classList.remove('hidden');
+                loginRequiredMessage.classList.add('hidden');
+            } else {
+                // User is not logged in or is anonymous, show login required message
+                modalTitle.textContent = "로그인 필요";
+                postFormContent.classList.add('hidden');
+                loginRequiredMessage.classList.remove('hidden');
+            }
+            postModal.classList.remove('hidden');
+        };
+
+        // Hide post creation modal
+        const hidePostModal = () => {
+            postModal.classList.add('hidden');
+            postTitleInput.value = ''; // Clear form
+            postContentInput.value = ''; // Clear form
+        };
+
+        // Event Listeners
+        writePostBtn.addEventListener('click', showPostModal);
+        bottomWritePostBtn.addEventListener('click', showPostModal);
+        cancelPostBtn.addEventListener('click', hidePostModal);
+        closeLoginRequiredBtn.addEventListener('click', hidePostModal); // Close button for login required message
+
+        submitPostBtn.addEventListener('click', () => {
+            const title = postTitleInput.value.trim();
+            const content = postContentInput.value.trim();
+            if (title && content) {
+                createPost(title, content);
+            } else {
+                console.log("제목과 내용을 모두 입력해주세요.");
+                // In a real app, you might show a visual error message
+            }
+        });
+
+        // Initialize Firebase when the window loads
+        window.onload = initFirebase;
+
+        // Redirect to the new authentication page
+        document.getElementById('loginBtn').addEventListener('click', () => {
+            console.log("로그인 페이지로 이동합니다. (새 캔버스 확인)");
+            // In a real application, you would navigate to a new page like:
+            // window.location.href = 'auth.html';
+        });
+        document.getElementById('signupBtn').addEventListener('click', () => {
+            console.log("회원가입 페이지로 이동합니다. (새 캔버스 확인)");
+            // In a real application, you would navigate to a new page like:
+            // window.location.href = 'auth.html';
+        });
+        goToLoginBtn.addEventListener('click', () => {
+            console.log("로그인 페이지로 이동합니다. (새 캔버스 확인)");
+            // In a real application, you would navigate to a new page like:
+            // window.location.href = 'auth.html';
+            hidePostModal(); // Close the current modal
+        });
+
+        // Optional: Populate "Real-time Popular Posts" with dummy data or integrate with Firestore
+        const popularPostsList = document.getElementById('realtimePopularPosts');
+        const dummyPopularPosts = [
+            { title: "오늘의 날씨 예보", comments: 25 },
+            { title: "최신 영화 리뷰", comments: 18 },
+            { title: "IT 트렌드 분석", comments: 10 },
+            { title: "건강 관리 팁", comments: 7 },
+            { title: "여행 계획 공유", comments: 5 }
+        ];
+        popularPostsList.innerHTML = dummyPopularPosts.map(post => `
+            <li><a href="#" class="text-gray-700 hover:text-blue-600">${post.title} <span class="text-blue-500 text-xs">[${post.comments}]</span></a></li>
+        `).join('');
+
+    </script>
+</body>
+</html>
