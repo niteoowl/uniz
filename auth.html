@@ -99,8 +99,9 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-analytics.js";
 
-        // Firebase configuration (use your actual project config here for deployment)
+        // Firebase configuration (사용자님께서 제공해주신 정확한 설정)
         const firebaseConfig = {
             apiKey: "AIzaSyDLzrMR2QVK4rWNDIg4bQv4rlYTkchnU58",
             authDomain: "uniz-a.firebaseapp.com",
@@ -112,6 +113,7 @@
         };
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
+        const analytics = getAnalytics(app);
 
         // DOM Elements
         const authTitle = document.getElementById('authTitle');
@@ -192,8 +194,7 @@
                 await signInWithEmailAndPassword(auth, email, password);
                 showSuccessMessage(loginSuccessMsg, '로그인 성공! 메인 페이지로 돌아갑니다.');
                 console.log("Login successful!");
-                // Redirect to the main page after successful login
-                window.location.href = 'index.html'; // Assuming main page is index.html
+                window.location.href = 'index.html';
             } catch (error) {
                 let errorMessage = '로그인 실패. 다시 시도해주세요.';
                 switch (error.code) {
@@ -208,6 +209,9 @@
                         break;
                     case 'auth/wrong-password':
                         errorMessage = '잘못된 비밀번호입니다.';
+                        break;
+                    case 'auth/configuration-not-found':
+                        errorMessage = 'Firebase 설정이 올바르지 않거나 인증 공급자가 활성화되지 않았습니다. Firebase 콘솔을 확인해주세요.';
                         break;
                     default:
                         errorMessage = `로그인 오류: ${error.message}`;
@@ -243,14 +247,12 @@
 
             try {
                 const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-                // Optionally set a display name for the user
                 await updateProfile(userCredential.user, {
-                    displayName: email.split('@')[0] // Use part of email as display name
+                    displayName: email.split('@')[0]
                 });
                 showSuccessMessage(signupSuccessMsg, '회원가입 성공! 이제 로그인 페이지로 이동합니다.');
                 console.log("Signup successful!");
-                // Redirect to the main page after successful signup
-                window.location.href = 'index.html'; // Assuming main page is index.html
+                window.location.href = 'index.html';
             } catch (error) {
                 let errorMessage = '회원가입 실패. 다시 시도해주세요.';
                 switch (error.code) {
@@ -262,6 +264,9 @@
                         break;
                     case 'auth/weak-password':
                         errorMessage = '비밀번호가 너무 취약합니다 (6자 이상).';
+                        break;
+                    case 'auth/configuration-not-found':
+                        errorMessage = 'Firebase 설정이 올바르지 않거나 인증 공급자가 활성화되지 않았습니다. Firebase 콘솔을 확인해주세요.';
                         break;
                     default:
                         errorMessage = `회원가입 오류: ${error.message}`;
