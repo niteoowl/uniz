@@ -242,6 +242,9 @@
         let postsCollectionRef;
         let isAuthReady = false;
 
+        // Get DOM element for user ID display
+        const userIdDisplayElement = document.getElementById('userIdDisplay');
+
         // Initialize Firebase and Auth
         const initFirebase = async () => {
             try {
@@ -256,21 +259,20 @@
                 onAuthStateChanged(auth, (user) => {
                     if (user) {
                         userId = user.uid;
-                        document.getElementById('userIdDisplay').textContent = `사용자 ID: ${userId}`;
-                        isAuthReady = true;
-                        console.log("Firebase initialized and user authenticated:", userId);
+                        userIdDisplayElement.textContent = `사용자 ID: ${userId}`;
+                        console.log("onAuthStateChanged: User is logged in. UID:", userId);
                     } else {
                         userId = null;
-                        document.getElementById('userIdDisplay').textContent = `사용자 ID: 로그인 필요`;
-                        isAuthReady = true;
-                        console.log("User is not logged in.");
+                        userIdDisplayElement.textContent = `사용자 ID: 로그인 필요`;
+                        console.log("onAuthStateChanged: User is NOT logged in.");
                     }
-                    setupPostListener();
+                    isAuthReady = true; // Auth state is now known
+                    setupPostListener(); // Call listener after auth state is determined
                 });
 
             } catch (error) {
                 console.error("Error initializing Firebase:", error);
-                document.getElementById('userIdDisplay').textContent = `사용자 ID: 오류 발생`;
+                userIdDisplayElement.textContent = `사용자 ID: 오류 발생`;
             }
         };
 
@@ -320,7 +322,11 @@
 
         const setupPostListener = () => {
             if (!isAuthReady) {
-                console.log("Authentication not ready, skipping post listener setup.");
+                console.log("setupPostListener: Authentication not ready, skipping post listener setup.");
+                return;
+            }
+            if (!postsCollectionRef) {
+                console.error("setupPostListener: postsCollectionRef is not initialized.");
                 return;
             }
             onSnapshot(postsCollectionRef, (snapshot) => {
