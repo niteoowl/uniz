@@ -56,28 +56,6 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
-        /* 모달 배경 */
-        .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-        }
-        /* 모달 내용 */
-        .modal-content {
-            background-color: white;
-            padding: 2rem;
-            border-radius: 0.5rem;
-            width: 90%;
-            max-width: 500px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
     </style>
 </head>
 <body class="min-h-screen flex flex-col">
@@ -223,7 +201,7 @@
                 <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
                 <span>갤러리</span>
             </a>
-            <a href="#" id="bottomWritePostBtn" class="flex flex-col items-center text-white bg-blue-600 rounded-full p-3 -mt-8 hover:bg-blue-700 transition duration-200">
+            <a href="write.html" id="bottomWritePostBtn" class="flex flex-col items-center text-white bg-blue-600 rounded-full p-3 -mt-8 hover:bg-blue-700 transition duration-200">
                 <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
                 <span class="sr-only">글쓰기</span>
             </a>
@@ -238,32 +216,14 @@
         </div>
     </nav>
 
-    <div id="postModal" class="modal-overlay hidden">
-        <div class="modal-content">
-            <h2 id="modalTitle" class="text-xl font-semibold mb-4">새 게시물 작성</h2>
-            <div id="postFormContent">
-                <input type="text" id="postTitle" placeholder="제목을 입력하세요" class="w-full p-2 border border-gray-300 rounded-md mb-3 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                <textarea id="postContent" placeholder="내용을 입력하세요" rows="8" class="w-full p-2 border border-gray-300 rounded-md mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
-                <div class="flex justify-end space-x-3">
-                    <button id="cancelPostBtn" class="bg-gray-300 text-gray-800 px-4 py-2 rounded-md hover:bg-gray-400 transition duration-200">취소</button>
-                    <button id="submitPostBtn" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition duration-200">작성</button>
-                </div>
-            </div>
-            <div id="loginRequiredMessage" class="hidden text-center">
-                <p class="text-lg text-gray-700 mb-4">글을 작성하려면 로그인해야 합니다.</p>
-                <button id="goToLoginBtn" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition duration-200">로그인 페이지로 이동</button>
-                <button id="closeLoginRequiredBtn" class="bg-gray-300 text-gray-800 px-4 py-2 rounded-md hover:bg-gray-400 transition duration-200 ml-2">닫기</button>
-            </div>
-        </div>
-    </div>
-
     <script type="module">
         // Firebase SDK imports
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, onSnapshot, query, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, collection, onSnapshot, query, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-analytics.js";
 
-        // Firebase configuration (use your actual project config here for deployment)
+        // Firebase configuration (사용자님께서 제공해주신 정확한 설정)
         const firebaseConfig = {
             apiKey: "AIzaSyDLzrMR2QVK4rWNDIg4bQv4rlYTkchnU58",
             authDomain: "uniz-a.firebaseapp.com",
@@ -278,7 +238,7 @@
         let app;
         let db;
         let auth;
-        let userId = null; // Initialize as null
+        let userId = null;
         let postsCollectionRef;
         let isAuthReady = false;
 
@@ -288,13 +248,11 @@
                 app = initializeApp(firebaseConfig);
                 db = getFirestore(app);
                 auth = getAuth(app);
+                const analytics = getAnalytics(app);
 
-                // Define the Firestore collection path for public posts
-                // Use a fixed appId for deployment, or derive it from firebaseConfig.projectId if needed
-                const appId = firebaseConfig.projectId; // Using projectId as appId for consistency
+                const appId = firebaseConfig.projectId;
                 postsCollectionRef = collection(db, `artifacts/${appId}/public/data/posts`);
 
-                // Listen for authentication state changes
                 onAuthStateChanged(auth, (user) => {
                     if (user) {
                         userId = user.uid;
@@ -302,12 +260,11 @@
                         isAuthReady = true;
                         console.log("Firebase initialized and user authenticated:", userId);
                     } else {
-                        userId = null; // User is not logged in
+                        userId = null;
                         document.getElementById('userIdDisplay').textContent = `사용자 ID: 로그인 필요`;
-                        isAuthReady = true; // Auth state is known
+                        isAuthReady = true;
                         console.log("User is not logged in.");
                     }
-                    // Setup post listener regardless of login status to display public posts
                     setupPostListener();
                 });
 
@@ -320,7 +277,7 @@
         // Function to render posts to the table
         const renderPosts = (posts) => {
             const postsTableBody = document.getElementById('postsTableBody');
-            postsTableBody.innerHTML = ''; // Clear existing posts
+            postsTableBody.innerHTML = '';
 
             if (posts.length === 0) {
                 postsTableBody.innerHTML = `
@@ -333,7 +290,6 @@
                 return;
             }
 
-            // Sort posts by createdAt in descending order (newest first)
             const sortedPosts = posts.sort((a, b) => {
                 const dateA = a.createdAt ? a.createdAt.toDate() : new Date(0);
                 const dateB = b.createdAt ? b.createdAt.toDate() : new Date(0);
@@ -343,9 +299,8 @@
 
             sortedPosts.forEach((post, index) => {
                 const row = document.createElement('tr');
-                const postNumber = sortedPosts.length - index; // Calculate descending number
+                const postNumber = sortedPosts.length - index;
 
-                // Format timestamp
                 const date = post.createdAt ? new Date(post.createdAt.seconds * 1000) : new Date();
                 const formattedDate = `${(date.getMonth() + 1).toString().padStart(2, '0')}.${date.getDate().toString().padStart(2, '0')}`;
 
@@ -363,13 +318,11 @@
             });
         };
 
-        // Function to set up real-time listener for posts
         const setupPostListener = () => {
             if (!isAuthReady) {
                 console.log("Authentication not ready, skipping post listener setup.");
                 return;
             }
-            // Use onSnapshot to listen for real-time updates
             onSnapshot(postsCollectionRef, (snapshot) => {
                 const posts = [];
                 snapshot.forEach((doc) => {
@@ -388,103 +341,23 @@
             });
         };
 
-        // Function to create a new post
-        const createPost = async (title, content) => {
-            if (!auth.currentUser || auth.currentUser.isAnonymous) { // Check if user is logged in and not anonymous
-                console.error("User not authenticated. Cannot create post.");
-                showPostModal(); // Re-show modal with login required message
-                return;
-            }
-            try {
-                await addDoc(postsCollectionRef, {
-                    title: title,
-                    content: content,
-                    authorId: auth.currentUser.uid,
-                    authorName: auth.currentUser.displayName || `익명${auth.currentUser.uid.substring(0, 4)}`, // Use display name if available
-                    createdAt: serverTimestamp(), // Use server timestamp
-                    views: 0,
-                    recommendations: 0,
-                    comments: 0
-                });
-                console.log("Post added successfully!");
-                hidePostModal(); // Hide modal after successful post
-            } catch (error) {
-                console.error("Error adding post:", error);
-                // Display error message to user
-            }
-        };
-
-        // Get DOM elements for modal
-        const postModal = document.getElementById('postModal');
-        const modalTitle = document.getElementById('modalTitle');
-        const postFormContent = document.getElementById('postFormContent');
-        const loginRequiredMessage = document.getElementById('loginRequiredMessage');
-        const writePostBtn = document.getElementById('writePostBtn');
-        const bottomWritePostBtn = document.getElementById('bottomWritePostBtn');
-        const cancelPostBtn = document.getElementById('cancelPostBtn');
-        const submitPostBtn = document.getElementById('submitPostBtn');
-        const postTitleInput = document.getElementById('postTitle');
-        const postContentInput = document.getElementById('postContent');
-        const goToLoginBtn = document.getElementById('goToLoginBtn');
-        const closeLoginRequiredBtn = document.getElementById('closeLoginRequiredBtn');
-
-
-        // Show post creation modal or login required message
-        const showPostModal = () => {
-            if (auth.currentUser && !auth.currentUser.isAnonymous) {
-                // User is logged in, show post creation form
-                modalTitle.textContent = "새 게시물 작성";
-                postFormContent.classList.remove('hidden');
-                loginRequiredMessage.classList.add('hidden');
-            } else {
-                // User is not logged in or is anonymous, show login required message
-                modalTitle.textContent = "로그인 필요";
-                postFormContent.classList.add('hidden');
-                loginRequiredMessage.classList.remove('hidden');
-            }
-            postModal.classList.remove('hidden');
-        };
-
-        // Hide post creation modal
-        const hidePostModal = () => {
-            postModal.classList.add('hidden');
-            postTitleInput.value = ''; // Clear form
-            postContentInput.value = ''; // Clear form
-        };
-
-        // Event Listeners
-        writePostBtn.addEventListener('click', showPostModal);
-        bottomWritePostBtn.addEventListener('click', showPostModal);
-        cancelPostBtn.addEventListener('click', hidePostModal);
-        closeLoginRequiredBtn.addEventListener('click', hidePostModal); // Close button for login required message
-
-        submitPostBtn.addEventListener('click', () => {
-            const title = postTitleInput.value.trim();
-            const content = postContentInput.value.trim();
-            if (title && content) {
-                createPost(title, content);
-            } else {
-                console.log("제목과 내용을 모두 입력해주세요.");
-                // In a real app, you might show a visual error message
-            }
+        // Event Listeners for navigation
+        document.getElementById('writePostBtn').addEventListener('click', () => {
+            window.location.href = 'write.html'; // Redirect to write.html
+        });
+        document.getElementById('bottomWritePostBtn').addEventListener('click', () => {
+            window.location.href = 'write.html'; // Redirect to write.html
         });
 
-        // Initialize Firebase when the window loads
         window.onload = initFirebase;
 
-        // Redirect to the new authentication page
         document.getElementById('loginBtn').addEventListener('click', () => {
-            window.location.href = 'auth.html'; // Redirect to auth.html
+            window.location.href = 'auth.html';
         });
         document.getElementById('signupBtn').addEventListener('click', () => {
-            window.location.href = 'auth.html'; // Redirect to auth.html
-        });
-        goToLoginBtn.addEventListener('click', () => {
-            window.location.href = 'auth.html'; // Redirect to auth.html
-            hidePostModal(); // Close the current modal
+            window.location.href = 'auth.html';
         });
 
-        // Optional: Populate "Real-time Popular Posts" with dummy data or integrate with Firestore
         const popularPostsList = document.getElementById('realtimePopularPosts');
         const dummyPopularPosts = [
             { title: "오늘의 날씨 예보", comments: 25 },
