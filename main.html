@@ -1,0 +1,1718 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>야구 GM 시뮬레이션 게임</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f2f5;
+            color: #333;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .card {
+            background-color: #fff;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+        .btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        .btn-primary {
+            background-color: #4f46e5;
+            color: white;
+            box-shadow: 0 4px 8px rgba(79, 70, 229, 0.3);
+        }
+        .btn-primary:hover {
+            background-color: #4338ca;
+            transform: translateY(-2px);
+        }
+        .btn-secondary {
+            background-color: #e2e8f0;
+            color: #4a5568;
+        }
+        .btn-secondary:hover {
+            background-color: #cbd5e0;
+            transform: translateY(-2px);
+        }
+        .btn-danger {
+            background-color: #ef4444;
+            color: white;
+        }
+        .btn-danger:hover {
+            background-color: #dc2626;
+            transform: translateY(-2px);
+        }
+        input[type="text"], input[type="number"], input[type="password"], select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #cbd5e0;
+            border-radius: 8px;
+            margin-top: 8px;
+            margin-bottom: 16px;
+            font-size: 16px;
+        }
+        input[type="text"]:focus, input[type="number"]:focus, input[type="password"]:focus, select:focus {
+            outline: none;
+            border-color: #4f46e5;
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.2);
+        }
+        .tab-button {
+            padding: 12px 20px;
+            border-radius: 8px 8px 0 0;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+            background-color: #e2e8f0;
+            color: #4a5568;
+            border-bottom: 3px solid transparent;
+        }
+        .tab-button.active {
+            background-color: #fff;
+            color: #4f46e5;
+            border-bottom: 3px solid #4f46e5;
+        }
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.6);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .modal-content {
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+            max-width: 500px;
+            width: 90%;
+            text-align: center;
+            position: relative;
+        }
+        .modal-close-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            font-size: 24px;
+            cursor: pointer;
+            color: #94a3b8;
+        }
+        .modal-close-btn:hover {
+            color: #64748b;
+        }
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1001;
+            flex-direction: column;
+        }
+        .spinner {
+            border: 8px solid #f3f3f3;
+            border-top: 8px solid #4f46e5;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .player-card {
+            background-color: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .player-card.selected {
+            background-color: #eff6ff;
+            border-color: #60a5fa;
+            box-shadow: 0 0 0 2px rgba(96, 165, 250, 0.3);
+        }
+        .player-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 600;
+            font-size: 1.1em;
+            color: #333;
+        }
+        .player-card-stats {
+            font-size: 0.9em;
+            color: #666;
+        }
+        .player-card-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 8px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 16px;
+        }
+        th, td {
+            border: 1px solid #e2e8f0;
+            padding: 12px;
+            text-align: left;
+        }
+        th {
+            background-color: #f8fafc;
+            font-weight: 600;
+            color: #4a5568;
+            text-transform: uppercase;
+            font-size: 0.9em;
+        }
+        tr:nth-child(even) {
+            background-color: #fbfcfe;
+        }
+        tr:hover {
+            background-color: #f0f4f8;
+        }
+    </style>
+</head>
+<body class="min-h-screen">
+    <div id="loading-overlay" class="loading-overlay hidden">
+        <div class="spinner"></div>
+        <p class="mt-4 text-lg font-semibold text-indigo-700" id="loading-message">로딩 중...</p>
+    </div>
+
+    <div class="container py-8">
+        <h1 class="text-4xl font-bold text-center text-indigo-700 mb-8">⚾ 야구 GM 시뮬레이션</h1>
+
+        <div class="bg-white rounded-xl shadow-lg p-6 mb-8 flex flex-col md:flex-row justify-between items-center">
+            <div id="user-info" class="text-lg font-medium text-gray-700 mb-4 md:mb-0">
+                환영합니다! <span id="display-user-id" class="font-bold text-indigo-600"></span>
+            </div>
+            <div class="flex flex-wrap gap-2">
+                <button id="nav-my-team" class="tab-button active" onclick="showSection('my-team')">
+                    <i class="fas fa-users"></i> 내 팀
+                </button>
+                <button id="nav-roster" class="tab-button" onclick="showSection('roster')">
+                    <i class="fas fa-baseball-ball"></i> 로스터
+                </button>
+                <button id="nav-lineup" class="tab-button" onclick="showSection('lineup')">
+                    <i class="fas fa-clipboard-list"></i> 라인업
+                </button>
+                <button id="nav-game-sim" class="tab-button" onclick="showSection('game-sim')">
+                    <i class="fas fa-play"></i> 경기 시뮬레이션
+                </button>
+                <button id="nav-league-standings" class="tab-button" onclick="showSection('league-standings')">
+                    <i class="fas fa-trophy"></i> 리그 순위표
+                </button>
+                <button id="nav-trade-shop" class="tab-button" onclick="showSection('trade-shop')">
+                    <i class="fas fa-exchange-alt"></i> 트레이드 & 상점
+                </button>
+                <button id="nav-hall-of-fame" class="tab-button" onclick="showSection('hall-of-fame')">
+                    <i class="fas fa-star"></i> 명예의 전당
+                </button>
+                <button id="nav-logout" class="btn btn-secondary" onclick="handleLogout()">
+                    <i class="fas fa-sign-out-alt"></i> 로그아웃
+                </button>
+            </div>
+        </div>
+
+        <div id="login-signup-section" class="card hidden">
+            <h2 class="text-2xl font-bold text-indigo-700 mb-6 text-center">로그인 / 회원가입</h2>
+            <div class="max-w-md mx-auto">
+                <label for="email" class="block text-gray-700 text-sm font-bold mb-2">이메일:</label>
+                <input type="text" id="email" placeholder="이메일을 입력하세요">
+
+                <label for="password" class="block text-gray-700 text-sm font-bold mb-2">비밀번호:</label>
+                <input type="password" id="password" placeholder="비밀번호를 입력하세요">
+
+                <div class="flex justify-between mt-6">
+                    <button id="login-btn" class="btn btn-primary w-1/2 mr-2" onclick="handleLogin()">
+                        <i class="fas fa-sign-in-alt"></i> 로그인
+                    </button>
+                    <button id="signup-btn" class="btn btn-secondary w-1/2 ml-2" onclick="handleSignup()">
+                        <i class="fas fa-user-plus"></i> 회원가입
+                    </button>
+                </div>
+                <p id="auth-error-message" class="text-red-500 text-center mt-4 hidden"></p>
+            </div>
+        </div>
+
+        <div id="my-team-section" class="card">
+            <h2 class="text-2xl font-bold text-indigo-700 mb-6">내 팀</h2>
+            <div id="team-display" class="mb-8">
+                <h3 class="text-xl font-semibold mb-4">현재 팀 정보</h3>
+                <div id="current-team-info" class="bg-blue-50 p-6 rounded-lg border border-blue-200">
+                    <p class="text-lg mb-2"><span class="font-bold">팀명:</span> <span id="display-team-name"></span></p>
+                    <p class="text-lg mb-2"><span class="font-bold">연고지:</span> <span id="display-team-location"></span></p>
+                    <p class="text-lg mb-2"><span class="font-bold">로고:</span> <span id="display-team-logo" class="text-4xl"></span></p>
+                    <p class="text-lg mb-2"><span class="font-bold">승:</span> <span id="display-team-wins">0</span></p>
+                    <p class="text-lg mb-2"><span class="font-bold">패:</span> <span id="display-team-losses">0</span></p>
+                    <p class="text-lg mb-2"><span class="font-bold">포인트:</span> <span id="display-team-points">0</span></p>
+                    <p class="text-lg mb-2"><span class="font-bold">현재 시즌:</span> <span id="display-current-season">0</span></p>
+                </div>
+            </div>
+
+            <div id="team-creation-form" class="mt-8">
+                <h3 class="text-xl font-semibold mb-4">팀 생성 / 업데이트</h3>
+                <label for="team-name" class="block text-gray-700 text-sm font-bold mb-2">팀명:</label>
+                <input type="text" id="team-name" placeholder="팀명을 입력하세요">
+
+                <label for="team-location" class="block text-gray-700 text-sm font-bold mb-2">연고지:</label>
+                <input type="text" id="team-location" placeholder="연고지를 입력하세요">
+
+                <label for="team-logo" class="block text-gray-700 text-sm font-bold mb-2">로고 (이모지):</label>
+                <input type="text" id="team-logo" placeholder="팀 로고 이모지를 입력하세요 (예: ⚾)">
+
+                <button id="create-update-team-btn" class="btn btn-primary mt-4 w-full" onclick="createOrUpdateTeam()">
+                    <i class="fas fa-save"></i> 팀 생성/업데이트
+                </button>
+            </div>
+        </div>
+
+        <div id="roster-section" class="card hidden">
+            <h2 class="text-2xl font-bold text-indigo-700 mb-6">로스터</h2>
+            <button id="generate-players-btn" class="btn btn-primary mb-6" onclick="generateInitialPlayers()">
+                <i class="fas fa-plus-circle"></i> 초기 선수 생성 (팀 생성 후 1회)
+            </button>
+            <div id="roster-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                </div>
+        </div>
+
+        <div id="lineup-section" class="card hidden">
+            <h2 class="text-2xl font-bold text-indigo-700 mb-6">라인업 편성</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div>
+                    <h3 class="text-xl font-semibold mb-4">타자 라인업 (9명)</h3>
+                    <div id="batting-lineup-slots" class="flex flex-col gap-2 mb-4">
+                        </div>
+                    <h3 class="text-xl font-semibold mb-4 mt-8">선발 투수 (1명)</h3>
+                    <div id="pitching-lineup-slots" class="flex flex-col gap-2">
+                        </div>
+                    <button id="save-lineup-btn" class="btn btn-primary mt-6 w-full" onclick="saveLineup()">
+                        <i class="fas fa-save"></i> 라인업 저장
+                    </button>
+                </div>
+                <div>
+                    <h3 class="text-xl font-semibold mb-4">선수 목록</h3>
+                    <div id="available-players-for-lineup" class="grid grid-cols-1 gap-2 max-h-96 overflow-y-auto">
+                        </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="game-sim-section" class="card hidden">
+            <h2 class="text-2xl font-bold text-indigo-700 mb-6">경기 시뮬레이션</h2>
+            <div id="game-controls" class="mb-6">
+                <button id="start-season-btn" class="btn btn-primary mr-2" onclick="startSeason()">
+                    <i class="fas fa-calendar-alt"></i> 시즌 시작
+                </button>
+                <button id="simulate-next-game-btn" class="btn btn-primary" onclick="simulateNextGame()">
+                    <i class="fas fa-forward"></i> 다음 경기 시뮬레이션
+                </button>
+            </div>
+            <div id="game-result-display" class="bg-gray-50 p-6 rounded-lg border border-gray-200">
+                <h3 class="text-xl font-semibold mb-4">최근 경기 결과</h3>
+                <div id="latest-game-summary" class="mb-4 text-gray-800">
+                    <p>아직 경기가 없습니다.</p>
+                </div>
+                <h3 class="text-xl font-semibold mb-4 mt-6">경기 기록</h3>
+                <div id="game-history-list" class="max-h-80 overflow-y-auto">
+                    </div>
+            </div>
+        </div>
+
+        <div id="league-standings-section" class="card hidden">
+            <h2 class="text-2xl font-bold text-indigo-700 mb-6">리그 순위표</h2>
+            <div id="standings-table-container">
+                <table id="standings-table" class="min-w-full bg-white rounded-lg shadow-sm">
+                    <thead>
+                        <tr>
+                            <th>순위</th>
+                            <th>팀명</th>
+                            <th>승</th>
+                            <th>패</th>
+                            <th>승률</th>
+                            <th>포인트</th>
+                        </tr>
+                    </thead>
+                    <tbody id="standings-table-body">
+                        </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="trade-shop-section" class="card hidden">
+            <h2 class="text-2xl font-bold text-indigo-700 mb-6">트레이드 & 상점</h2>
+
+            <div class="mb-8">
+                <h3 class="text-xl font-semibold mb-4">트레이드 센터</h3>
+                <button class="btn btn-primary mb-4" onclick="listPlayerForTrade()">
+                    <i class="fas fa-handshake"></i> 선수 트레이드 제안
+                </button>
+                <div id="trade-listings" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    </div>
+            </div>
+
+            <div>
+                <h3 class="text-xl font-semibold mb-4">상점</h3>
+                <div id="shop-items" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div class="card p-4 flex flex-col items-center">
+                        <span class="text-5xl mb-2">💪</span>
+                        <h4 class="font-bold text-lg">훈련 부스트</h4>
+                        <p class="text-sm text-gray-600 mb-2">선수 스탯을 소폭 상승시킵니다.</p>
+                        <p class="font-bold text-indigo-600 mb-4">500 포인트</p>
+                        <button class="btn btn-primary w-full" onclick="buyShopItem('training_boost', 500)">구매</button>
+                    </div>
+                    <div class="card p-4 flex flex-col items-center">
+                        <span class="text-5xl mb-2">🔭</span>
+                        <h4 class="font-bold text-lg">스카우트 보고서</h4>
+                        <p class="text-sm text-gray-600 mb-2">잠재력 높은 신인 선수를 발견합니다.</p>
+                        <p class="font-bold text-indigo-600 mb-4">1000 포인트</p>
+                        <button class="btn btn-primary w-full" onclick="buyShopItem('scouting_report', 1000)">구매</button>
+                    </div>
+                    </div>
+            </div>
+        </div>
+
+        <div id="hall-of-fame-section" class="card hidden">
+            <h2 class="text-2xl font-bold text-indigo-700 mb-6">명예의 전당</h2>
+            <div id="hall-of-fame-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                </div>
+        </div>
+
+        <div id="custom-modal" class="modal hidden">
+            <div class="modal-content">
+                <span class="modal-close-btn" onclick="closeModal()">&times;</span>
+                <h3 id="modal-title" class="text-xl font-bold mb-4"></h3>
+                <p id="modal-message" class="mb-6"></p>
+                <div id="modal-actions" class="flex justify-center gap-4">
+                    <button id="modal-confirm-btn" class="btn btn-primary hidden" onclick="confirmModalAction()">확인</button>
+                    <button id="modal-cancel-btn" class="btn btn-secondary hidden" onclick="closeModal()">취소</button>
+                    <button id="modal-ok-btn" class="btn btn-primary" onclick="closeModal()">확인</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc, updateDoc, onSnapshot, collection, query, where, addDoc, getDocs, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Global variables for Firebase
+        let app;
+        let db;
+        let auth;
+        let userId = null;
+        let userTeam = null;
+        let players = [];
+        let leagueTeams = []; // All teams in the league
+        let currentSeason = 0;
+        let lineup = { batters: [], pitcher: null };
+        let availablePlayersForLineup = []; // Players not currently in lineup
+
+        // Firebase configuration (provided by Canvas environment)
+        const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+
+        // Initialize Firebase
+        window.onload = async () => {
+            showLoading('앱 초기화 중...');
+            try {
+                app = initializeApp(firebaseConfig);
+                db = getFirestore(app);
+                auth = getAuth(app);
+
+                onAuthStateChanged(auth, async (user) => {
+                    if (user) {
+                        userId = user.uid;
+                        document.getElementById('display-user-id').textContent = userId;
+                        await loadUserData();
+                        hideLoading();
+                        showSection('my-team'); // Show default section after login
+                    } else {
+                        userId = null;
+                        document.getElementById('display-user-id').textContent = '로그인 필요';
+                        showSection('login-signup');
+                        hideLoading();
+                    }
+                });
+
+                if (initialAuthToken) {
+                    await signInWithCustomToken(auth, initialAuthToken);
+                } else {
+                    await signInAnonymously(auth);
+                }
+
+            } catch (error) {
+                console.error("Firebase 초기화 오류:", error);
+                showMessage('오류', `Firebase 초기화 중 오류가 발생했습니다: ${error.message}`, false);
+                hideLoading();
+            }
+        };
+
+        // --- UI Utility Functions ---
+        window.showSection = (sectionId) => {
+            const sections = ['login-signup', 'my-team', 'roster', 'lineup', 'game-sim', 'league-standings', 'trade-shop', 'hall-of-fame'];
+            sections.forEach(id => {
+                document.getElementById(`${id}-section`).classList.add('hidden');
+            });
+            document.getElementById(`${sectionId}-section`).classList.remove('hidden');
+
+            const navButtons = document.querySelectorAll('.tab-button');
+            navButtons.forEach(btn => btn.classList.remove('active'));
+            const activeNavButton = document.getElementById(`nav-${sectionId}`);
+            if (activeNavButton) {
+                activeNavButton.classList.add('active');
+            }
+        };
+
+        let currentModalAction = null;
+        window.showMessage = (title, message, isConfirm = false, onConfirm = null) => {
+            document.getElementById('modal-title').textContent = title;
+            document.getElementById('modal-message').textContent = message;
+            document.getElementById('modal-ok-btn').classList.remove('hidden');
+            document.getElementById('modal-confirm-btn').classList.add('hidden');
+            document.getElementById('modal-cancel-btn').classList.add('hidden');
+
+            if (isConfirm) {
+                document.getElementById('modal-ok-btn').classList.add('hidden');
+                document.getElementById('modal-confirm-btn').classList.remove('hidden');
+                document.getElementById('modal-cancel-btn').classList.remove('hidden');
+                currentModalAction = onConfirm;
+            } else {
+                currentModalAction = null;
+            }
+            document.getElementById('custom-modal').classList.remove('hidden');
+        };
+
+        window.closeModal = () => {
+            document.getElementById('custom-modal').classList.add('hidden');
+            currentModalAction = null;
+        };
+
+        window.confirmModalAction = () => {
+            if (currentModalAction) {
+                currentModalAction();
+            }
+            closeModal();
+        };
+
+        window.showLoading = (message = '로딩 중...') => {
+            document.getElementById('loading-message').textContent = message;
+            document.getElementById('loading-overlay').classList.remove('hidden');
+        };
+
+        window.hideLoading = () => {
+            document.getElementById('loading-overlay').classList.add('hidden');
+        };
+
+        // --- Authentication Functions ---
+        window.handleLogin = async () => {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const errorMessage = document.getElementById('auth-error-message');
+            errorMessage.classList.add('hidden');
+
+            if (!email || !password) {
+                errorMessage.textContent = '이메일과 비밀번호를 입력해주세요.';
+                errorMessage.classList.remove('hidden');
+                return;
+            }
+
+            showLoading('로그인 중...');
+            try {
+                await signInWithEmailAndPassword(auth, email, password);
+                // onAuthStateChanged will handle UI update
+            } catch (error) {
+                console.error("로그인 오류:", error);
+                errorMessage.textContent = `로그인 실패: ${error.message}`;
+                errorMessage.classList.remove('hidden');
+            } finally {
+                hideLoading();
+            }
+        };
+
+        window.handleSignup = async () => {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const errorMessage = document.getElementById('auth-error-message');
+            errorMessage.classList.add('hidden');
+
+            if (!email || !password) {
+                errorMessage.textContent = '이메일과 비밀번호를 입력해주세요.';
+                errorMessage.classList.remove('hidden');
+                return;
+            }
+
+            showLoading('회원가입 중...');
+            try {
+                await createUserWithEmailAndPassword(auth, email, password);
+                showMessage('성공', '회원가입이 완료되었습니다. 자동으로 로그인됩니다.');
+                // onAuthStateChanged will handle UI update
+            } catch (error) {
+                console.error("회원가입 오류:", error);
+                errorMessage.textContent = `회원가입 실패: ${error.message}`;
+                errorMessage.classList.remove('hidden');
+            } finally {
+                hideLoading();
+            }
+        };
+
+        window.handleLogout = async () => {
+            showLoading('로그아웃 중...');
+            try {
+                await signOut(auth);
+                userTeam = null;
+                players = [];
+                lineup = { batters: [], pitcher: null };
+                availablePlayersForLineup = [];
+                showMessage('로그아웃', '성공적으로 로그아웃되었습니다.');
+                showSection('login-signup');
+            } catch (error) {
+                console.error("로그아웃 오류:", error);
+                showMessage('오류', `로그아웃 실패: ${error.message}`, false);
+            } finally {
+                hideLoading();
+            }
+        };
+
+        // --- Data Loading and Real-time Updates ---
+        const loadUserData = async () => {
+            if (!userId) return;
+
+            // Listen to current user's team data
+            const teamDocRef = doc(db, `artifacts/${appId}/users/${userId}/teams`, userId);
+            onSnapshot(teamDocRef, (docSnap) => {
+                if (docSnap.exists()) {
+                    userTeam = docSnap.data();
+                    displayTeamInfo();
+                } else {
+                    userTeam = null;
+                    displayTeamInfo(); // Clear existing info
+                    showMessage('팀 생성 필요', '아직 팀이 없습니다. "내 팀" 섹션에서 팀을 생성해주세요.', false);
+                }
+            }, (error) => {
+                console.error("팀 데이터 로딩 오류:", error);
+                showMessage('오류', `팀 데이터를 불러오는 중 오류가 발생했습니다: ${error.message}`, false);
+            });
+
+            // Listen to current user's players
+            const playersColRef = collection(db, `artifacts/${appId}/users/${userId}/players`);
+            onSnapshot(playersColRef, (snapshot) => {
+                players = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                displayRoster();
+                displayLineupSelection(); // Update lineup selection when players change
+            }, (error) => {
+                console.error("선수 데이터 로딩 오류:", error);
+                showMessage('오류', `선수 데이터를 불러오는 중 오류가 발생했습니다: ${error.message}`, false);
+            });
+
+            // Listen to league settings
+            const leagueSettingsDocRef = doc(db, `artifacts/${appId}/public/data/league_settings`, 'current');
+            onSnapshot(leagueSettingsDocRef, (docSnap) => {
+                if (docSnap.exists()) {
+                    currentSeason = docSnap.data().currentSeason || 0;
+                    document.getElementById('display-current-season').textContent = currentSeason;
+                } else {
+                    currentSeason = 0; // Default if not exists
+                    document.getElementById('display-current-season').textContent = currentSeason;
+                    // Initialize league settings if they don't exist
+                    setDoc(leagueSettingsDocRef, { currentSeason: 0 }, { merge: true }).catch(e => console.error("리그 설정 초기화 오류:", e));
+                }
+            }, (error) => {
+                console.error("리그 설정 로딩 오류:", error);
+            });
+
+            // Listen to all teams in the league (for standings and opponent selection)
+            const allTeamsColRef = collection(db, `artifacts/${appId}/public/data/teams`);
+            onSnapshot(allTeamsColRef, (snapshot) => {
+                leagueTeams = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                updateLeagueStandings();
+            }, (error) => {
+                console.error("리그 팀 데이터 로딩 오류:", error);
+            });
+
+            // Listen to game history for the current user's team
+            const gameHistoryColRef = collection(db, `artifacts/${appId}/public/data/games`);
+            const q = query(gameHistoryColRef, where("teamIds", "array-contains", userId));
+            onSnapshot(q, (snapshot) => {
+                const games = snapshot.docs.map(doc => doc.data()).sort((a, b) => b.timestamp - a.timestamp);
+                displayGameHistory(games);
+            }, (error) => {
+                console.error("경기 기록 로딩 오류:", error);
+            });
+
+            // Listen to trade listings
+            const tradeListingsColRef = collection(db, `artifacts/${appId}/public/data/transactions`);
+            const tradeQuery = query(tradeListingsColRef, where("type", "==", "trade_listing"));
+            onSnapshot(tradeQuery, (snapshot) => {
+                const listings = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                displayTradeListings(listings);
+            }, (error) => {
+                console.error("트레이드 목록 로딩 오류:", error);
+            });
+
+            // Listen to Hall of Fame players
+            const hallOfFameColRef = collection(db, `artifacts/${appId}/public/data/hall_of_fame`);
+            onSnapshot(hallOfFameColRef, (snapshot) => {
+                const hofPlayers = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                displayHallOfFame(hofPlayers);
+            }, (error) => {
+                console.error("명예의 전당 로딩 오류:", error);
+            });
+        };
+
+        // --- Team Management ---
+        const displayTeamInfo = () => {
+            const teamNameEl = document.getElementById('display-team-name');
+            const teamLocationEl = document.getElementById('display-team-location');
+            const teamLogoEl = document.getElementById('display-team-logo');
+            const teamWinsEl = document.getElementById('display-team-wins');
+            const teamLossesEl = document.getElementById('display-team-losses');
+            const teamPointsEl = document.getElementById('display-team-points');
+            const teamCreationForm = document.getElementById('team-creation-form');
+            const generatePlayersBtn = document.getElementById('generate-players-btn');
+
+            if (userTeam) {
+                teamNameEl.textContent = userTeam.name;
+                teamLocationEl.textContent = userTeam.location;
+                teamLogoEl.textContent = userTeam.logo;
+                teamWinsEl.textContent = userTeam.wins || 0;
+                teamLossesEl.textContent = userTeam.losses || 0;
+                teamPointsEl.textContent = userTeam.points || 0;
+
+                document.getElementById('team-name').value = userTeam.name;
+                document.getElementById('team-location').value = userTeam.location;
+                document.getElementById('team-logo').value = userTeam.logo;
+
+                // Hide player generation button if players already exist
+                if (players.length > 0) {
+                    generatePlayersBtn.classList.add('hidden');
+                } else {
+                    generatePlayersBtn.classList.remove('hidden');
+                }
+
+            } else {
+                teamNameEl.textContent = '없음';
+                teamLocationEl.textContent = '없음';
+                teamLogoEl.textContent = '❓';
+                teamWinsEl.textContent = '0';
+                teamLossesEl.textContent = '0';
+                teamPointsEl.textContent = '0';
+
+                document.getElementById('team-name').value = '';
+                document.getElementById('team-location').value = '';
+                document.getElementById('team-logo').value = '';
+
+                generatePlayersBtn.classList.add('hidden'); // Cannot generate players without a team
+            }
+        };
+
+        window.createOrUpdateTeam = async () => {
+            if (!userId) {
+                showMessage('오류', '로그인이 필요합니다.');
+                return;
+            }
+
+            const teamName = document.getElementById('team-name').value.trim();
+            const teamLocation = document.getElementById('team-location').value.trim();
+            const teamLogo = document.getElementById('team-logo').value.trim();
+
+            if (!teamName || !teamLocation || !teamLogo) {
+                showMessage('경고', '팀명, 연고지, 로고를 모두 입력해주세요.');
+                return;
+            }
+
+            showLoading('팀 저장 중...');
+            try {
+                const teamData = {
+                    id: userId, // Team ID is same as owner's userId
+                    ownerId: userId,
+                    name: teamName,
+                    location: teamLocation,
+                    logo: teamLogo,
+                    wins: userTeam ? userTeam.wins : 0,
+                    losses: userTeam ? userTeam.losses : 0,
+                    points: userTeam ? userTeam.points : 0,
+                    createdAt: userTeam ? userTeam.createdAt : Date.now(),
+                    lastUpdated: Date.now()
+                };
+
+                // Save to private user collection
+                const userTeamDocRef = doc(db, `artifacts/${appId}/users/${userId}/teams`, userId);
+                await setDoc(userTeamDocRef, teamData);
+
+                // Also save to public collection for league visibility
+                const publicTeamDocRef = doc(db, `artifacts/${appId}/public/data/teams`, userId);
+                await setDoc(publicTeamDocRef, teamData);
+
+                showMessage('성공', '팀 정보가 성공적으로 저장되었습니다!');
+            } catch (error) {
+                console.error("팀 저장 오류:", error);
+                showMessage('오류', `팀 저장 중 오류가 발생했습니다: ${error.message}`, false);
+            } finally {
+                hideLoading();
+            }
+        };
+
+        // --- Player Management ---
+        const PLAYER_POSITIONS = ['P', 'C', '1B', '2B', '3B', 'SS', 'LF', 'CF', 'RF', 'DH'];
+        const PLAYER_NAMES = [
+            "김민준", "이서준", "박도윤", "최지호", "정하준", "강예준", "조시우", "윤은우", "장유찬", "임준서",
+            "한서아", "신지아", "오하윤", "권서윤", "송채원", "문수아", "황지우", "안예린", "서아윤", "고은서"
+        ];
+
+        const generateRandomStat = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
+
+        window.generateInitialPlayers = async () => {
+            if (!userId || !userTeam) {
+                showMessage('경고', '팀을 먼저 생성해주세요.');
+                return;
+            }
+            if (players.length > 0) {
+                showMessage('경고', '이미 선수들이 생성되었습니다. 초기 선수 생성은 한 번만 가능합니다.');
+                return;
+            }
+
+            showLoading('초기 선수 생성 중...');
+            try {
+                const newPlayers = [];
+                for (let i = 0; i < 25; i++) { // Generate 25 players
+                    const position = PLAYER_POSITIONS[generateRandomStat(0, PLAYER_POSITIONS.length - 1)];
+                    const name = PLAYER_NAMES[generateRandomStat(0, PLAYER_NAMES.length - 1)] + ' ' + (i + 1); // Unique name
+
+                    newPlayers.push({
+                        teamId: userId,
+                        name: name,
+                        position: position,
+                        batting_skill: generateRandomStat(50, 90), // 0-100 scale
+                        power: generateRandomStat(40, 85),
+                        speed: generateRandomStat(30, 75),
+                        defense: generateRandomStat(50, 90),
+                        pitching_skill: (position === 'P') ? generateRandomStat(60, 95) : 0, // Only pitchers have pitching skill
+                        velocity: (position === 'P') ? generateRandomStat(70, 99) : 0,
+                        age: generateRandomStat(20, 35),
+                        contract: generateRandomStat(1, 5), // Years remaining
+                        overall: 0, // Will be calculated based on stats
+                        status: 'active', // active, injured, retired, trade_listed
+                        careerGames: 0,
+                        careerHits: 0,
+                        careerHR: 0,
+                        careerRBI: 0,
+                        careerERA: 0,
+                        careerWins: 0,
+                        careerLosses: 0,
+                    });
+                }
+
+                // Calculate overall for each player
+                newPlayers.forEach(p => {
+                    if (p.position === 'P') {
+                        p.overall = Math.round((p.pitching_skill * 0.4 + p.velocity * 0.3 + p.defense * 0.3) / 10) * 10;
+                    } else {
+                        p.overall = Math.round((p.batting_skill * 0.4 + p.power * 0.3 + p.speed * 0.15 + p.defense * 0.15) / 10) * 10;
+                    }
+                });
+
+                const playersColRef = collection(db, `artifacts/${appId}/users/${userId}/players`);
+                const batch = [];
+                for (const player of newPlayers) {
+                    batch.push(addDoc(playersColRef, player));
+                }
+                await Promise.all(batch);
+                showMessage('성공', '초기 선수 25명이 성공적으로 생성되었습니다!');
+            } catch (error) {
+                console.error("선수 생성 오류:", error);
+                showMessage('오류', `선수 생성 중 오류가 발생했습니다: ${error.message}`, false);
+            } finally {
+                hideLoading();
+            }
+        };
+
+        const displayRoster = () => {
+            const rosterListEl = document.getElementById('roster-list');
+            rosterListEl.innerHTML = ''; // Clear previous list
+
+            if (players.length === 0) {
+                rosterListEl.innerHTML = '<p class="text-gray-600">아직 로스터에 선수가 없습니다. "초기 선수 생성" 버튼을 클릭하세요.</p>';
+                return;
+            }
+
+            players.forEach(player => {
+                const playerCard = document.createElement('div');
+                playerCard.className = 'player-card';
+                playerCard.innerHTML = `
+                    <div class="player-card-header">
+                        <span>${player.name} (${player.position})</span>
+                        <span class="text-indigo-600 font-bold">OVR ${player.overall}</span>
+                    </div>
+                    <div class="player-card-stats">
+                        <p>타격: ${player.batting_skill} | 파워: ${player.power} | 주력: ${player.speed} | 수비: ${player.defense}</p>
+                        ${player.position === 'P' ? `<p>투구: ${player.pitching_skill} | 구속: ${player.velocity}</p>` : ''}
+                        <p>나이: ${player.age} | 계약: ${player.contract}년</p>
+                    </div>
+                    <div class="player-card-actions">
+                        <button class="btn btn-secondary btn-sm" onclick="retirePlayer('${player.id}', '${player.name}')">
+                            <i class="fas fa-sign-out-alt"></i> 은퇴
+                        </button>
+                    </div>
+                `;
+                rosterListEl.appendChild(playerCard);
+            });
+        };
+
+        window.retirePlayer = async (playerId, playerName) => {
+            showMessage(
+                '선수 은퇴',
+                `${playerName} 선수를 은퇴시키겠습니까? 이 작업은 되돌릴 수 없습니다.`,
+                true,
+                async () => {
+                    showLoading(`${playerName} 은퇴 처리 중...`);
+                    try {
+                        // Remove player from user's roster
+                        await deleteDoc(doc(db, `artifacts/${appId}/users/${userId}/players`, playerId));
+
+                        // Add player to Hall of Fame (public collection)
+                        const playerToRetire = players.find(p => p.id === playerId);
+                        if (playerToRetire) {
+                            const hofDocRef = doc(db, `artifacts/${appId}/public/data/hall_of_fame`, playerId);
+                            await setDoc(hofDocRef, {
+                                ...playerToRetire,
+                                retiredAt: Date.now(),
+                                retiredByTeam: userTeam.name,
+                                retiredByOwnerId: userId,
+                            });
+                        }
+
+                        showMessage('성공', `${playerName} 선수가 명예의 전당에 올랐습니다!`);
+                    } catch (error) {
+                        console.error("선수 은퇴 오류:", error);
+                        showMessage('오류', `선수 은퇴 중 오류가 발생했습니다: ${error.message}`, false);
+                    } finally {
+                        hideLoading();
+                    }
+                }
+            );
+        };
+
+        // --- Lineup Management ---
+        const displayLineupSelection = () => {
+            const battingSlotsEl = document.getElementById('batting-lineup-slots');
+            const pitchingSlotEl = document.getElementById('pitching-lineup-slots');
+            const availablePlayersEl = document.getElementById('available-players-for-lineup');
+
+            battingSlotsEl.innerHTML = '';
+            pitchingSlotEl.innerHTML = '';
+            availablePlayersEl.innerHTML = '';
+
+            // Initialize lineup if not set or if players changed
+            if (lineup.batters.length === 0 && players.length > 0) {
+                // Try to auto-populate if possible, or just create empty slots
+                for (let i = 0; i < 9; i++) {
+                    lineup.batters.push(null);
+                }
+                lineup.pitcher = null;
+            }
+
+            // Create batting lineup slots
+            for (let i = 0; i < 9; i++) {
+                const slotDiv = document.createElement('div');
+                slotDiv.className = 'bg-gray-100 p-3 rounded-md flex justify-between items-center';
+                slotDiv.innerHTML = `
+                    <span class="font-semibold">${i + 1}. ${lineup.batters[i] ? players.find(p => p.id === lineup.batters[i])?.name : '선택되지 않음'}</span>
+                    <button class="btn btn-secondary btn-sm" onclick="removePlayerFromLineup('batters', ${i})">
+                        <i class="fas fa-minus-circle"></i> 제거
+                    </button>
+                `;
+                battingSlotsEl.appendChild(slotDiv);
+            }
+
+            // Create pitching lineup slot
+            const pitcherSlotDiv = document.createElement('div');
+            pitcherSlotDiv.className = 'bg-gray-100 p-3 rounded-md flex justify-between items-center';
+            pitcherSlotDiv.innerHTML = `
+                <span class="font-semibold">선발 투수: ${lineup.pitcher ? players.find(p => p.id === lineup.pitcher)?.name : '선택되지 않음'}</span>
+                <button class="btn btn-secondary btn-sm" onclick="removePlayerFromLineup('pitcher')">
+                    <i class="fas fa-minus-circle"></i> 제거
+                </button>
+            `;
+            pitchingSlotEl.appendChild(pitcherSlotDiv);
+
+            // Populate available players
+            availablePlayersForLineup = players.filter(p =>
+                !lineup.batters.includes(p.id) && p.id !== lineup.pitcher
+            );
+
+            availablePlayersForLineup.forEach(player => {
+                const playerCard = document.createElement('div');
+                playerCard.className = 'player-card cursor-pointer hover:bg-blue-50';
+                playerCard.onclick = () => selectPlayerForLineup(player.id, player.position);
+                playerCard.innerHTML = `
+                    <div class="player-card-header">
+                        <span>${player.name} (${player.position})</span>
+                        <span class="text-indigo-600 font-bold">OVR ${player.overall}</span>
+                    </div>
+                    <div class="player-card-stats">
+                        <p>타격: ${player.batting_skill} | 파워: ${player.power} | 주력: ${player.speed} | 수비: ${player.defense}</p>
+                        ${player.position === 'P' ? `<p>투구: ${player.pitching_skill} | 구속: ${player.velocity}</p>` : ''}
+                    </div>
+                `;
+                availablePlayersEl.appendChild(playerCard);
+            });
+        };
+
+        let selectedPlayerForLineupId = null;
+        let selectedPlayerForLineupPosition = null;
+
+        window.selectPlayerForLineup = (playerId, position) => {
+            selectedPlayerForLineupId = playerId;
+            selectedPlayerForLineupPosition = position;
+
+            // Highlight selected player
+            document.querySelectorAll('#available-players-for-lineup .player-card').forEach(card => card.classList.remove('selected'));
+            const selectedCard = Array.from(document.querySelectorAll('#available-players-for-lineup .player-card'))
+                                .find(card => card.onclick.toString().includes(`'${playerId}'`));
+            if (selectedCard) selectedCard.classList.add('selected');
+
+            showMessage(
+                '라인업 선택',
+                `${players.find(p => p.id === playerId).name} 선수를 어디에 배치하시겠습니까?`,
+                true,
+                () => {
+                    if (selectedPlayerForLineupPosition === 'P') {
+                        lineup.pitcher = selectedPlayerForLineupId;
+                    } else {
+                        // Find first empty batting slot
+                        const emptyIndex = lineup.batters.findIndex(slot => slot === null);
+                        if (emptyIndex !== -1) {
+                            lineup.batters[emptyIndex] = selectedPlayerForLineupId;
+                        } else {
+                            showMessage('경고', '타자 라인업이 가득 찼습니다. 기존 선수를 제거하고 추가해주세요.');
+                        }
+                    }
+                    displayLineupSelection();
+                    selectedPlayerForLineupId = null;
+                    selectedPlayerForLineupPosition = null;
+                }
+            );
+        };
+
+        window.removePlayerFromLineup = (type, index = null) => {
+            if (type === 'batters' && index !== null) {
+                lineup.batters[index] = null;
+            } else if (type === 'pitcher') {
+                lineup.pitcher = null;
+            }
+            displayLineupSelection();
+        };
+
+        window.saveLineup = async () => {
+            if (!userId) {
+                showMessage('오류', '로그인이 필요합니다.');
+                return;
+            }
+
+            const filledBatters = lineup.batters.filter(p => p !== null);
+            if (filledBatters.length !== 9) {
+                showMessage('경고', `타자 라인업은 9명으로 구성되어야 합니다. 현재 ${filledBatters.length}명.`);
+                return;
+            }
+            if (!lineup.pitcher) {
+                showMessage('경고', '선발 투수를 선택해야 합니다.');
+                return;
+            }
+
+            // Ensure selected players are indeed in the roster and are unique
+            const allSelectedPlayerIds = [...lineup.batters, lineup.pitcher];
+            const uniqueSelectedPlayerIds = new Set(allSelectedPlayerIds);
+            if (uniqueSelectedPlayerIds.size !== 10) { // 9 batters + 1 pitcher
+                showMessage('경고', '라인업에 중복된 선수가 있거나, 정확히 9명의 타자와 1명의 투수를 선택하지 않았습니다.');
+                return;
+            }
+            const allPlayersExist = allSelectedPlayerIds.every(id => players.some(p => p.id === id));
+            if (!allPlayersExist) {
+                showMessage('오류', '선택된 선수 중 로스터에 없는 선수가 있습니다.');
+                return;
+            }
+
+            showLoading('라인업 저장 중...');
+            try {
+                const teamDocRef = doc(db, `artifacts/${appId}/users/${userId}/teams`, userId);
+                await updateDoc(teamDocRef, {
+                    lineup: lineup,
+                    lastLineupUpdate: Date.now()
+                });
+                showMessage('성공', '라인업이 성공적으로 저장되었습니다!');
+            } catch (error) {
+                console.error("라인업 저장 오류:", error);
+                showMessage('오류', `라인업 저장 중 오류가 발생했습니다: ${error.message}`, false);
+            } finally {
+                hideLoading();
+            }
+        };
+
+        // --- Game Simulation ---
+        const getTeamStrength = (teamPlayers, isBatting) => {
+            let totalSkill = 0;
+            let count = 0;
+
+            if (isBatting) {
+                // Sum of batting_skill and power for batters
+                const batters = teamPlayers.filter(p => lineup.batters.includes(p.id));
+                batters.forEach(p => {
+                    totalSkill += (p.batting_skill + p.power) / 2;
+                    count++;
+                });
+            } else {
+                // Pitcher's pitching_skill and velocity, plus defense of fielders
+                const pitcher = teamPlayers.find(p => p.id === lineup.pitcher);
+                if (pitcher) {
+                    totalSkill += (pitcher.pitching_skill + pitcher.velocity) / 2;
+                    count++;
+                }
+                const fielders = teamPlayers.filter(p => p.position !== 'P' && lineup.batters.includes(p.id)); // Assuming batters also field
+                fielders.forEach(p => {
+                    totalSkill += p.defense;
+                    count++;
+                });
+            }
+            return count > 0 ? totalSkill / count : 0;
+        };
+
+        const simulateInning = (battingTeamStrength, pitchingTeamStrength) => {
+            // Simplified scoring logic: higher batting strength vs lower pitching strength means more runs
+            const offensiveFactor = battingTeamStrength / 100; // Normalize to 0-1
+            const defensiveFactor = pitchingTeamStrength / 100; // Normalize to 0-1
+
+            const runProbability = Math.max(0, offensiveFactor - (defensiveFactor * 0.5)); // Offensive vs half of defensive
+            let runs = 0;
+
+            // Basic probabilistic run generation
+            if (Math.random() < runProbability * 1.5) { // Higher chance for some runs
+                runs = Math.floor(Math.random() * 3) + 1; // 1-3 runs
+                if (Math.random() < runProbability * 0.5) { // Small chance for more
+                    runs += Math.floor(Math.random() * 2); // Add 0-1 more
+                }
+            }
+            return runs;
+        };
+
+        const generateGameSummary = (teamA, scoreA, teamB, scoreB) => {
+            let summary = `<p class="font-bold text-lg mb-2">${teamA.name} ${scoreA} : ${scoreB} ${teamB.name}</p>`;
+            summary += `<p class="text-gray-700">${teamA.name}와 ${teamB.name}의 치열한 승부였습니다. </p>`;
+
+            if (scoreA > scoreB) {
+                summary += `<p class="text-green-700 font-semibold">${teamA.name}가 ${scoreA}대${scoreB}로 승리했습니다!</p>`;
+            } else if (scoreB > scoreA) {
+                summary += `<p class="text-green-700 font-semibold">${teamB.name}가 ${scoreB}대${scoreA}로 승리했습니다!</p>`;
+            } else {
+                summary += `<p class="text-yellow-700 font-semibold">경기는 ${scoreA}대${scoreB}로 무승부로 끝났습니다. (야구는 무승부가 드물지만 시뮬레이션에서는 가능)</p>`;
+            }
+            summary += `<p class="text-sm text-gray-500 mt-2">경기 시뮬레이션은 양 팀의 종합적인 스탯을 기반으로 확률적으로 진행됩니다.</p>`;
+            return summary;
+        };
+
+        window.simulateNextGame = async () => {
+            if (!userId || !userTeam) {
+                showMessage('경고', '팀을 생성하고 로그인해야 경기를 시뮬레이션할 수 있습니다.');
+                return;
+            }
+            if (players.length === 0) {
+                showMessage('경고', '선수 로스터가 비어있습니다. "로스터" 섹션에서 선수를 생성해주세요.');
+                return;
+            }
+            const filledBatters = lineup.batters.filter(p => p !== null);
+            if (filledBatters.length !== 9 || !lineup.pitcher) {
+                showMessage('경고', '라인업이 완성되지 않았습니다. "라인업" 섹션에서 9명의 타자와 1명의 선발 투수를 설정해주세요.');
+                return;
+            }
+
+            showLoading('경기 시뮬레이션 중...');
+            try {
+                // Find an opponent (any other team in the league)
+                const availableOpponents = leagueTeams.filter(team => team.id !== userId);
+                if (availableOpponents.length === 0) {
+                    showMessage('경고', '리그에 다른 팀이 없습니다. 다른 사용자가 팀을 생성할 때까지 기다려주세요.');
+                    hideLoading();
+                    return;
+                }
+
+                // For simplicity, pick a random opponent
+                const opponentTeam = availableOpponents[Math.floor(Math.random() * availableOpponents.length)];
+
+                // Fetch opponent's players and lineup (if available)
+                const opponentPlayersSnap = await getDocs(collection(db, `artifacts/${appId}/users/${opponentTeam.id}/players`));
+                const opponentPlayers = opponentPlayersSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                const opponentLineup = opponentTeam.lineup || { batters: [], pitcher: null };
+
+                if (opponentPlayers.length === 0 || opponentLineup.batters.length !== 9 || !opponentLineup.pitcher) {
+                    showMessage('경고', `${opponentTeam.name} 팀의 로스터 또는 라인업이 완성되지 않아 경기를 진행할 수 없습니다. 다른 팀을 선택하거나 나중에 다시 시도해주세요.`);
+                    hideLoading();
+                    return;
+                }
+
+                // Get actual player objects for simulation
+                const userTeamPlayersInLineup = lineup.batters.map(id => players.find(p => p.id === id)).filter(Boolean);
+                userTeamPlayersInLineup.push(players.find(p => p.id === lineup.pitcher));
+
+                const opponentTeamPlayersInLineup = opponentLineup.batters.map(id => opponentPlayers.find(p => p.id === id)).filter(Boolean);
+                opponentTeamPlayersInLineup.push(opponentPlayers.find(p => p.id === opponentLineup.pitcher));
+
+
+                const userTeamOffense = getTeamStrength(userTeamPlayersInLineup, true);
+                const userTeamDefense = getTeamStrength(userTeamPlayersInLineup, false);
+                const opponentOffense = getTeamStrength(opponentTeamPlayersInLineup, true);
+                const opponentDefense = getTeamStrength(opponentTeamPlayersInLineup, false);
+
+                let userScore = 0;
+                let opponentScore = 0;
+                let gameLog = [];
+
+                for (let i = 1; i <= 9; i++) {
+                    // User team bats
+                    const userRuns = simulateInning(userTeamOffense, opponentDefense);
+                    userScore += userRuns;
+                    gameLog.push(`${i}회 초: ${userTeam.name} ${userRuns}점 득점. 현재 ${userTeam.name} ${userScore} : ${opponentScore} ${opponentTeam.name}`);
+
+                    // Opponent team bats
+                    const opponentRuns = simulateInning(opponentOffense, userDefense);
+                    opponentScore += opponentRuns;
+                    gameLog.push(`${i}회 말: ${opponentTeam.name} ${opponentRuns}점 득점. 현재 ${userTeam.name} ${userScore} : ${opponentScore} ${opponentTeam.name}`);
+                }
+
+                const gameSummaryText = generateGameSummary(userTeam, userScore, opponentTeam, opponentScore);
+
+                // Update team records
+                let userWins = userTeam.wins || 0;
+                let userLosses = userTeam.losses || 0;
+                let userPoints = userTeam.points || 0;
+                let opponentWins = opponentTeam.wins || 0;
+                let opponentLosses = opponentTeam.losses || 0;
+                let opponentPoints = opponentTeam.points || 0;
+
+                if (userScore > opponentScore) {
+                    userWins++;
+                    userPoints += 100; // Points for win
+                    opponentLosses++;
+                } else if (opponentScore > userScore) {
+                    userLosses++;
+                    opponentWins++;
+                    opponentPoints += 100; // Points for win
+                } else {
+                    // Tie - rare in baseball, but possible in simplified sim
+                    userPoints += 50; // Points for tie
+                    opponentPoints += 50;
+                }
+
+                // Update user's team in Firestore
+                const userTeamDocRef = doc(db, `artifacts/${appId}/users/${userId}/teams`, userId);
+                await updateDoc(userTeamDocRef, {
+                    wins: userWins,
+                    losses: userLosses,
+                    points: userPoints
+                });
+                // Update user's team in public collection
+                const publicUserTeamDocRef = doc(db, `artifacts/${appId}/public/data/teams`, userId);
+                await updateDoc(publicUserTeamDocRef, {
+                    wins: userWins,
+                    losses: userLosses,
+                    points: userPoints
+                });
+
+                // Update opponent's team in public collection
+                const publicOpponentTeamDocRef = doc(db, `artifacts/${appId}/public/data/teams`, opponentTeam.id);
+                await updateDoc(publicOpponentTeamDocRef, {
+                    wins: opponentWins,
+                    losses: opponentLosses,
+                    points: opponentPoints
+                });
+
+                // Save game result
+                const gameResult = {
+                    season: currentSeason,
+                    teamAId: userId,
+                    teamAName: userTeam.name,
+                    teamALogo: userTeam.logo,
+                    teamAScore: userScore,
+                    teamBId: opponentTeam.id,
+                    teamBName: opponentTeam.name,
+                    teamBLogo: opponentTeam.logo,
+                    teamBScore: opponentScore,
+                    summary: gameSummaryText,
+                    log: gameLog,
+                    timestamp: Date.now(),
+                    teamIds: [userId, opponentTeam.id] // For easier querying
+                };
+                await addDoc(collection(db, `artifacts/${appId}/public/data/games`), gameResult);
+
+                document.getElementById('latest-game-summary').innerHTML = gameSummaryText;
+                showMessage('경기 종료', '경기가 성공적으로 시뮬레이션되었습니다!');
+
+            } catch (error) {
+                console.error("경기 시뮬레이션 오류:", error);
+                showMessage('오류', `경기 시뮬레이션 중 오류가 발생했습니다: ${error.message}`, false);
+            } finally {
+                hideLoading();
+            }
+        };
+
+        const displayGameHistory = (games) => {
+            const gameHistoryListEl = document.getElementById('game-history-list');
+            gameHistoryListEl.innerHTML = '';
+
+            if (games.length === 0) {
+                gameHistoryListEl.innerHTML = '<p class="text-gray-600">아직 경기 기록이 없습니다.</p>';
+                return;
+            }
+
+            games.forEach(game => {
+                const gameEntry = document.createElement('div');
+                gameEntry.className = 'bg-white p-4 rounded-lg shadow-sm mb-4';
+                gameEntry.innerHTML = `
+                    <p class="text-sm text-gray-500 mb-2">${new Date(game.timestamp).toLocaleString()}</p>
+                    <p class="text-lg font-semibold mb-2">
+                        ${game.teamALogo} ${game.teamAName} ${game.teamAScore} : ${game.teamBScore} ${game.teamBName} ${game.teamBLogo}
+                    </p>
+                    <p class="text-gray-700">${game.summary}</p>
+                    <button class="btn btn-secondary btn-sm mt-2" onclick="showMessage('경기 상세 로그', '<pre class=\'whitespace-pre-wrap text-left\'>${game.log.join('\\n')}</pre>')">
+                        <i class="fas fa-info-circle"></i> 상세 로그 보기
+                    </button>
+                `;
+                gameHistoryListEl.appendChild(gameEntry);
+            });
+        };
+
+        window.startSeason = async () => {
+            if (!userId || !userTeam) {
+                showMessage('경고', '팀을 생성하고 로그인해야 시즌을 시작할 수 있습니다.');
+                return;
+            }
+            if (players.length === 0) {
+                showMessage('경고', '선수 로스터가 비어있습니다. "로스터" 섹션에서 선수를 생성해주세요.');
+                return;
+            }
+            const filledBatters = lineup.batters.filter(p => p !== null);
+            if (filledBatters.length !== 9 || !lineup.pitcher) {
+                showMessage('경고', '라인업이 완성되지 않았습니다. "라인업" 섹션에서 9명의 타자와 1명의 선발 투수를 설정해주세요.');
+                return;
+            }
+
+            showMessage(
+                '시즌 시작',
+                `새로운 시즌을 시작하시겠습니까? 현재 시즌 기록이 초기화됩니다.`,
+                true,
+                async () => {
+                    showLoading('시즌 초기화 중...');
+                    try {
+                        // Reset all teams' wins/losses to 0
+                        const allTeamsColRef = collection(db, `artifacts/${appId}/public/data/teams`);
+                        const teamDocs = await getDocs(allTeamsColRef);
+                        const teamUpdateBatch = [];
+                        teamDocs.forEach(docSnap => {
+                            const teamRef = doc(db, `artifacts/${appId}/public/data/teams`, docSnap.id);
+                            teamUpdateBatch.push(updateDoc(teamRef, { wins: 0, losses: 0 }));
+                            // Also update private team record if it's the current user's team
+                            if (docSnap.id === userId) {
+                                const userTeamRef = doc(db, `artifacts/${appId}/users/${userId}/teams`, userId);
+                                teamUpdateBatch.push(updateDoc(userTeamRef, { wins: 0, losses: 0 }));
+                            }
+                        });
+                        await Promise.all(teamUpdateBatch);
+
+                        // Increment season number
+                        const leagueSettingsDocRef = doc(db, `artifacts/${appId}/public/data/league_settings`, 'current');
+                        await updateDoc(leagueSettingsDocRef, { currentSeason: currentSeason + 1 });
+
+                        // Player growth
+                        await applyPlayerGrowth();
+
+                        showMessage('성공', `새로운 시즌이 시작되었습니다! 현재 시즌: ${currentSeason + 1}`);
+                    } catch (error) {
+                        console.error("시즌 시작 오류:", error);
+                        showMessage('오류', `시즌 시작 중 오류가 발생했습니다: ${error.message}`, false);
+                    } finally {
+                        hideLoading();
+                    }
+                }
+            );
+        };
+
+        const applyPlayerGrowth = async () => {
+            showLoading('선수 성장 적용 중...');
+            try {
+                const playerUpdates = [];
+                for (const player of players) {
+                    const updatedPlayer = { ...player };
+                    let changed = false;
+
+                    // Random small stat boost
+                    if (Math.random() < 0.6) { // 60% chance to grow a stat
+                        const statToGrow = ['batting_skill', 'power', 'speed', 'defense', 'pitching_skill', 'velocity'][Math.floor(Math.random() * 6)];
+                        if (updatedPlayer[statToGrow] !== undefined && updatedPlayer[statToGrow] < 100) {
+                            updatedPlayer[statToGrow] = Math.min(100, updatedPlayer[statToGrow] + generateRandomStat(1, 3));
+                            changed = true;
+                        }
+                    }
+
+                    // Age and contract
+                    updatedPlayer.age++;
+                    updatedPlayer.contract = Math.max(0, updatedPlayer.contract - 1); // Contract decreases by 1 year
+
+                    // Recalculate overall
+                    if (updatedPlayer.position === 'P') {
+                        updatedPlayer.overall = Math.round((updatedPlayer.pitching_skill * 0.4 + updatedPlayer.velocity * 0.3 + updatedPlayer.defense * 0.3) / 10) * 10;
+                    } else {
+                        updatedPlayer.overall = Math.round((updatedPlayer.batting_skill * 0.4 + updatedPlayer.power * 0.3 + updatedPlayer.speed * 0.15 + updatedPlayer.defense * 0.15) / 10) * 10;
+                    }
+
+                    if (changed || updatedPlayer.age > player.age || updatedPlayer.contract < player.contract) {
+                        playerUpdates.push(updateDoc(doc(db, `artifacts/${appId}/users/${userId}/players`, player.id), updatedPlayer));
+                    }
+                }
+                await Promise.all(playerUpdates);
+                console.log("선수 성장 적용 완료.");
+            } catch (error) {
+                console.error("선수 성장 적용 오류:", error);
+            } finally {
+                hideLoading();
+            }
+        };
+
+        // --- League Standings ---
+        const updateLeagueStandings = () => {
+            const standingsTableBodyEl = document.getElementById('standings-table-body');
+            standingsTableBodyEl.innerHTML = '';
+
+            const sortedTeams = [...leagueTeams].sort((a, b) => {
+                const winsA = a.wins || 0;
+                const lossesA = a.losses || 0;
+                const winsB = b.wins || 0;
+                const lossesB = b.losses || 0;
+
+                if (winsA !== winsB) {
+                    return winsB - winsA; // More wins first
+                }
+                return lossesA - lossesB; // Fewer losses first
+            });
+
+            sortedTeams.forEach((team, index) => {
+                const wins = team.wins || 0;
+                const losses = team.losses || 0;
+                const totalGames = wins + losses;
+                const winPercentage = totalGames > 0 ? (wins / totalGames).toFixed(3) : '0.000';
+
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${index + 1}</td>
+                    <td>${team.logo} ${team.name}</td>
+                    <td>${wins}</td>
+                    <td>${losses}</td>
+                    <td>${winPercentage}</td>
+                    <td>${team.points || 0}</td>
+                `;
+                standingsTableBodyEl.appendChild(row);
+            });
+        };
+
+        // --- Trade & Shop ---
+        window.listPlayerForTrade = async () => {
+            if (!userId || !userTeam) {
+                showMessage('경고', '팀을 생성하고 로그인해야 합니다.');
+                return;
+            }
+            if (players.length === 0) {
+                showMessage('경고', '트레이드할 선수가 없습니다.');
+                return;
+            }
+
+            const playerOptions = players.map(p => `<option value="${p.id}">${p.name} (${p.position}) OVR ${p.overall}</option>`).join('');
+
+            showMessage(
+                '선수 트레이드 제안',
+                `
+                <div class="text-left">
+                    <label for="trade-player-select" class="block text-gray-700 text-sm font-bold mb-2">트레이드할 선수:</label>
+                    <select id="trade-player-select" class="w-full p-2 border rounded mb-4">
+                        ${playerOptions}
+                    </select>
+                    <label for="trade-price" class="block text-gray-700 text-sm font-bold mb-2">원하는 포인트:</label>
+                    <input type="number" id="trade-price" class="w-full p-2 border rounded" value="500" min="0">
+                </div>
+                `,
+                true,
+                async () => {
+                    const playerId = document.getElementById('trade-player-select').value;
+                    const price = parseInt(document.getElementById('trade-price').value);
+
+                    if (!playerId || isNaN(price) || price < 0) {
+                        showMessage('경고', '유효한 선수와 가격을 선택해주세요.');
+                        return;
+                    }
+
+                    const playerToTrade = players.find(p => p.id === playerId);
+                    if (!playerToTrade) {
+                        showMessage('오류', '선택된 선수를 찾을 수 없습니다.');
+                        return;
+                    }
+
+                    showLoading('트레이드 제안 등록 중...');
+                    try {
+                        const transactionDocRef = collection(db, `artifacts/${appId}/public/data/transactions`);
+                        await addDoc(transactionDocRef, {
+                            type: 'trade_listing',
+                            playerId: playerId,
+                            playerName: playerToTrade.name,
+                            playerOverall: playerToTrade.overall,
+                            playerTeamId: userId,
+                            playerTeamName: userTeam.name,
+                            playerTeamLogo: userTeam.logo,
+                            price: price,
+                            status: 'active', // active, completed, cancelled
+                            timestamp: Date.now()
+                        });
+                        showMessage('성공', `${playerToTrade.name} 선수가 트레이드 시장에 등록되었습니다.`);
+                    } catch (error) {
+                        console.error("트레이드 등록 오류:", error);
+                        showMessage('오류', `트레이드 등록 중 오류가 발생했습니다: ${error.message}`, false);
+                    } finally {
+                        hideLoading();
+                    }
+                }
+            );
+        };
+
+        const displayTradeListings = (listings) => {
+            const tradeListingsEl = document.getElementById('trade-listings');
+            tradeListingsEl.innerHTML = '';
+
+            if (listings.length === 0) {
+                tradeListingsEl.innerHTML = '<p class="text-gray-600">현재 트레이드 매물이 없습니다.</p>';
+                return;
+            }
+
+            listings.forEach(listing => {
+                // Do not show own listings
+                if (listing.playerTeamId === userId) return;
+
+                const listingCard = document.createElement('div');
+                listingCard.className = 'card p-4';
+                listingCard.innerHTML = `
+                    <h4 class="font-bold text-lg mb-2">${listing.playerName} (${listing.playerOverall} OVR)</h4>
+                    <p class="text-sm text-gray-600 mb-2">
+                        판매 팀: ${listing.playerTeamLogo} ${listing.playerTeamName}
+                    </p>
+                    <p class="font-bold text-indigo-600 mb-4">${listing.price} 포인트</p>
+                    <button class="btn btn-primary w-full" onclick="purchasePlayer('${listing.id}', '${listing.playerId}', '${listing.playerTeamId}', ${listing.price})">
+                        <i class="fas fa-shopping-cart"></i> 구매
+                    </button>
+                `;
+                tradeListingsEl.appendChild(listingCard);
+            });
+        };
+
+        window.purchasePlayer = async (listingId, playerId, sellerTeamId, price) => {
+            if (!userId || !userTeam) {
+                showMessage('경고', '로그인해야 선수를 구매할 수 있습니다.');
+                return;
+            }
+            if (userTeam.points < price) {
+                showMessage('경고', '포인트가 부족합니다.');
+                return;
+            }
+            if (userId === sellerTeamId) {
+                showMessage('경고', '자신의 선수는 구매할 수 없습니다.');
+                return;
+            }
+
+            showMessage(
+                '선수 구매 확인',
+                `${players.find(p => p.id === playerId)?.name || '이 선수'}를 ${price} 포인트에 구매하시겠습니까?`,
+                true,
+                async () => {
+                    showLoading('선수 구매 처리 중...');
+                    try {
+                        // 1. Deduct points from buyer
+                        const buyerTeamRef = doc(db, `artifacts/${appId}/users/${userId}/teams`, userId);
+                        const publicBuyerTeamRef = doc(db, `artifacts/${appId}/public/data/teams`, userId);
+                        await updateDoc(buyerTeamRef, { points: userTeam.points - price });
+                        await updateDoc(publicBuyerTeamRef, { points: userTeam.points - price });
+
+                        // 2. Add points to seller
+                        const sellerTeamRef = doc(db, `artifacts/${appId}/public/data/teams`, sellerTeamId);
+                        const sellerTeamSnap = await getDoc(sellerTeamRef);
+                        if (sellerTeamSnap.exists()) {
+                            const sellerTeamData = sellerTeamSnap.data();
+                            await updateDoc(sellerTeamRef, { points: (sellerTeamData.points || 0) + price });
+                            // If seller is also an active user, update their private team doc too
+                            const privateSellerTeamRef = doc(db, `artifacts/${appId}/users/${sellerTeamId}/teams`, sellerTeamId);
+                            await updateDoc(privateSellerTeamRef, { points: (sellerTeamData.points || 0) + price });
+                        }
+
+                        // 3. Transfer player ownership (delete from seller, add to buyer)
+                        const playerDocRef = doc(db, `artifacts/${appId}/users/${sellerTeamId}/players`, playerId);
+                        const playerSnap = await getDoc(playerDocRef);
+                        if (playerSnap.exists()) {
+                            const playerData = playerSnap.data();
+                            // Delete from seller's roster
+                            await deleteDoc(playerDocRef);
+                            // Add to buyer's roster
+                            await setDoc(doc(db, `artifacts/${appId}/users/${userId}/players`, playerId), { ...playerData, teamId: userId });
+                        } else {
+                            throw new Error("구매하려는 선수를 찾을 수 없습니다.");
+                        }
+
+                        // 4. Mark listing as completed
+                        await updateDoc(doc(db, `artifacts/${appId}/public/data/transactions`, listingId), { status: 'completed', completedAt: Date.now() });
+
+                        showMessage('성공', '선수 구매가 완료되었습니다!');
+                    } catch (error) {
+                        console.error("선수 구매 오류:", error);
+                        showMessage('오류', `선수 구매 중 오류가 발생했습니다: ${error.message}`, false);
+                    } finally {
+                        hideLoading();
+                    }
+                }
+            );
+        };
+
+        window.buyShopItem = async (itemName, price) => {
+            if (!userId || !userTeam) {
+                showMessage('경고', '팀을 생성하고 로그인해야 상점을 이용할 수 있습니다.');
+                return;
+            }
+            if (userTeam.points < price) {
+                showMessage('경고', '포인트가 부족합니다.');
+                return;
+            }
+
+            showMessage(
+                '아이템 구매 확인',
+                `${itemName}을(를) ${price} 포인트에 구매하시겠습니까?`,
+                true,
+                async () => {
+                    showLoading('아이템 구매 처리 중...');
+                    try {
+                        // Deduct points
+                        const teamRef = doc(db, `artifacts/${appId}/users/${userId}/teams`, userId);
+                        const publicTeamRef = doc(db, `artifacts/${appId}/public/data/teams`, userId);
+                        await updateDoc(teamRef, { points: userTeam.points - price });
+                        await updateDoc(publicTeamRef, { points: userTeam.points - price });
+
+                        // Apply item effect
+                        if (itemName === 'training_boost') {
+                            // Apply small stat boost to a random player
+                            if (players.length > 0) {
+                                const randomPlayer = players[Math.floor(Math.random() * players.length)];
+                                const statToBoost = ['batting_skill', 'power', 'speed', 'defense', 'pitching_skill', 'velocity'][Math.floor(Math.random() * 6)];
+                                const boostAmount = generateRandomStat(2, 5); // Boost by 2-5 points
+                                const updatedStat = Math.min(100, (randomPlayer[statToBoost] || 0) + boostAmount);
+
+                                const playerDocRef = doc(db, `artifacts/${appId}/users/${userId}/players`, randomPlayer.id);
+                                await updateDoc(playerDocRef, { [statToBoost]: updatedStat });
+                                showMessage('구매 완료', `${randomPlayer.name}의 ${statToBoost} 스탯이 ${boostAmount}만큼 상승했습니다!`);
+                            } else {
+                                showMessage('경고', '훈련 부스트를 적용할 선수가 없습니다.');
+                            }
+                        } else if (itemName === 'scouting_report') {
+                            // Generate a new, potentially better player
+                            const newPlayer = {
+                                teamId: userId,
+                                name: PLAYER_NAMES[generateRandomStat(0, PLAYER_NAMES.length - 1)] + ' (신인)',
+                                position: PLAYER_POSITIONS[generateRandomStat(0, PLAYER_POSITIONS.length - 1)],
+                                batting_skill: generateRandomStat(60, 95), // Higher potential
+                                power: generateRandomStat(50, 90),
+                                speed: generateRandomStat(40, 80),
+                                defense: generateRandomStat(60, 95),
+                                pitching_skill: generateRandomStat(70, 100),
+                                velocity: generateRandomStat(80, 100),
+                                age: generateRandomStat(18, 22),
+                                contract: generateRandomStat(3, 7),
+                                status: 'active',
+                                careerGames: 0, careerHits: 0, careerHR: 0, careerRBI: 0, careerERA: 0, careerWins: 0, careerLosses: 0,
+                            };
+                            if (newPlayer.position === 'P') {
+                                newPlayer.overall = Math.round((newPlayer.pitching_skill * 0.4 + newPlayer.velocity * 0.3 + newPlayer.defense * 0.3) / 10) * 10;
+                            } else {
+                                newPlayer.overall = Math.round((newPlayer.batting_skill * 0.4 + newPlayer.power * 0.3 + newPlayer.speed * 0.15 + newPlayer.defense * 0.15) / 10) * 10;
+                            }
+                            await addDoc(collection(db, `artifacts/${appId}/users/${userId}/players`), newPlayer);
+                            showMessage('구매 완료', `새로운 유망주 ${newPlayer.name} (${newPlayer.overall} OVR)를 스카우트했습니다!`);
+                        }
+                    } catch (error) {
+                        console.error("상점 아이템 구매 오류:", error);
+                        showMessage('오류', `아이템 구매 중 오류가 발생했습니다: ${error.message}`, false);
+                    } finally {
+                        hideLoading();
+                    }
+                }
+            );
+        };
+
+        // --- Hall of Fame ---
+        const displayHallOfFame = (hofPlayers) => {
+            const hofListEl = document.getElementById('hall-of-fame-list');
+            hofListEl.innerHTML = '';
+
+            if (hofPlayers.length === 0) {
+                hofListEl.innerHTML = '<p class="text-gray-600">아직 명예의 전당에 오른 선수가 없습니다.</p>';
+                return;
+            }
+
+            hofPlayers.sort((a, b) => b.retiredAt - a.retiredAt); // Sort by most recent retirement
+
+            hofPlayers.forEach(player => {
+                const playerCard = document.createElement('div');
+                playerCard.className = 'player-card bg-yellow-50 border-yellow-200';
+                playerCard.innerHTML = `
+                    <div class="player-card-header">
+                        <span>${player.name} (${player.position})</span>
+                        <span class="text-yellow-700 font-bold">⭐ 명예의 전당</span>
+                    </div>
+                    <div class="player-card-stats">
+                        <p>은퇴 팀: ${player.retiredByTeam || '알 수 없음'}</p>
+                        <p>은퇴 당시 OVR: ${player.overall}</p>
+                        <p>은퇴일: ${new Date(player.retiredAt).toLocaleDateString()}</p>
+                        <p>커리어 게임: ${player.careerGames || 0} | 안타: ${player.careerHits || 0} | 홈런: ${player.careerHR || 0} | RBI: ${player.careerRBI || 0}</p>
+                        ${player.position === 'P' ? `<p>커리어 ERA: ${player.careerERA || 0} | 승: ${player.careerWins || 0} | 패: ${player.careerLosses || 0}</p>` : ''}
+                    </div>
+                `;
+                hofListEl.appendChild(playerCard);
+            });
+        };
+
+    </script>
+</body>
+</html>
