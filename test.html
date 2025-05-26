@@ -312,7 +312,7 @@
         const myTeamNameDisplay = document.getElementById('my-team-name-display');
         const myTeamHometownDisplay = document.getElementById('my-team-hometown-display');
         const myTeamWinsDisplay = document.getElementById('my-team-wins');
-        const myTeamLossesDisplay = document.getElementById('my-team-losses');
+        const myTeamLossesDisplay = document = document.getElementById('my-team-losses');
         const battingLineupDisplay = document.getElementById('batting-lineup-display');
         const availablePlayersDiv = document.getElementById('available-players');
         const saveLineupBtn = document.getElementById('save-lineup-btn');
@@ -388,12 +388,11 @@
         }
 
         /**
-         * Gets the current user ID. If not authenticated, generates a random one.
-         * This is crucial for Firestore paths.
+         * Gets the current user ID. This will always be the authenticated user's UID.
          * @returns {string} The user ID.
          */
         function getUserId() {
-            return auth.currentUser?.uid || generateUUID(); // This function is now less relevant as anonymous sign-in is removed.
+            return auth.currentUser?.uid;
         }
 
         // --- Firebase Authentication ---
@@ -402,21 +401,14 @@
         async function authenticateUser() {
             toggleLoadingSpinner(true);
             try {
-                // If a custom token is provided, attempt to sign in with it.
-                // Otherwise, the user must log in or sign up.
-                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                    await signInWithCustomToken(auth, __initial_auth_token);
-                    console.log("Signed in with custom token.");
-                } else {
-                    // No custom token, ensure auth section is shown for email/password login
-                    showSection(authSection);
-                    console.log("No custom token provided, showing login/signup.");
-                }
+                // As per user's request, always show the email/password login section by default.
+                // Removed the __initial_auth_token check to ensure this.
+                showSection(authSection);
+                console.log("Showing login/signup section for email/password authentication.");
             } catch (error) {
                 console.error("Authentication error:", error);
                 authStatus.textContent = `인증 오류: ${error.message}`;
-                // If custom token fails, or no token, ensure auth section is visible
-                showSection(authSection);
+                showSection(authSection); // Ensure auth section is visible on error
             } finally {
                 toggleLoadingSpinner(false);
             }
