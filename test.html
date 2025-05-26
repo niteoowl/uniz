@@ -205,7 +205,7 @@
                     <div>
                         <h4 class="font-semibold mb-2">타자 라인업 (9명 선택)</h4>
                         <div id="batting-lineup-display" class="border p-3 rounded-lg bg-gray-50 min-h-[150px]">
-                            <p class="text-gray-500">선수를 클릭하여 라인업에 추가하세요.</p>
+                            <p class="text-gray-500">선수를 로딩 중...</p>
                         </div>
                     </div>
                     <div>
@@ -259,7 +259,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged, signOut, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getAuth, signInWithCustomToken, onAuthStateChanged, signOut, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, getDoc, setDoc, updateDoc, onSnapshot, collection, query, where, addDoc, getDocs, runTransaction } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // Firebase Configuration (Provided by user)
@@ -393,25 +393,30 @@
          * @returns {string} The user ID.
          */
         function getUserId() {
-            return auth.currentUser?.uid || generateUUID();
+            return auth.currentUser?.uid || generateUUID(); // This function is now less relevant as anonymous sign-in is removed.
         }
 
         // --- Firebase Authentication ---
 
-        // Initial authentication with custom token or anonymously
+        // Initial authentication check
         async function authenticateUser() {
             toggleLoadingSpinner(true);
             try {
+                // If a custom token is provided, attempt to sign in with it.
+                // Otherwise, the user must log in or sign up.
                 if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
                     await signInWithCustomToken(auth, __initial_auth_token);
                     console.log("Signed in with custom token.");
                 } else {
-                    await signInAnonymously(auth);
-                    console.log("Signed in anonymously.");
+                    // No custom token, ensure auth section is shown for email/password login
+                    showSection(authSection);
+                    console.log("No custom token provided, showing login/signup.");
                 }
             } catch (error) {
                 console.error("Authentication error:", error);
                 authStatus.textContent = `인증 오류: ${error.message}`;
+                // If custom token fails, or no token, ensure auth section is visible
+                showSection(authSection);
             } finally {
                 toggleLoadingSpinner(false);
             }
@@ -984,31 +989,6 @@
             }, (error) => {
                 console.error("Error loading standings:", error);
                 showMessageModal("순위표 로딩 오류", "순위표를 불러오는 데 실패했습니다.");
-            });
-        }
-
-        /**
-         * Renders the league standings table.
-         * @param {Array<Object>} standings - Array of team standing objects.
-         */
-        function renderStandings(standings) {
-            standingsTableBody.innerHTML = '';
-            if (standings.length === 0) {
-                standingsTableBody.innerHTML = '<tr><td colspan="5" class="py-4 px-4 text-center text-gray-500">아직 리그에 팀이 없습니다.</td></tr>';
-                return;
-            }
-
-            standings.forEach((team, index) => {
-                const row = document.createElement('tr');
-                row.className = 'hover:bg-gray-50';
-                row.innerHTML = `
-                    <td class="py-2 px-4">${index + 1}</td>
-                    <td class="py-2 px-4">${team.name}</td>
-                    <td class="py-2 px-4">${team.wins}</td>
-                    <td class="py-2 px-4">${team.losses}</td>
-                    <td class="py-2 px-4">${team.winRate}</td>
-                `;
-                standingsTableBody.appendChild(row);
             });
         }
 
