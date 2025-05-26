@@ -1,3 +1,5 @@
+// js/player.js
+
 import { db } from './firebase.js';
 import { doc, setDoc, collection } from 'https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js';
 
@@ -28,13 +30,12 @@ function randomStat() {
 
 export async function generatePlayersForUser(userId) {
   const playersRef = collection(db, "players");
-
   let playerCount = 0;
 
   for (let posData of POSITIONS) {
     for (let i = 0; i < posData.count; i++) {
       const player = {
-        userId: userId,
+        userId,
         name: randomName(),
         position: posData.pos,
         avg: randomStat(),
@@ -51,10 +52,10 @@ export async function generatePlayersForUser(userId) {
     }
   }
 
-  // 나머지 백업선수 추가
+  // 남은 인원 UTIL
   while (playerCount < 32) {
     const player = {
-      userId: userId,
+      userId,
       name: randomName(),
       position: 'UTIL',
       avg: randomStat(),
