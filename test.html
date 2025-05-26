@@ -1,0 +1,1019 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>텍스트 기반 야구 시뮬레이션 게임</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f2f5;
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start; /* Align to top for better content display */
+            min-height: 100vh;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .container {
+            background-color: #fff;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 960px;
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        h1, h2, h3 {
+            color: #1a202c;
+            font-weight: 700;
+        }
+        .btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        .btn-primary {
+            background-color: #4299e1;
+            color: white;
+            border: none;
+        }
+        .btn-primary:hover {
+            background-color: #3182ce;
+            transform: translateY(-1px);
+        }
+        .btn-secondary {
+            background-color: #edf2f7;
+            color: #4a5568;
+            border: 1px solid #cbd5e0;
+        }
+        .btn-secondary:hover {
+            background-color: #e2e8f0;
+            transform: translateY(-1px);
+        }
+        .input-field {
+            padding: 10px 15px;
+            border-radius: 8px;
+            border: 1px solid #cbd5e0;
+            width: 100%;
+            box-sizing: border-box;
+            font-size: 1rem;
+        }
+        .section-hidden {
+            display: none;
+        }
+        .player-card {
+            background-color: #f7fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .player-card.selected {
+            background-color: #c3dafe;
+            border-color: #667eea;
+        }
+        .game-log-entry {
+            background-color: #f7fafc;
+            border-radius: 8px;
+            padding: 10px;
+            margin-bottom: 8px;
+            font-size: 0.95rem;
+            line-height: 1.4;
+        }
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.6);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            padding: 20px;
+        }
+        .modal-content {
+            background-color: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+            max-width: 500px;
+            width: 100%;
+            text-align: center;
+        }
+        .modal-buttons {
+            display: flex;
+            justify-content.center;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .nav-bar {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        .nav-bar button {
+            flex-grow: 1;
+        }
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+            .nav-bar {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="loading-spinner" class="section-hidden flex flex-col items-center justify-center py-10">
+            <div class="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-500"></div>
+            <p class="mt-4 text-lg text-blue-600">로딩 중...</p>
+        </div>
+
+        <div id="message-modal" class="modal section-hidden">
+            <div class="modal-content">
+                <h3 id="modal-title" class="text-xl font-bold mb-4"></h3>
+                <p id="modal-message" class="mb-6"></p>
+                <button id="modal-ok-btn" class="btn btn-primary w-full">확인</button>
+            </div>
+        </div>
+
+        <div id="auth-section" class="flex flex-col gap-4">
+            <h2 class="text-2xl">로그인 / 회원가입</h2>
+            <div class="flex flex-col gap-2">
+                <input type="email" id="auth-email" placeholder="이메일" class="input-field" />
+                <input type="password" id="auth-password" placeholder="비밀번호" class="input-field" />
+            </div>
+            <div class="flex gap-4">
+                <button id="login-btn" class="btn btn-primary flex-1">로그인</button>
+                <button id="signup-btn" class="btn btn-secondary flex-1">회원가입</button>
+            </div>
+            <p id="auth-status" class="text-center text-sm text-red-500"></p>
+        </div>
+
+        <div id="main-app" class="section-hidden">
+            <div class="nav-bar">
+                <button id="nav-my-team" class="btn btn-primary">내 팀</button>
+                <button id="nav-simulate-game" class="btn btn-secondary">경기 시뮬레이션</button>
+                <button id="nav-standings" class="btn btn-secondary">리그 순위표</button>
+                <button id="logout-btn" class="btn btn-secondary">로그아웃</button>
+            </div>
+
+            <div id="user-info" class="text-sm text-gray-600 mb-4">
+                <p>현재 사용자 ID: <span id="current-user-id"></span></p>
+            </div>
+
+            <div id="team-creation-section" class="section-hidden flex flex-col gap-4 p-4 border rounded-lg bg-gray-50">
+                <h2 class="text-2xl">팀 생성</h2>
+                <div class="flex flex-col gap-2">
+                    <input type="text" id="team-name" placeholder="팀 이름" class="input-field" />
+                    <input type="text" id="team-hometown" placeholder="연고지" class="input-field" />
+                    <input type="text" id="team-logo-url" placeholder="팀 로고 URL (선택 사항)" class="input-field" value="https://placehold.co/60x60/4299e1/ffffff?text=LOGO" />
+                </div>
+                <button id="create-team-btn" class="btn btn-primary">팀 생성</button>
+            </div>
+
+            <div id="my-team-section" class="section-hidden flex flex-col gap-4">
+                <h2 class="text-2xl">내 팀</h2>
+                <div id="my-team-details" class="p-4 border rounded-lg bg-blue-50 flex items-center gap-4">
+                    <img id="my-team-logo" src="" alt="팀 로고" class="w-16 h-16 rounded-full object-cover border-2 border-blue-400">
+                    <div>
+                        <h3 id="my-team-name-display" class="text-xl font-bold"></h3>
+                        <p id="my-team-hometown-display" class="text-gray-700"></p>
+                        <p><span id="my-team-wins">0</span>승 <span id="my-team-losses">0</span>패</p>
+                    </div>
+                </div>
+
+                <h3 class="text-xl mt-4">라인업 설정</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <h4 class="font-semibold mb-2">타자 라인업 (9명 선택)</h4>
+                        <div id="batting-lineup-display" class="border p-3 rounded-lg bg-gray-50 min-h-[150px]">
+                            <p class="text-gray-500">선수를 클릭하여 라인업에 추가하세요.</p>
+                        </div>
+                    </div>
+                    <div>
+                        <h4 class="font-semibold mb-2">보유 선수</h4>
+                        <div id="available-players" class="border p-3 rounded-lg bg-gray-50">
+                            <p class="text-gray-500">선수를 로딩 중...</p>
+                        </div>
+                    </div>
+                </div>
+                <button id="save-lineup-btn" class="btn btn-primary mt-4">라인업 저장</button>
+            </div>
+
+            <div id="simulate-game-section" class="section-hidden flex flex-col gap-4">
+                <h2 class="text-2xl">경기 시뮬레이션</h2>
+                <div class="p-4 border rounded-lg bg-green-50">
+                    <h3 class="text-xl font-bold mb-2">오늘의 경기</h3>
+                    <p id="today-game-info" class="text-gray-700 mb-4">상대 팀을 선택하고 경기를 시작하세요.</p>
+                    <button id="find-opponent-btn" class="btn btn-primary mr-2">상대 팀 찾기</button>
+                    <button id="simulate-btn" class="btn btn-primary section-hidden">경기 시작</button>
+                </div>
+
+                <div id="game-results-display" class="section-hidden p-4 border rounded-lg bg-gray-50">
+                    <h3 class="text-xl font-bold mb-2">경기 결과</h3>
+                    <p id="game-score" class="text-2xl font-bold mb-2"></p>
+                    <div id="game-log" class="max-h-80 overflow-y-auto border p-3 rounded-lg bg-white">
+                        </div>
+                </div>
+            </div>
+
+            <div id="standings-section" class="section-hidden flex flex-col gap-4">
+                <h2 class="text-2xl">리그 순위표</h2>
+                <div class="p-4 border rounded-lg bg-yellow-50">
+                    <table class="min-w-full bg-white rounded-lg overflow-hidden">
+                        <thead>
+                            <tr class="bg-yellow-200 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider">
+                                <th class="py-2 px-4">순위</th>
+                                <th class="py-2 px-4">팀명</th>
+                                <th class="py-2 px-4">승</th>
+                                <th class="py-2 px-4">패</th>
+                                <th class="py-2 px-4">승률</th>
+                            </tr>
+                        </thead>
+                        <tbody id="standings-table-body" class="divide-y divide-gray-200">
+                            <tr><td colspan="5" class="py-4 px-4 text-center text-gray-500">순위표 로딩 중...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged, signOut, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc, updateDoc, onSnapshot, collection, query, where, addDoc, getDocs, runTransaction } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Firebase Configuration (Provided by user)
+        const firebaseConfig = {
+            apiKey: "AIzaSyDjlk8wMMC3N_uEXdHIrBBWvArvHkvMpN8",
+            authDomain: "uniz-baseball.firebaseapp.com",
+            projectId: "uniz-baseball",
+            storageBucket: "uniz-baseball.firebasestorage.app",
+            messagingSenderId: "601982955671",
+            appId: "1:601982955671:web:56c81e8d03478939d139d2",
+            measurementId: "G-P0MX60MYQ3"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+
+        // Global variables for app and user state
+        let currentUserId = null;
+        let currentUserTeam = null;
+        let availableOpponentTeams = [];
+        let selectedOpponentTeam = null;
+
+        // DOM Elements
+        const loadingSpinner = document.getElementById('loading-spinner');
+        const authSection = document.getElementById('auth-section');
+        const authEmailInput = document.getElementById('auth-email');
+        const authPasswordInput = document.getElementById('auth-password');
+        const loginBtn = document.getElementById('login-btn');
+        const signupBtn = document.getElementById('signup-btn');
+        const authStatus = document.getElementById('auth-status');
+
+        const mainApp = document.getElementById('main-app');
+        const currentUserIdDisplay = document.getElementById('current-user-id');
+        const logoutBtn = document.getElementById('logout-btn');
+
+        const navMyTeamBtn = document.getElementById('nav-my-team');
+        const navSimulateGameBtn = document.getElementById('nav-simulate-game');
+        const navStandingsBtn = document.getElementById('nav-standings');
+
+        const teamCreationSection = document.getElementById('team-creation-section');
+        const teamNameInput = document.getElementById('team-name');
+        const teamHometownInput = document.getElementById('team-hometown');
+        const teamLogoUrlInput = document.getElementById('team-logo-url');
+        const createTeamBtn = document.getElementById('create-team-btn');
+
+        const myTeamSection = document.getElementById('my-team-section');
+        const myTeamLogoDisplay = document.getElementById('my-team-logo');
+        const myTeamNameDisplay = document.getElementById('my-team-name-display');
+        const myTeamHometownDisplay = document.getElementById('my-team-hometown-display');
+        const myTeamWinsDisplay = document.getElementById('my-team-wins');
+        const myTeamLossesDisplay = document.getElementById('my-team-losses');
+        const battingLineupDisplay = document.getElementById('batting-lineup-display');
+        const availablePlayersDiv = document.getElementById('available-players');
+        const saveLineupBtn = document.getElementById('save-lineup-btn');
+
+        const simulateGameSection = document.getElementById('simulate-game-section');
+        const todayGameInfo = document.getElementById('today-game-info');
+        const findOpponentBtn = document.getElementById('find-opponent-btn');
+        const simulateBtn = document.getElementById('simulate-btn');
+        const gameResultsDisplay = document.getElementById('game-results-display');
+        const gameScoreDisplay = document.getElementById('game-score');
+        const gameLogDiv = document.getElementById('game-log');
+
+        const standingsSection = document.getElementById('standings-section');
+        const standingsTableBody = document.getElementById('standings-table-body');
+
+        // Message Modal elements
+        const messageModal = document.getElementById('message-modal');
+        const modalTitle = document.getElementById('modal-title');
+        const modalMessage = document.getElementById('modal-message');
+        const modalOkBtn = document.getElementById('modal-ok-btn');
+
+        // --- Utility Functions ---
+
+        /**
+         * Displays a custom modal message.
+         * @param {string} title - The title of the modal.
+         * @param {string} message - The message content.
+         */
+        function showMessageModal(title, message) {
+            modalTitle.textContent = title;
+            modalMessage.textContent = message;
+            messageModal.classList.remove('section-hidden');
+        }
+
+        modalOkBtn.addEventListener('click', () => {
+            messageModal.classList.add('section-hidden');
+        });
+
+        /**
+         * Shows a specific section and hides others.
+         * @param {HTMLElement} sectionToShow - The section to display.
+         */
+        function showSection(sectionToShow) {
+            const sections = [authSection, teamCreationSection, myTeamSection, simulateGameSection, standingsSection, mainApp];
+            sections.forEach(section => {
+                if (section) { // Check if section exists before trying to hide
+                    section.classList.add('section-hidden');
+                }
+            });
+            if (sectionToShow) {
+                sectionToShow.classList.remove('section-hidden');
+            }
+        }
+
+        /**
+         * Toggles loading spinner visibility.
+         * @param {boolean} show - True to show, false to hide.
+         */
+        function toggleLoadingSpinner(show) {
+            if (show) {
+                loadingSpinner.classList.remove('section-hidden');
+            } else {
+                loadingSpinner.classList.add('section-hidden');
+            }
+        }
+
+        /**
+         * Generates a random UUID.
+         * @returns {string} A unique ID.
+         */
+        function generateUUID() {
+            return crypto.randomUUID();
+        }
+
+        /**
+         * Gets the current user ID. If not authenticated, generates a random one.
+         * This is crucial for Firestore paths.
+         * @returns {string} The user ID.
+         */
+        function getUserId() {
+            return auth.currentUser?.uid || generateUUID();
+        }
+
+        // --- Firebase Authentication ---
+
+        // Initial authentication with custom token or anonymously
+        async function authenticateUser() {
+            toggleLoadingSpinner(true);
+            try {
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                    console.log("Signed in with custom token.");
+                } else {
+                    await signInAnonymously(auth);
+                    console.log("Signed in anonymously.");
+                }
+            } catch (error) {
+                console.error("Authentication error:", error);
+                authStatus.textContent = `인증 오류: ${error.message}`;
+            } finally {
+                toggleLoadingSpinner(false);
+            }
+        }
+
+        // Listen for authentication state changes
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                currentUserId = user.uid;
+                currentUserIdDisplay.textContent = currentUserId;
+                showSection(mainApp);
+                authSection.classList.add('section-hidden'); // Hide auth section
+                await loadUserTeam(); // Load user's team data
+                await loadStandings(); // Load league standings
+                showSection(myTeamSection); // Default to My Team section after login
+            } else {
+                currentUserId = null;
+                currentUserTeam = null;
+                currentUserIdDisplay.textContent = '로그인 필요';
+                showSection(authSection); // Show auth section if not logged in
+                mainApp.classList.add('section-hidden'); // Hide main app
+            }
+        });
+
+        // Event Listeners for Auth
+        loginBtn.addEventListener('click', async () => {
+            const email = authEmailInput.value;
+            const password = authPasswordInput.value;
+            if (!email || !password) {
+                showMessageModal("로그인 오류", "이메일과 비밀번호를 입력해주세요.");
+                return;
+            }
+            toggleLoadingSpinner(true);
+            try {
+                await signInWithEmailAndPassword(auth, email, password);
+                authStatus.textContent = "";
+            } catch (error) {
+                console.error("Login error:", error);
+                authStatus.textContent = `로그인 실패: ${error.message}`;
+                showMessageModal("로그인 실패", `로그인에 실패했습니다: ${error.message}`);
+            } finally {
+                toggleLoadingSpinner(false);
+            }
+        });
+
+        signupBtn.addEventListener('click', async () => {
+            const email = authEmailInput.value;
+            const password = authPasswordInput.value;
+            if (!email || !password) {
+                showMessageModal("회원가입 오류", "이메일과 비밀번호를 입력해주세요.");
+                return;
+            }
+            toggleLoadingSpinner(true);
+            try {
+                await createUserWithEmailAndPassword(auth, email, password);
+                authStatus.textContent = "";
+                showMessageModal("회원가입 성공", "성공적으로 회원가입되었습니다. 로그인해주세요.");
+            } catch (error) {
+                console.error("Signup error:", error);
+                authStatus.textContent = `회원가입 실패: ${error.message}`;
+                showMessageModal("회원가입 실패", `회원가입에 실패했습니다: ${error.message}`);
+            } finally {
+                toggleLoadingSpinner(false);
+            }
+        });
+
+        logoutBtn.addEventListener('click', async () => {
+            try {
+                await signOut(auth);
+                showMessageModal("로그아웃", "성공적으로 로그아웃되었습니다.");
+            } catch (error) {
+                console.error("Logout error:", error);
+                showMessageModal("로그아웃 실패", `로그아웃에 실패했습니다: ${error.message}`);
+            }
+        });
+
+        // --- Navigation ---
+        navMyTeamBtn.addEventListener('click', () => {
+            showSection(myTeamSection);
+            navMyTeamBtn.classList.add('btn-primary');
+            navMyTeamBtn.classList.remove('btn-secondary');
+            navSimulateGameBtn.classList.add('btn-secondary');
+            navSimulateGameBtn.classList.remove('btn-primary');
+            navStandingsBtn.classList.add('btn-secondary');
+            navStandingsBtn.classList.remove('btn-primary');
+        });
+
+        navSimulateGameBtn.addEventListener('click', () => {
+            showSection(simulateGameSection);
+            navSimulateGameBtn.classList.add('btn-primary');
+            navSimulateGameBtn.classList.remove('btn-secondary');
+            navMyTeamBtn.classList.add('btn-secondary');
+            navMyTeamBtn.classList.remove('btn-primary');
+            navStandingsBtn.classList.add('btn-secondary');
+            navStandingsBtn.classList.remove('btn-primary');
+        });
+
+        navStandingsBtn.addEventListener('click', () => {
+            showSection(standingsSection);
+            navStandingsBtn.classList.add('btn-primary');
+            navStandingsBtn.classList.remove('btn-secondary');
+            navMyTeamBtn.classList.add('btn-secondary');
+            navMyTeamBtn.classList.remove('btn-primary');
+            navSimulateGameBtn.classList.add('btn-secondary');
+            navSimulateGameBtn.classList.remove('btn-primary');
+        });
+
+        // --- Team Management ---
+
+        /**
+         * Loads the current user's team data from Firestore.
+         * If no team exists, shows the team creation section.
+         */
+        async function loadUserTeam() {
+            if (!currentUserId) return;
+
+            const teamDocRef = doc(db, `artifacts/${__app_id}/users/${currentUserId}/teams`, 'myTeam');
+            onSnapshot(teamDocRef, (docSnap) => {
+                if (docSnap.exists()) {
+                    currentUserTeam = { id: docSnap.id, ...docSnap.data() };
+                    displayMyTeam();
+                    teamCreationSection.classList.add('section-hidden');
+                    myTeamSection.classList.remove('section-hidden');
+                } else {
+                    currentUserTeam = null;
+                    showSection(teamCreationSection); // Show team creation if no team exists
+                    myTeamSection.classList.add('section-hidden');
+                }
+            }, (error) => {
+                console.error("Error loading user team:", error);
+                showMessageModal("팀 로딩 오류", "팀 정보를 불러오는 데 실패했습니다.");
+            });
+        }
+
+        /**
+         * Displays the current user's team details and available players.
+         */
+        function displayMyTeam() {
+            if (!currentUserTeam) return;
+
+            myTeamLogoDisplay.src = currentUserTeam.logoUrl || "https://placehold.co/60x60/4299e1/ffffff?text=LOGO";
+            myTeamNameDisplay.textContent = currentUserTeam.name;
+            myTeamHometownDisplay.textContent = currentUserTeam.hometown;
+            myTeamWinsDisplay.textContent = currentUserTeam.wins || 0;
+            myTeamLossesDisplay.textContent = currentUserTeam.losses || 0;
+
+            renderPlayersForLineup();
+            renderLineup();
+        }
+
+        /**
+         * Renders available players for lineup selection.
+         */
+        function renderPlayersForLineup() {
+            availablePlayersDiv.innerHTML = '';
+            if (!currentUserTeam || !currentUserTeam.players || currentUserTeam.players.length === 0) {
+                availablePlayersDiv.innerHTML = '<p class="text-gray-500">팀에 선수가 없습니다. 팀 생성 시 기본 선수가 추가됩니다.</p>';
+                return;
+            }
+
+            currentUserTeam.players.forEach(player => {
+                const isSelected = currentUserTeam.lineup && currentUserTeam.lineup.some(p => p.id === player.id);
+                const playerCard = document.createElement('div');
+                playerCard.className = `player-card ${isSelected ? 'selected' : ''}`;
+                playerCard.innerHTML = `
+                    <span>${player.name} (${player.position}) - 타격: ${player.battingSkill}, 투구: ${player.pitchingSkill}</span>
+                    <button class="btn btn-secondary btn-sm select-player-btn" data-player-id="${player.id}">
+                        ${isSelected ? '제거' : '추가'}
+                    </button>
+                `;
+                availablePlayersDiv.appendChild(playerCard);
+            });
+
+            // Add event listeners for player selection
+            document.querySelectorAll('.select-player-btn').forEach(button => {
+                button.addEventListener('click', (event) => {
+                    const playerId = event.target.dataset.playerId;
+                    togglePlayerInLineup(playerId);
+                });
+            });
+        }
+
+        /**
+         * Renders the current batting lineup.
+         */
+        function renderLineup() {
+            battingLineupDisplay.innerHTML = '';
+            if (!currentUserTeam || !currentUserTeam.lineup || currentUserTeam.lineup.length === 0) {
+                battingLineupDisplay.innerHTML = '<p class="text-gray-500">라인업이 비어 있습니다.</p>';
+                return;
+            }
+
+            currentUserTeam.lineup.forEach((player, index) => {
+                const playerLine = document.createElement('p');
+                playerLine.className = 'player-card selected'; // Use selected style for lineup players
+                playerLine.innerHTML = `
+                    <span>${index + 1}. ${player.name} (${player.position})</span>
+                    <button class="btn btn-secondary btn-sm remove-lineup-player-btn" data-player-id="${player.id}">제거</button>
+                `;
+                battingLineupDisplay.appendChild(playerLine);
+            });
+
+            // Add event listeners for removing players from lineup
+            document.querySelectorAll('.remove-lineup-player-btn').forEach(button => {
+                button.addEventListener('click', (event) => {
+                    const playerId = event.target.dataset.playerId;
+                    togglePlayerInLineup(playerId); // Re-use the same logic to remove
+                });
+            });
+        }
+
+        /**
+         * Adds or removes a player from the batting lineup.
+         * @param {string} playerId - The ID of the player to toggle.
+         */
+        function togglePlayerInLineup(playerId) {
+            if (!currentUserTeam || !currentUserTeam.players) return;
+
+            const player = currentUserTeam.players.find(p => p.id === playerId);
+            if (!player) return;
+
+            if (!currentUserTeam.lineup) {
+                currentUserTeam.lineup = [];
+            }
+
+            const lineupIndex = currentUserTeam.lineup.findIndex(p => p.id === playerId);
+
+            if (lineupIndex > -1) {
+                // Player is in lineup, remove them
+                currentUserTeam.lineup.splice(lineupIndex, 1);
+            } else {
+                // Player is not in lineup, add them if less than 9
+                if (currentUserTeam.lineup.length < 9) {
+                    currentUserTeam.lineup.push(player);
+                } else {
+                    showMessageModal("라인업 가득 참", "타자 라인업은 9명까지 가능합니다.");
+                }
+            }
+            renderPlayersForLineup(); // Re-render available players to update selection status
+            renderLineup(); // Re-render lineup
+        }
+
+        // Event listener for creating a new team
+        createTeamBtn.addEventListener('click', async () => {
+            const teamName = teamNameInput.value.trim();
+            const hometown = teamHometownInput.value.trim();
+            const logoUrl = teamLogoUrlInput.value.trim();
+
+            if (!teamName || !hometown) {
+                showMessageModal("팀 생성 오류", "팀 이름과 연고지를 입력해주세요.");
+                return;
+            }
+
+            if (!currentUserId) {
+                showMessageModal("인증 오류", "팀을 생성하려면 로그인해야 합니다.");
+                return;
+            }
+
+            toggleLoadingSpinner(true);
+            try {
+                // Define some default players for a new team
+                const defaultPlayers = [
+                    { id: generateUUID(), name: "김타자", position: "타자", battingSkill: 80, pitchingSkill: 0, defenseSkill: 75 },
+                    { id: generateUUID(), name: "박타자", position: "타자", battingSkill: 75, pitchingSkill: 0, defenseSkill: 70 },
+                    { id: generateUUID(), name: "이타자", position: "타자", battingSkill: 85, pitchingSkill: 0, defenseSkill: 80 },
+                    { id: generateUUID(), name: "최타자", position: "타자", battingSkill: 70, pitchingSkill: 0, defenseSkill: 65 },
+                    { id: generateUUID(), name: "정타자", position: "타자", battingSkill: 78, pitchingSkill: 0, defenseSkill: 72 },
+                    { id: generateUUID(), name: "강타자", position: "타자", battingSkill: 82, pitchingSkill: 0, defenseSkill: 77 },
+                    { id: generateUUID(), name: "조타자", position: "타자", battingSkill: 68, pitchingSkill: 0, defenseSkill: 60 },
+                    { id: generateUUID(), name: "윤타자", position: "타자", battingSkill: 90, pitchingSkill: 0, defenseSkill: 85 },
+                    { id: generateUUID(), name: "장타자", position: "타자", battingSkill: 73, pitchingSkill: 0, defenseSkill: 68 },
+                    { id: generateUUID(), name: "김투수", position: "투수", battingSkill: 50, pitchingSkill: 85, defenseSkill: 70 },
+                    { id: generateUUID(), name: "이투수", position: "투수", battingSkill: 45, pitchingSkill: 80, defenseSkill: 65 },
+                    { id: generateUUID(), name: "박투수", position: "투수", battingSkill: 55, pitchingSkill: 90, defenseSkill: 75 },
+                ];
+
+                const newTeamData = {
+                    name: teamName,
+                    hometown: hometown,
+                    logoUrl: logoUrl,
+                    ownerId: currentUserId,
+                    wins: 0,
+                    losses: 0,
+                    players: defaultPlayers, // Add default players
+                    lineup: defaultPlayers.filter(p => p.position === '타자').slice(0, 9), // Default 9 batters
+                    rotation: defaultPlayers.filter(p => p.position === '투수').slice(0, 1), // Default 1 pitcher
+                    createdAt: new Date()
+                };
+
+                // Save team data in private collection
+                const teamDocRef = doc(db, `artifacts/${__app_id}/users/${currentUserId}/teams`, 'myTeam');
+                await setDoc(teamDocRef, newTeamData);
+
+                // Also save a public record for standings and opponent selection
+                const publicTeamDocRef = doc(db, `artifacts/${__app_id}/public/data/standings`, currentUserId); // Use userId as doc ID for public standings
+                await setDoc(publicTeamDocRef, {
+                    teamId: currentUserId, // Store the owner's ID as teamId for lookup
+                    name: teamName,
+                    hometown: hometown,
+                    logoUrl: logoUrl,
+                    wins: 0,
+                    losses: 0,
+                    lastPlayed: null // To track when the team last played for daily game logic
+                });
+
+                showMessageModal("팀 생성 성공", `${teamName} 팀이 성공적으로 생성되었습니다!`);
+                // loadUserTeam() will be triggered by onSnapshot
+            } catch (error) {
+                console.error("Error creating team:", error);
+                showMessageModal("팀 생성 실패", `팀 생성 중 오류가 발생했습니다: ${error.message}`);
+            } finally {
+                toggleLoadingSpinner(false);
+            }
+        });
+
+        // Event listener for saving lineup
+        saveLineupBtn.addEventListener('click', async () => {
+            if (!currentUserTeam) {
+                showMessageModal("오류", "먼저 팀을 생성해주세요.");
+                return;
+            }
+            if (!currentUserTeam.lineup || currentUserTeam.lineup.length !== 9) {
+                showMessageModal("라인업 오류", "타자 라인업은 9명으로 구성해야 합니다.");
+                return;
+            }
+            if (!currentUserTeam.rotation || currentUserTeam.rotation.length === 0) {
+                 showMessageModal("라인업 오류", "투수를 최소 1명 선택해야 합니다.");
+                 return;
+            }
+
+            toggleLoadingSpinner(true);
+            try {
+                const teamDocRef = doc(db, `artifacts/${__app_id}/users/${currentUserId}/teams`, 'myTeam');
+                await updateDoc(teamDocRef, {
+                    lineup: currentUserTeam.lineup,
+                    rotation: currentUserTeam.rotation // Save rotation as well
+                });
+                showMessageModal("라인업 저장", "라인업이 성공적으로 저장되었습니다!");
+            } catch (error) {
+                console.error("Error saving lineup:", error);
+                showMessageModal("라인업 저장 실패", `라인업 저장 중 오류가 발생했습니다: ${error.message}`);
+            } finally {
+                toggleLoadingSpinner(false);
+            }
+        });
+
+        // --- Game Simulation ---
+
+        /**
+         * Simulates a single baseball game.
+         * @param {Object} teamA - The first team object.
+         * @param {Object} teamB - The second team object.
+         * @returns {Object} Game result including scores and log.
+         */
+        function simulateGame(teamA, teamB) {
+            const gameLog = [];
+            let scoreA = 0;
+            let scoreB = 0;
+
+            gameLog.push(`--- ${teamA.name} vs ${teamB.name} 경기 시작 ---`);
+
+            for (let inning = 1; inning <= 9; inning++) {
+                gameLog.push(`\n--- ${inning}회 초 ---`);
+                const runsA = Math.floor(Math.random() * 3); // 0, 1, or 2 runs
+                scoreA += runsA;
+                gameLog.push(`${teamA.name} ${runsA}점 획득! 현재 점수: ${teamA.name} ${scoreA} - ${teamB.name} ${scoreB}`);
+
+                gameLog.push(`\n--- ${inning}회 말 ---`);
+                const runsB = Math.floor(Math.random() * 3); // 0, 1, or 2 runs
+                scoreB += runsB;
+                gameLog.push(`${teamB.name} ${runsB}점 획득! 현재 점수: ${teamA.name} ${scoreA} - ${teamB.name} ${scoreB}`);
+            }
+
+            gameLog.push(`\n--- 경기 종료 ---`);
+            let winner = '';
+            let loser = '';
+            if (scoreA > scoreB) {
+                winner = teamA.name;
+                loser = teamB.name;
+                gameLog.push(`${teamA.name}가 ${scoreA}대${scoreB}로 승리했습니다!`);
+            } else if (scoreB > scoreA) {
+                winner = teamB.name;
+                loser = teamA.name;
+                gameLog.push(`${teamB.name}가 ${scoreB}대${scoreA}로 승리했습니다!`);
+            } else {
+                // Simple tie-breaker for now, or just declare a tie
+                gameLog.push("동점입니다! 연장전 없이 무승부로 처리합니다.");
+                winner = '무승부';
+                loser = '무승부';
+            }
+
+            return {
+                homeTeam: teamA.name,
+                awayTeam: teamB.name,
+                homeScore: scoreA,
+                awayScore: scoreB,
+                winner: winner,
+                loser: loser,
+                log: gameLog
+            };
+        }
+
+        /**
+         * Finds available opponent teams from the public standings.
+         */
+        findOpponentBtn.addEventListener('click', async () => {
+            if (!currentUserTeam) {
+                showMessageModal("오류", "먼저 팀을 생성해주세요.");
+                return;
+            }
+
+            toggleLoadingSpinner(true);
+            try {
+                const standingsColRef = collection(db, `artifacts/${__app_id}/public/data/standings`);
+                const q = query(standingsColRef, where("teamId", "!=", currentUserId)); // Get all teams except current user's
+                const querySnapshot = await getDocs(q);
+
+                availableOpponentTeams = [];
+                querySnapshot.forEach(doc => {
+                    availableOpponentTeams.push({ id: doc.id, ...doc.data() });
+                });
+
+                if (availableOpponentTeams.length > 0) {
+                    // Select a random opponent
+                    selectedOpponentTeam = availableOpponentTeams[Math.floor(Math.random() * availableOpponentTeams.length)];
+                    todayGameInfo.innerHTML = `오늘의 상대: <span class="font-bold">${selectedOpponentTeam.name}</span> (${selectedOpponentTeam.hometown})`;
+                    simulateBtn.classList.remove('section-hidden');
+                } else {
+                    todayGameInfo.textContent = "현재 리그에 다른 팀이 없습니다. 다른 사용자가 팀을 생성할 때까지 기다려주세요!";
+                    simulateBtn.classList.add('section-hidden');
+                }
+            } catch (error) {
+                console.error("Error finding opponent:", error);
+                showMessageModal("상대 팀 찾기 오류", "상대 팀을 찾는 데 실패했습니다.");
+            } finally {
+                toggleLoadingSpinner(false);
+            }
+        });
+
+        /**
+         * Starts the game simulation and saves results.
+         */
+        simulateBtn.addEventListener('click', async () => {
+            if (!currentUserTeam || !selectedOpponentTeam) {
+                showMessageModal("오류", "먼저 팀을 생성하고 상대 팀을 선택해주세요.");
+                return;
+            }
+            if (!currentUserTeam.lineup || currentUserTeam.lineup.length !== 9) {
+                showMessageModal("라인업 오류", "경기를 시작하려면 타자 라인업 9명을 설정해야 합니다.");
+                return;
+            }
+
+            toggleLoadingSpinner(true);
+            gameResultsDisplay.classList.add('section-hidden'); // Hide previous results
+            gameLogDiv.innerHTML = ''; // Clear previous log
+
+            try {
+                // Simulate game
+                const gameResult = simulateGame(currentUserTeam, selectedOpponentTeam);
+
+                // Display game results
+                gameScoreDisplay.textContent = `${gameResult.homeTeam} ${gameResult.homeScore} : ${gameResult.awayScore} ${gameResult.awayTeam}`;
+                gameResult.log.forEach(entry => {
+                    const p = document.createElement('p');
+                    p.className = 'game-log-entry';
+                    p.textContent = entry;
+                    gameLogDiv.appendChild(p);
+                });
+                gameResultsDisplay.classList.remove('section-hidden');
+
+                // Update team records in a transaction
+                await runTransaction(db, async (transaction) => {
+                    // Update current user's team
+                    const myTeamRef = doc(db, `artifacts/${__app_id}/users/${currentUserId}/teams`, 'myTeam');
+                    const myTeamDoc = await transaction.get(myTeamRef);
+                    if (myTeamDoc.exists()) {
+                        const currentWins = myTeamDoc.data().wins || 0;
+                        const currentLosses = myTeamDoc.data().losses || 0;
+                        transaction.update(myTeamRef, {
+                            wins: gameResult.winner === currentUserTeam.name ? currentWins + 1 : currentWins,
+                            losses: gameResult.loser === currentUserTeam.name ? currentLosses + 1 : currentLosses
+                        });
+                    }
+
+                    // Update opponent's public standing
+                    const opponentStandingRef = doc(db, `artifacts/${__app_id}/public/data/standings`, selectedOpponentTeam.id);
+                    const opponentStandingDoc = await transaction.get(opponentStandingRef);
+                    if (opponentStandingDoc.exists()) {
+                        const currentOpponentWins = opponentStandingDoc.data().wins || 0;
+                        const currentOpponentLosses = opponentStandingDoc.data().losses || 0;
+                        transaction.update(opponentStandingRef, {
+                            wins: gameResult.winner === selectedOpponentTeam.name ? currentOpponentWins + 1 : currentOpponentWins,
+                            losses: gameResult.loser === selectedOpponentTeam.name ? currentOpponentLosses + 1 : currentOpponentLosses,
+                            lastPlayed: new Date() // Mark opponent as played
+                        });
+                    }
+
+                    // Update current user's public standing
+                    const myPublicStandingRef = doc(db, `artifacts/${__app_id}/public/data/standings`, currentUserId);
+                    const myPublicStandingDoc = await transaction.get(myPublicStandingRef);
+                    if (myPublicStandingDoc.exists()) {
+                        const currentMyPublicWins = myPublicStandingDoc.data().wins || 0;
+                        const currentMyPublicLosses = myPublicStandingDoc.data().losses || 0;
+                        transaction.update(myPublicStandingRef, {
+                            wins: gameResult.winner === currentUserTeam.name ? currentMyPublicWins + 1 : currentMyPublicWins,
+                            losses: gameResult.loser === currentUserTeam.name ? currentMyPublicLosses + 1 : currentMyPublicLosses,
+                            lastPlayed: new Date() // Mark my team as played
+                        });
+                    }
+
+                    // Save game result to public games collection
+                    const gamesColRef = collection(db, `artifacts/${__app_id}/public/data/games`);
+                    await addDoc(gamesColRef, {
+                        date: new Date(),
+                        homeTeamId: currentUserTeam.id,
+                        awayTeamId: selectedOpponentTeam.id,
+                        homeTeamName: currentUserTeam.name,
+                        awayTeamName: selectedOpponentTeam.name,
+                        homeScore: gameResult.homeScore,
+                        awayScore: gameResult.awayScore,
+                        winnerTeamName: gameResult.winner,
+                        loserTeamName: gameResult.loser,
+                        summaryLog: gameResult.log.join('\n')
+                    });
+                });
+
+                showMessageModal("경기 완료", "경기가 성공적으로 시뮬레이션되고 결과가 저장되었습니다!");
+                // No need to call loadUserTeam or loadStandings explicitly, onSnapshot will handle updates.
+            } catch (error) {
+                console.error("Error simulating game or saving results:", error);
+                showMessageModal("경기 시뮬레이션 오류", `경기 시뮬레이션 중 오류가 발생했습니다: ${error.message}`);
+            } finally {
+                toggleLoadingSpinner(false);
+            }
+        });
+
+        // --- League Standings ---
+
+        /**
+         * Loads and displays league standings from Firestore.
+         */
+        async function loadStandings() {
+            const standingsColRef = collection(db, `artifacts/${__app_id}/public/data/standings`);
+            onSnapshot(standingsColRef, (snapshot) => {
+                const standings = [];
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    const wins = data.wins || 0;
+                    const losses = data.losses || 0;
+                    const gamesPlayed = wins + losses;
+                    const winRate = gamesPlayed > 0 ? (wins / gamesPlayed).toFixed(3) : '0.000';
+                    standings.push({
+                        id: doc.id,
+                        name: data.name,
+                        wins: wins,
+                        losses: losses,
+                        winRate: winRate
+                    });
+                });
+
+                // Sort by wins (descending), then losses (ascending)
+                standings.sort((a, b) => {
+                    if (b.wins !== a.wins) {
+                        return b.wins - a.wins;
+                    }
+                    return a.losses - b.losses;
+                });
+
+                renderStandings(standings);
+            }, (error) => {
+                console.error("Error loading standings:", error);
+                showMessageModal("순위표 로딩 오류", "순위표를 불러오는 데 실패했습니다.");
+            });
+        }
+
+        /**
+         * Renders the league standings table.
+         * @param {Array<Object>} standings - Array of team standing objects.
+         */
+        function renderStandings(standings) {
+            standingsTableBody.innerHTML = '';
+            if (standings.length === 0) {
+                standingsTableBody.innerHTML = '<tr><td colspan="5" class="py-4 px-4 text-center text-gray-500">아직 리그에 팀이 없습니다.</td></tr>';
+                return;
+            }
+
+            standings.forEach((team, index) => {
+                const row = document.createElement('tr');
+                row.className = 'hover:bg-gray-50';
+                row.innerHTML = `
+                    <td class="py-2 px-4">${index + 1}</td>
+                    <td class="py-2 px-4">${team.name}</td>
+                    <td class="py-2 px-4">${team.wins}</td>
+                    <td class="py-2 px-4">${team.losses}</td>
+                    <td class="py-2 px-4">${team.winRate}</td>
+                `;
+                standingsTableBody.appendChild(row);
+            });
+        }
+
+        // Initial authentication when the page loads
+        authenticateUser();
+    </script>
+</body>
+</html>
