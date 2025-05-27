@@ -474,8 +474,8 @@
     <script type="module">
         // Firebase SDK imports
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc, updateDoc, onSnapshot, collection, query, where, addDoc, getDocs, runTransaction } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getAuth, signInWithCustomToken, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc, updateDoc, onSnapshot, collection, query, where, addDoc, getDocs, writeBatch } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // Global Firebase variables (provided by Canvas environment)
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
@@ -870,33 +870,26 @@
                 mainAppSection.classList.add('hidden');
                 showAuthForm('loginForm'); // Show login form on logout
                 stopAutoSeason(); // Stop season if logged out
+                hideLoading(); // Ensure loading is hidden if auth fails or logs out
             }
         });
 
         // Initial Firebase authentication check (for custom token)
         window.onload = async () => {
+            showLoading('인증 확인 중...');
             if (initialAuthToken) {
-                showLoading('자동 로그인 중...');
                 try {
                     await signInWithCustomToken(auth, initialAuthToken);
                 } catch (error) {
                     console.error("Custom token sign-in error:", error);
-                    showModal('로그인 실패', '자동 로그인에 실패했습니다. 다시 시도해주세요.');
-                    await signInAnonymously(auth); // Fallback to anonymous login if custom token fails
-                } finally {
-                    hideLoading();
+                    showModal('로그인 실패', '자동 로그인에 실패했습니다. 직접 로그인해주세요.');
+                    hideLoading(); // Hide loading and show auth forms
+                    showAuthForm('loginForm');
                 }
             } else {
-                // If no custom token, sign in anonymously or let user login
-                showLoading('익명 로그인 중...');
-                try {
-                    await signInAnonymously(auth);
-                } catch (error) {
-                    console.error("Anonymous sign-in error:", error);
-                    showModal('오류', '익명 로그인에 실패했습니다. 앱을 사용할 수 없습니다.');
-                } finally {
-                    hideLoading();
-                }
+                // If no custom token, simply hide loading and show auth forms
+                hideLoading();
+                showAuthForm('loginForm');
             }
         };
 
@@ -1018,7 +1011,7 @@
                 }
 
                 const playersToGenerate = 32 - myPlayers.length;
-                const batch = db.batch(); // Use batch writes for efficiency
+                const batch = writeBatch(db); // Use batch writes for efficiency
 
                 for (let i = 0; i < playersToGenerate; i++) {
                     const firstName = KOREAN_FIRST_NAMES[Math.floor(Math.random() * KOREAN_FIRST_NAMES.length)];
@@ -1640,7 +1633,7 @@
                 await updateDoc(awayTeamDocRef, awayTeamUpdate);
 
                 // Update player stats in Firestore (e.g., games played, hits, etc.)
-                const playerBatch = db.batch();
+                const playerBatch = writeBatch(db);
                 allPlayers.forEach(player => {
                     const playerRef = doc(db, `artifacts/${appId}/public/data/players`, player.id);
                     playerBatch.update(playerRef, {
@@ -1796,7 +1789,7 @@
          */
         async function applyPlayerGrowth() {
             console.log("선수 성장 적용 중...");
-            const playerBatch = db.batch();
+            const playerBatch = writeBatch(db);
             allPlayers.forEach(player => {
                 if (player.growthPoints > 0) {
                     const growthFactor = player.growthPoints / 10; // 10 growth points for 1 stat point
