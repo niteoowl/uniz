@@ -70,25 +70,37 @@
         /* 캐러셀 아이템이 줄바꿈되지 않도록 */
         .carousel-item {
             flex: 0 0 auto; /* 아이템이 축소되거나 확장되지 않도록 고정 */
-            width: 140px; /* 아이템 너비 고정 (160px -> 140px로 변경) */
+            width: 140px; /* 모바일: 아이템 너비 고정 */
             margin-right: 16px; /* 아이템 간 간격 */
         }
         .carousel-item:last-child {
             margin-right: 0; /* 마지막 아이템에는 마진 없음 */
         }
         .carousel-item img {
-            width: 140px; /* 이미지 너비 고정 (w-40 -> 140px로 변경) */
-            height: 180px; /* 이미지 높이 고정 (h-56 -> 180px로 변경) */
+            width: 140px; /* 모바일: 이미지 너비 고정 */
+            height: 180px; /* 모바일: 이미지 높이 고정 */
             object-fit: cover;
             border-radius: 0.375rem; /* rounded-md */
             margin-bottom: 0.5rem; /* mb-2 */
             margin-left: auto;
             margin-right: auto;
         }
+
+        /* PC (lg) 화면에서 캐러셀 아이템 크기 */
+        @media (min-width: 1024px) {
+            .carousel-item {
+                width: 160px; /* PC: 아이템 너비 원래대로 */
+            }
+            .carousel-item img {
+                width: 160px; /* PC: 이미지 너비 원래대로 */
+                height: 224px; /* PC: 이미지 높이 원래대로 */
+            }
+        }
+
         /* 캐러셀 버튼 위치 및 크기 조정 */
         .carousel-nav-button {
             position: absolute;
-            top: 90px; /* 이미지 높이 (180px)의 절반인 90px에 정확히 위치 */
+            top: 90px; /* 모바일: 이미지 높이(180px)의 절반 */
             transform: translateY(-50%); /* 정확한 중앙 정렬을 위해 버튼 자체 높이의 절반만큼 위로 이동 */
             background-color: #ffffff; /* 불투명 흰색 배경 */
             border: 1px solid #d1d5db; /* 회색 테두리 */
@@ -103,10 +115,11 @@
             justify-content: center;
             pointer-events: auto; /* 기본적으로 클릭 가능 */
         }
-        /* 대형 화면 (lg)에서 캐러셀 버튼 표시 */
+        /* 대형 화면 (lg)에서 캐러셀 버튼 표시 및 위치 조정 */
         @media (min-width: 1024px) {
             .carousel-nav-button {
                 display: flex;
+                top: 112px; /* PC: 이미지 높이(224px)의 절반 */
             }
         }
 
@@ -601,8 +614,8 @@
         const editorsPickNextButton = document.getElementById('editors-pick-carousel-next');
 
         // 스크롤 단위 (아이템 너비 + 마진)
-        // 캐러셀 아이템 너비 (140px) + 마진 (16px)
-        const scrollAmount = 140 + 16; 
+        // PC (lg) 화면에서 캐러셀 아이템 너비 (160px) + 마진 (16px)
+        const scrollAmount = 160 + 16; 
 
         // 캐러셀 버튼 가시성 업데이트 함수
         function updateCarouselButtons(carouselElement, prevButtonElement, nextButtonElement) {
