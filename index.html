@@ -54,7 +54,8 @@
             flex: 1;
             overflow-y: auto;
             background-color: #ffffff;
-            padding: 0; /* 모바일에서 좌우 패딩을 0으로 완전히 제거 */
+            padding-left: 0.5rem; /* 모바일에서 좌우 패딩을 0.5rem (8px)으로 최소화 */
+            padding-right: 0.5rem; /* 모바일에서 좌우 패딩을 0.5rem (8px)으로 최소화 */
             margin-left: 0; /* 모바일에서는 왼쪽 마진 없음 */
             padding-bottom: 5rem; /* 하단 내비게이션 바 높이만큼 패딩 추가 */
         }
@@ -241,13 +242,13 @@
         </aside>
 
         <main class="main-content-area">
-            <section class="p-6 mb-8">
-                <div class="flex justify-between items-center mb-6">
+            <section class="mb-8">
+                <div class="px-4 flex justify-between items-center mb-6">
                     <h2 class="text-xl font-semibold text-gray-800">따끈따끈 신작이 왔어요 (*´▽`*)ﾉ</h2>
                     <a href="#" class="text-gray-600 hover:text-gray-800 font-normal">더보기</a>
                 </div>
                 <div class="relative">
-                    <div id="new-releases-carousel" class="flex overflow-x-scroll scroll-smooth pb-4">
+                    <div id="new-releases-carousel" class="flex overflow-x-scroll scroll-smooth pb-4 px-4">
                         <div class="carousel-item">
                             <img src="https://placehold.co/150x200/E0F2FE/3B82F6?text=신작+1" alt="사랑하지 않는 그가 네임을 지웠다">
                             <h3 class="font-medium text-gray-900 text-sm mb-1 text-left">사랑하지 않는 그가 네임을 지웠다</h3>
@@ -312,13 +313,13 @@
                 </div>
             </section>
 
-            <section class="p-6 mb-8">
-                <div class="flex justify-between items-center mb-6">
+            <section class="mb-8">
+                <div class="px-4 flex justify-between items-center mb-6">
                     <h2 class="text-xl font-semibold text-gray-800">지난주 독자들의 ♥ 가 듬뿍!</h2>
                     <a href="#" class="text-gray-600 hover:text-gray-800 font-normal">더보기</a>
                 </div>
                 <div class="relative">
-                    <div id="popular-carousel" class="flex overflow-x-scroll scroll-smooth pb-4">
+                    <div id="popular-carousel" class="flex overflow-x-scroll scroll-smooth pb-4 px-4">
                         <div class="carousel-item">
                             <img src="https://placehold.co/150x200/FEE2E2/EF4444?text=인기+1" alt="정략 결혼을 피하는 방법">
                             <h3 class="font-medium text-gray-900 text-sm mb-1 text-left">정략 결혼을 피하는 방법</h3>
@@ -374,12 +375,12 @@
                 </div>
             </section>
 
-            <section class="p-6 mb-8">
-                <div class="flex justify-between items-center mb-6">
+            <section class="mb-8">
+                <div class="px-4 flex justify-between items-center mb-6">
                     <h2 class="text-xl font-semibold text-gray-800">실시간 인기 주제</h2>
                     <a href="#" class="text-gray-600 hover:text-gray-800 font-normal">더보기</a>
                 </div>
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 px-4">
                     <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-200 flex items-center">
                         <span class="text-lg font-bold text-blue-600 mr-3">1</span>
                         <div>
@@ -425,13 +426,13 @@
                 </div>
             </section>
 
-            <section class="p-6 mb-8">
-                <div class="flex justify-between items-center mb-6">
+            <section class="mb-8">
+                <div class="px-4 flex justify-between items-center mb-6">
                     <h2 class="text-xl font-semibold text-gray-800">새롭게 떠오르는 작품</h2>
                     <a href="#" class="text-gray-600 hover:text-gray-800 font-normal">더보기</a>
                 </div>
                 <div class="relative">
-                    <div id="rising-stars-carousel" class="flex overflow-x-scroll scroll-smooth pb-4">
+                    <div id="rising-stars-carousel" class="flex overflow-x-scroll scroll-smooth pb-4 px-4">
                         <div class="carousel-item">
                             <img src="https://placehold.co/150x200/D1FAE5/059669?text=떠오르는+1" alt="환생한 빌런의 회귀">
                             <h3 class="font-medium text-gray-900 text-sm mb-1 text-left">환생한 빌런의 회귀</h3>
@@ -487,13 +488,13 @@
                 </div>
             </section>
 
-            <section class="p-6 mb-8">
-                <div class="flex justify-between items-center mb-6">
+            <section class="mb-8">
+                <div class="px-4 flex justify-between items-center mb-6">
                     <h2 class="text-xl font-semibold text-gray-800">에디터의 추천작</h2>
                     <a href="#" class="text-gray-600 hover:text-gray-800 font-normal">더보기</a>
                 </div>
                 <div class="relative">
-                    <div id="editors-pick-carousel" class="flex overflow-x-scroll scroll-smooth pb-4">
+                    <div id="editors-pick-carousel" class="flex overflow-x-scroll scroll-smooth pb-4 px-4">
                         <div class="carousel-item">
                             <img src="https://placehold.co/150x200/DBEAFE/2563EB?text=추천+1" alt="황제와 나의 계약">
                             <h3 class="font-medium text-gray-900 text-sm mb-1 text-left">황제와 나의 계약</h3>
