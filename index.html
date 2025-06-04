@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>uniz</title>
+    <title>디리토 웹사이트 뼈대</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
@@ -54,7 +54,7 @@
             flex: 1;
             overflow-y: auto;
             background-color: #ffffff;
-            padding: 0.01rem; /* 모바일에서 좌우 패딩을 0.25rem (4px)으로 줄임 */
+            padding: 0.25rem; /* 모바일에서 좌우 패딩을 0.25rem (4px)으로 줄임 */
             margin-left: 0; /* 모바일에서는 왼쪽 마진 없음 */
             padding-bottom: 5rem; /* 하단 내비게이션 바 높이만큼 패딩 추가 */
         }
@@ -70,21 +70,30 @@
         /* 캐러셀 아이템이 줄바꿈되지 않도록 */
         .carousel-item {
             flex: 0 0 auto; /* 아이템이 축소되거나 확장되지 않도록 고정 */
-            width: 160px; /* 아이템 너비 고정 (이미지 너비에 맞춤) */
+            width: 140px; /* 아이템 너비 고정 (160px -> 140px로 변경) */
             margin-right: 16px; /* 아이템 간 간격 */
         }
         .carousel-item:last-child {
             margin-right: 0; /* 마지막 아이템에는 마진 없음 */
         }
+        .carousel-item img {
+            width: 140px; /* 이미지 너비 고정 (w-40 -> 140px로 변경) */
+            height: 180px; /* 이미지 높이 고정 (h-56 -> 180px로 변경) */
+            object-fit: cover;
+            border-radius: 0.375rem; /* rounded-md */
+            margin-bottom: 0.5rem; /* mb-2 */
+            margin-left: auto;
+            margin-right: auto;
+        }
         /* 캐러셀 버튼 위치 및 크기 조정 */
         .carousel-nav-button {
             position: absolute;
-            top: 112px; /* 이미지 높이 (224px)의 절반인 112px에 정확히 위치 */
+            top: 90px; /* 이미지 높이 (180px)의 절반인 90px에 정확히 위치 */
             transform: translateY(-50%); /* 정확한 중앙 정렬을 위해 버튼 자체 높이의 절반만큼 위로 이동 */
             background-color: #ffffff; /* 불투명 흰색 배경 */
             border: 1px solid #d1d5db; /* 회색 테두리 */
             border-radius: 9999px; /* 완전한 원형 */
-            padding: 0.625rem; /* 10px, 이전 0.5rem(8px)보다 약간 크게 */
+            padding: 0.625rem; /* 10px */
             cursor: pointer;
             transition: background-color 0.2s ease-in-out, opacity 0.3s ease-in-out; /* 불투명도 전환 추가 */
             width: 48px; /* 32px(svg) + 8px(padding) * 2 = 48px */
@@ -111,7 +120,7 @@
             background-color: #f3f4f6; /* hover 시 약간 어둡게 */
         }
         .carousel-nav-button svg {
-            width: 1.75rem; /* 28px, 이전 1.5rem(24px)보다 약간 크게 */
+            width: 1.75rem; /* 28px */
             height: 1.75rem; /* 동일하게 설정 */
             color: #4b5563; /* text-gray-600과 동일 */
         }
@@ -227,7 +236,7 @@
                 <div class="relative">
                     <div id="new-releases-carousel" class="flex overflow-x-scroll scroll-smooth pb-4">
                         <div class="carousel-item">
-                            <img src="https://placehold.co/150x200/E0F2FE/3B82F6?text=신작+1" alt="사랑하지 않는 그가 네임을 지웠다" class="w-40 h-56 object-cover rounded-md mb-2 mx-auto">
+                            <img src="https://placehold.co/150x200/E0F2FE/3B82F6?text=신작+1" alt="사랑하지 않는 그가 네임을 지웠다">
                             <h3 class="font-medium text-gray-900 text-sm mb-1 text-left">사랑하지 않는 그가 네임을 지웠다</h3>
                             <p class="text-xs text-gray-600 text-left font-normal">김나나 로맨스</p>
                             <div class="flex items-center text-xs text-gray-500 mt-1 justify-start font-normal">
@@ -236,7 +245,7 @@
                             </div>
                         </div>
                         <div class="carousel-item">
-                            <img src="https://placehold.co/150x200/E0F2FE/3B82F6?text=신작+2" alt="나인 드림" class="w-40 h-56 object-cover rounded-md mb-2 mx-auto">
+                            <img src="https://placehold.co/150x200/E0F2FE/3B82F6?text=신작+2" alt="나인 드림">
                             <h3 class="font-medium text-gray-900 text-sm mb-1 text-left">나인 드림</h3>
                             <p class="text-xs text-gray-600 text-left font-normal">BL</p>
                             <div class="flex items-center text-xs text-gray-500 mt-1 justify-start font-normal">
@@ -245,7 +254,7 @@
                             </div>
                         </div>
                         <div class="carousel-item">
-                            <img src="https://placehold.co/150x200/E0F2FE/3B82F6?text=신작+3" alt="백년손님" class="w-40 h-56 object-cover rounded-md mb-2 mx-auto">
+                            <img src="https://placehold.co/150x200/E0F2FE/3B82F6?text=신작+3" alt="백년손님">
                             <h3 class="font-medium text-gray-900 text-sm mb-1 text-left">백년손님</h3>
                             <p class="text-xs text-gray-600 text-left font-normal">소조금 BL</p>
                             <div class="flex items-center text-xs text-gray-500 mt-1 justify-start font-normal">
@@ -254,7 +263,7 @@
                             </div>
                         </div>
                         <div class="carousel-item">
-                            <img src="https://placehold.co/150x200/E0F2FE/3B82F6?text=신작+4" alt="하드 테이밍 (Hard Taming)" class="w-40 h-56 object-cover rounded-md mb-2 mx-auto">
+                            <img src="https://placehold.co/150x200/E0F2FE/3B82F6?text=신작+4" alt="하드 테이밍 (Hard Taming)">
                             <h3 class="font-medium text-gray-900 text-sm mb-1 text-left">하드 테이밍 (Hard Taming)</h3>
                             <p class="text-xs text-gray-600 text-left font-normal">모드 엔드 - BL</p>
                             <div class="flex items-center text-xs text-gray-500 mt-1 justify-start font-normal">
@@ -263,7 +272,7 @@
                             </div>
                         </div>
                         <div class="carousel-item">
-                            <img src="https://placehold.co/150x200/E0F2FE/3B82F6?text=신작+5" alt="헤어진 거 끝난 건 아니잖아" class="w-40 h-56 object-cover rounded-md mb-2 mx-auto">
+                            <img src="https://placehold.co/150x200/E0F2FE/3B82F6?text=신작+5" alt="헤어진 거 끝난 건 아니잖아">
                             <h3 class="font-medium text-gray-900 text-sm mb-1 text-left">헤어진 거 끝난 건 아니잖아</h3>
                             <p class="text-xs text-gray-600 text-left font-normal">유유진 - BL</p>
                             <div class="flex items-center text-xs text-gray-500 mt-1 justify-start font-normal">
@@ -272,7 +281,7 @@
                             </div>
                         </div>
                         <div class="carousel-item">
-                            <img src="https://placehold.co/150x200/FFD700/000000?text=신작+6" alt="새로운 이야기" class="w-40 h-56 object-cover rounded-md mb-2 mx-auto">
+                            <img src="https://placehold.co/150x200/FFD700/000000?text=신작+6" alt="새로운 이야기">
                             <h3 class="font-medium text-gray-900 text-sm mb-1 text-left">새로운 이야기</h3>
                             <p class="text-xs text-gray-600 text-left font-normal">판타지</p>
                             <div class="flex items-center text-xs text-gray-500 mt-1 justify-start font-normal">
@@ -298,7 +307,7 @@
                 <div class="relative">
                     <div id="popular-carousel" class="flex overflow-x-scroll scroll-smooth pb-4">
                         <div class="carousel-item">
-                            <img src="https://placehold.co/150x200/FEE2E2/EF4444?text=인기+1" alt="정략 결혼을 피하는 방법" class="w-40 h-56 object-cover rounded-md mb-2 mx-auto">
+                            <img src="https://placehold.co/150x200/FEE2E2/EF4444?text=인기+1" alt="정략 결혼을 피하는 방법">
                             <h3 class="font-medium text-gray-900 text-sm mb-1 text-left">정략 결혼을 피하는 방법</h3>
                             <p class="text-xs text-gray-600 font-normal text-left">나전 7 BL</p>
                             <div class="flex items-center text-xs text-gray-500 mt-1 justify-start font-normal">
@@ -307,7 +316,7 @@
                             </div>
                         </div>
                         <div class="carousel-item">
-                            <img src="https://placehold.co/150x200/FEE2E2/EF4444?text=인기+2" alt="매니저를 그만두니 배우가 쫓아왔다" class="w-40 h-56 object-cover rounded-md mb-2 mx-auto">
+                            <img src="https://placehold.co/150x200/FEE2E2/EF4444?text=인기+2" alt="매니저를 그만두니 배우가 쫓아왔다">
                             <h3 class="font-medium text-gray-900 text-sm mb-1 text-left">매니저를 그만두니 배우가 쫓아왔다</h3>
                             <p class="text-xs text-gray-600 font-normal text-left">유우니 BL</p>
                             <div class="flex items-center text-xs text-gray-500 mt-1 justify-start font-normal">
@@ -316,7 +325,7 @@
                             </div>
                         </div>
                         <div class="carousel-item">
-                            <img src="https://placehold.co/150x200/FEE2E2/EF4444?text=인기+3" alt="취수혼" class="w-40 h-56 object-cover rounded-md mb-2 mx-auto">
+                            <img src="https://placehold.co/150x200/FEE2E2/EF4444?text=인기+3" alt="취수혼">
                             <h3 class="font-medium text-gray-900 text-sm mb-1 text-left">취수혼</h3>
                             <p class="text-xs text-gray-600 font-normal text-left">BL</p>
                             <div class="flex items-center text-xs text-gray-500 mt-1 justify-start font-normal">
@@ -325,7 +334,7 @@
                             </div>
                         </div>
                         <div class="carousel-item">
-                            <img src="https://placehold.co/150x200/FEE2E2/EF4444?text=인기+4" alt="내 남자 친구의 남자 친구" class="w-40 h-56 object-cover rounded-md mb-2 mx-auto">
+                            <img src="https://placehold.co/150x200/FEE2E2/EF4444?text=인기+4" alt="내 남자 친구의 남자 친구">
                             <h3 class="font-medium text-gray-900 text-sm mb-1 text-left">내 남자 친구의 남자 친구</h3>
                             <p class="text-xs text-gray-600 font-normal text-left">BOYFRIENDS</p>
                             <div class="flex items-center text-xs text-gray-500 mt-1 justify-start font-normal">
@@ -334,7 +343,7 @@
                             </div>
                         </div>
                         <div class="carousel-item">
-                            <img src="https://placehold.co/150x200/FEE2E2/EF4444?text=인기+5" alt="변호사 윤리 강령" class="w-40 h-56 object-cover rounded-md mb-2 mx-auto">
+                            <img src="https://placehold.co/150x200/FEE2E2/EF4444?text=인기+5" alt="변호사 윤리 강령">
                             <h3 class="font-medium text-gray-900 text-sm mb-1 text-left">변호사 윤리 강령</h3>
                             <p class="text-xs text-gray-600 font-normal text-left">메이에르 BL</p>
                             <div class="flex items-center text-xs text-gray-500 mt-1 justify-start font-normal">
@@ -411,7 +420,7 @@
                 <div class="relative">
                     <div id="rising-stars-carousel" class="flex overflow-x-scroll scroll-smooth pb-4">
                         <div class="carousel-item">
-                            <img src="https://placehold.co/150x200/D1FAE5/059669?text=떠오르는+1" alt="환생한 빌런의 회귀" class="w-40 h-56 object-cover rounded-md mb-2 mx-auto">
+                            <img src="https://placehold.co/150x200/D1FAE5/059669?text=떠오르는+1" alt="환생한 빌런의 회귀">
                             <h3 class="font-medium text-gray-900 text-sm mb-1 text-left">환생한 빌런의 회귀</h3>
                             <p class="text-xs text-gray-600 text-left font-normal">액션 판타지</p>
                             <div class="flex items-center text-xs text-gray-500 mt-1 justify-start font-normal">
@@ -420,7 +429,7 @@
                             </div>
                         </div>
                         <div class="carousel-item">
-                            <img src="https://placehold.co/150x200/D1FAE5/059669?text=떠오르는+2" alt="마법 학교의 천재" class="w-40 h-56 object-cover rounded-md mb-2 mx-auto">
+                            <img src="https://placehold.co/150x200/D1FAE5/059669?text=떠오르는+2" alt="마법 학교의 천재">
                             <h3 class="font-medium text-gray-900 text-sm mb-1 text-left">마법 학교의 천재</h3>
                             <p class="text-xs text-gray-600 text-left font-normal">판타지</p>
                             <div class="flex items-center text-xs text-gray-500 mt-1 justify-start font-normal">
@@ -429,7 +438,7 @@
                             </div>
                         </div>
                         <div class="carousel-item">
-                            <img src="https://placehold.co/150x200/D1FAE5/059669?text=떠오르는+3" alt="악녀는 오늘도 평화롭다" class="w-40 h-56 object-cover rounded-md mb-2 mx-auto">
+                            <img src="https://placehold.co/150x200/D1FAE5/059669?text=떠오르는+3" alt="악녀는 오늘도 평화롭다">
                             <h3 class="font-medium text-gray-900 text-sm mb-1 text-left">악녀는 오늘도 평화롭다</h3>
                             <p class="text-xs text-gray-600 text-left font-normal">로맨스 판타지</p>
                             <div class="flex items-center text-xs text-gray-500 mt-1 justify-start font-normal">
@@ -438,7 +447,7 @@
                             </div>
                         </div>
                         <div class="carousel-item">
-                            <img src="https://placehold.co/150x200/D1FAE5/059669?text=떠오르는+4" alt="회귀자의 두 번째 삶" class="w-40 h-56 object-cover rounded-md mb-2 mx-auto">
+                            <img src="https://placehold.co/150x200/D1FAE5/059669?text=떠오르는+4" alt="회귀자의 두 번째 삶">
                             <h3 class="font-medium text-gray-900 text-sm mb-1 text-left">회귀자의 두 번째 삶</h3>
                             <p class="text-xs text-gray-600 text-left font-normal">현대 판타지</p>
                             <div class="flex items-center text-xs text-gray-500 mt-1 justify-start font-normal">
@@ -447,7 +456,7 @@
                             </div>
                         </div>
                         <div class="carousel-item">
-                            <img src="https://placehold.co/150x200/D1FAE5/059669?text=떠오르는+5" alt="용사의 숨겨진 이야기" class="w-40 h-56 object-cover rounded-md mb-2 mx-auto">
+                            <img src="https://placehold.co/150x200/D1FAE5/059669?text=떠오르는+5" alt="용사의 숨겨진 이야기">
                             <h3 class="font-medium text-gray-900 text-sm mb-1 text-left">용사의 숨겨진 이야기</h3>
                             <p class="text-xs text-gray-600 text-left font-normal">정통 판타지</p>
                             <div class="flex items-center text-xs text-gray-500 mt-1 justify-start font-normal">
@@ -473,7 +482,7 @@
                 <div class="relative">
                     <div id="editors-pick-carousel" class="flex overflow-x-scroll scroll-smooth pb-4">
                         <div class="carousel-item">
-                            <img src="https://placehold.co/150x200/DBEAFE/2563EB?text=추천+1" alt="황제와 나의 계약" class="w-40 h-56 object-cover rounded-md mb-2 mx-auto">
+                            <img src="https://placehold.co/150x200/DBEAFE/2563EB?text=추천+1" alt="황제와 나의 계약">
                             <h3 class="font-medium text-gray-900 text-sm mb-1 text-left">황제와 나의 계약</h3>
                             <p class="text-xs text-gray-600 text-left font-normal">로맨스 판타지</p>
                             <div class="flex items-center text-xs text-gray-500 mt-1 justify-start font-normal">
@@ -482,7 +491,7 @@
                             </div>
                         </div>
                         <div class="carousel-item">
-                            <img src="https://placehold.co/150x200/DBEAFE/2563EB?text=추천+2" alt="별이 빛나는 밤에" class="w-40 h-56 object-cover rounded-md mb-2 mx-auto">
+                            <img src="https://placehold.co/150x200/DBEAFE/2563EB?text=추천+2" alt="별이 빛나는 밤에">
                             <h3 class="font-medium text-gray-900 text-sm mb-1 text-left">별이 빛나는 밤에</h3>
                             <p class="text-xs text-gray-600 text-left font-normal">현대 로맨스</p>
                             <div class="flex items-center text-xs text-gray-500 mt-1 justify-start font-normal">
@@ -491,7 +500,7 @@
                             </div>
                         </div>
                         <div class="carousel-item">
-                            <img src="https://placehold.co/150x200/DBEAFE/2563EB?text=추천+3" alt="그림자 속의 영웅" class="w-40 h-56 object-cover rounded-md mb-2 mx-auto">
+                            <img src="https://placehold.co/150x200/DBEAFE/2563EB?text=추천+3" alt="그림자 속의 영웅">
                             <h3 class="font-medium text-gray-900 text-sm mb-1 text-left">그림자 속의 영웅</h3>
                             <p class="text-xs text-gray-600 text-left font-normal">액션 판타지</p>
                             <div class="flex items-center text-xs text-gray-500 mt-1 justify-start font-normal">
@@ -500,7 +509,7 @@
                             </div>
                         </div>
                         <div class="carousel-item">
-                            <img src="https://placehold.co/150x200/DBEAFE/2563EB?text=추천+4" alt="시간 여행자의 일기" class="w-40 h-56 object-cover rounded-md mb-2 mx-auto">
+                            <img src="https://placehold.co/150x200/DBEAFE/2563EB?text=추천+4" alt="시간 여행자의 일기">
                             <h3 class="font-medium text-gray-900 text-sm mb-1 text-left">시간 여행자의 일기</h3>
                             <p class="text-xs text-gray-600 text-left font-normal">SF</p>
                             <div class="flex items-center text-xs text-gray-500 mt-1 justify-start font-normal">
@@ -509,7 +518,7 @@
                             </div>
                         </div>
                         <div class="carousel-item">
-                            <img src="https://placehold.co/150x200/DBEAFE/2563EB?text=추천+5" alt="미래를 보는 소녀" class="w-40 h-56 object-cover rounded-md mb-2 mx-auto">
+                            <img src="https://placehold.co/150x200/DBEAFE/2563EB?text=추천+5" alt="미래를 보는 소녀">
                             <h3 class="font-medium text-gray-900 text-sm mb-1 text-left">미래를 보는 소녀</h3>
                             <p class="text-xs text-gray-600 text-left font-normal">판타지</p>
                             <div class="flex items-center text-xs text-gray-500 mt-1 justify-start font-normal">
@@ -592,7 +601,8 @@
         const editorsPickNextButton = document.getElementById('editors-pick-carousel-next');
 
         // 스크롤 단위 (아이템 너비 + 마진)
-        const scrollAmount = 160 + 16; // carousel-item width + margin-right
+        // 캐러셀 아이템 너비 (140px) + 마진 (16px)
+        const scrollAmount = 140 + 16; 
 
         // 캐러셀 버튼 가시성 업데이트 함수
         function updateCarouselButtons(carouselElement, prevButtonElement, nextButtonElement) {
