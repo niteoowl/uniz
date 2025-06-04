@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>디리토 웹사이트 뼈대</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        @font-face {
+            font-family: 'Pretendard-Regular';
+            src: url('https://fastly.jsdelivr.net/gh/Project-Noonnu/noonfonts_2107@1.1/Pretendard-Regular.woff') format('woff');
+            font-weight: 400;
+            font-style: normal;
+        }
+        body {
+            font-family: 'Pretendard-Regular', 'Inter', sans-serif; /* Pretendard 폰트 적용 */
+            background-color: #f0f2f5; /* 밝은 회색 배경 */
+        }
+        /* 고정 헤더를 위한 스타일 */
+        .fixed-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 64px; /* 헤더 높이 고정 */
+            z-index: 1000; /* 다른 요소 위에 오도록 설정 */
+        }
+        /* 고정 사이드바를 위한 스타일 */
+        .fixed-sidebar {
+            position: fixed;
+            top: 64px; /* 헤더 높이만큼 아래로 시작 */
+            left: 0;
+            bottom: 0;
+            width: 16rem; /* w-64 (256px)와 동일 */
+            background-color: #ffffff;
+            border-right: 1px solid #d1d5db;
+            z-index: 999; /* 헤더보다 약간 아래 */
+            display: none; /* 모바일에서는 기본 숨김 */
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 1.5rem; /* p-6과 동일 */
+        }
+        /* 대형 화면 (lg)에서 사이드바 표시 */
+        @media (min-width: 1024px) {
+            .fixed-sidebar {
+                display: flex;
+            }
+        }
+
+        /* 메인 콘텐츠 영역이 헤더와 사이드바/하단 내비게이션 바를 피하도록 조정 */
+        .main-content-area {
+            margin-top: 64px; /* 헤더 높이만큼 위쪽 마진 */
+            flex: 1;
+            overflow-y: auto;
+            background-color: #ffffff;
+            padding: 1rem; /* 모바일에서 좌우 패딩을 1rem (16px)으로 줄임 */
+            margin-left: 0; /* 모바일에서는 왼쪽 마진 없음 */
+            padding-bottom: 5rem; /* 하단 내비게이션 바 높이만큼 패딩 추가 */
+        }
+        /* 대형 화면 (lg)에서 메인 콘텐츠 영역 왼쪽 마진 조정 */
+        @media (min-width: 1024px) {
+            .main-content-area {
+                margin-left: 16rem; /* 사이드바 너비만큼 왼쪽 마진 */
+                padding: 2rem; /* 데스크톱에서는 패딩을 2rem (32px)으로 유지 */
+                padding-bottom: 2rem; /* 데스크톱에서는 하단 패딩 줄임 */
+            }
+        }
+
+        /* 캐러셀 아이템이 줄바꿈되지 않도록 */
+        .carousel-item {
+            flex: 0 0 auto; /* 아이템이 축소되거나 확장되지 않도록 고정 */
+            width: 160px; /* 아이템 너비 고정 (이미지 너비에 맞춤) */
+            margin-right: 16px; /* 아이템 간 간격 */
+        }
+        .carousel-item:last-child {
+            margin-right: 0; /* 마지막 아이템에는 마진 없음 */
+        }
+        /* 캐러셀 버튼 위치 및 크기 조정 */
+        .carousel-nav-button {
+            position: absolute;
+            top: 112px; /* 이미지 높이 (224px)의 절반인 112px에 정확히 위치 */
+            transform: translateY(-50%); /* 정확한 중앙 정렬을 위해 버튼 자체 높이의 절반만큼 위로 이동 */
+            background-color: #ffffff; /* 불투명 흰색 배경 */
+            border: 1px solid #d1d5db; /* 회색 테두리 */
+            border-radius: 9999px; /* 완전한 원형 */
+            padding: 0.625rem; /* 10px, 이전 0.5rem(8px)보다 약간 크게 */
+            cursor: pointer;
+            transition: background-color 0.2s ease-in-out, opacity 0.3s ease-in-out; /* 불투명도 전환 추가 */
+            width: 48px; /* 32px(svg) + 8px(padding) * 2 = 48px */
+            height: 48px; /* 동일하게 설정 */
+            display: none; /* 모바일에서는 기본 숨김 */
+            align-items: center;
+            justify-content: center;
+            pointer-events: auto; /* 기본적으로 클릭 가능 */
+        }
+        /* 대형 화면 (lg)에서 캐러셀 버튼 표시 */
+        @media (min-width: 1024px) {
+            .carousel-nav-button {
+                display: flex;
+            }
+        }
+
+        .carousel-nav-button.left-2 {
+            left: -24px; /* 버튼 너비(48px)의 절반만큼 왼쪽으로 이동 */
+        }
+        .carousel-nav-button.right-2 {
+            right: -24px; /* 버튼 너비(48px)의 절반만큼 오른쪽으로 이동 */
+        }
+        .carousel-nav-button:hover {
+            background-color: #f3f4f6; /* hover 시 약간 어둡게 */
+        }
+        .carousel-nav-button svg {
+            width: 1.75rem; /* 28px, 이전 1.5rem(24px)보다 약간 크게 */
+            height: 1.75rem; /* 동일하게 설정 */
+            color: #4b5563; /* text-gray-600과 동일 */
+        }
+        /* 스크롤 불가능 시 버튼 숨김 */
+        .carousel-nav-button.hidden-button {
+            opacity: 0;
+            pointer-events: none; /* 클릭 불가능하게 */
+        }
+        /* 선택된 사이드바 항목 스타일 */
+        .selected-nav-item {
+            color: #2563eb; /* text-blue-600 */
+            background-color: #eff6ff; /* bg-blue-50 */
+        }
+        /* 선택된 항목의 호버 효과는 없애거나 다르게 설정 (선택된 상태 유지) */
+        .selected-nav-item:hover {
+            background-color: #eff6ff; /* 선택된 상태의 배경색 유지 */
+            color: #2563eb; /* 선택된 상태의 텍스트 색상 유지 */
+        }
+
+        /* 캐러셀 스크롤바 숨기기 */
+        .flex.overflow-x-scroll::-webkit-scrollbar {
+            display: none; /* Webkit (Chrome, Safari) */
+        }
+
+        .flex.overflow-x-scroll {
+            -ms-overflow-style: none;  /* IE and Edge */
+            scrollbar-width: none;  /* Firefox */
+        }
+
+        /* 사이드바 항목 호버 효과 제거 */
+        .sidebar-nav-item:hover {
+            background-color: transparent; /* 호버 시 배경색 변경 없음 */
+            color: inherit; /* 호버 시 텍스트 색상 변경 없음 */
+        }
+    </style>
+</head>
+<body class="flex min-h-screen flex-col">
+
+    <header class="fixed-header flex items-center justify-between bg-white p-4 border-b border-gray-300">
+        <div class="flex items-center">
+            <img src="https://placehold.co/40x40/60A5FA/FFFFFF?text=D" alt="로고" class="rounded-full mr-3">
+            <span class="text-2xl font-bold text-gray-800">diritto</span>
+        </div>
+        <div class="flex items-center space-x-4">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6 text-gray-600 cursor-pointer hover:text-blue-500 transition-colors duration-200">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+            </svg>
+            <!-- 심플한 계정 아이콘으로 변경 -->
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6 text-gray-600 cursor-pointer hover:text-blue-500 transition-colors duration-200">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+            </svg>
+        </div>
+    </header>
+
+    <div class="flex flex-1">
+        <aside class="fixed-sidebar">
+            <div>
+                <nav>
+                    <ul>
+                        <li class="mb-2">
+                            <a href="#" class="flex items-center p-3 rounded-lg transition-colors duration-200 selected-nav-item">
+                                <svg class="w-6 h-6 mr-3" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M4 23V9.66667L13 3L22 9.66667V23H14.125V16.3333H11.875V23H4Z" />
+                                </svg>
+                                <span class="font-normal">홈</span>
+                            </a>
+                        </li>
+                        <li class="mb-2">
+                            <a href="#" class="flex items-center text-gray-700 p-3 rounded-lg transition-colors duration-200 sidebar-nav-item">
+                                <svg class="w-6 h-6 mr-3" fill="currentColor" viewBox="0 0 26 26" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M7.21474 18.7853L15.0995 15.1267L18.7581 7.24187L10.8733 10.9005L7.21474 18.7853ZM13 14.0834C12.693 14.0834 12.4357 13.9795 12.2281 13.7719C12.0205 13.5643 11.9166 13.307 11.9166 13C11.9166 12.6931 12.0205 12.4358 12.2281 12.2282C12.4357 12.0205 12.693 11.9167 13 11.9167C13.3069 11.9167 13.5642 12.0205 13.7719 12.2282C13.9795 12.4358 14.0833 12.6931 14.0833 13C14.0833 13.307 13.9795 13.5643 13.7719 13.7719C13.5642 13.9795 13.3069 14.0834 13 14.0834ZM13.0021 24.2161C11.4589 24.2161 10.0054 23.9236 8.64152 23.3387C7.27767 22.7538 6.08623 21.9518 5.06719 20.9328C4.04817 19.9138 3.24621 18.723 2.6613 17.3606C2.07639 15.9982 1.78394 14.5453 1.78394 13.0021C1.78394 11.4409 2.07639 9.97834 2.6613 8.61448C3.24621 7.25063 4.04738 6.06344 5.06481 5.05291C6.08222 4.04238 7.27253 3.24237 8.63572 2.65289C9.99892 2.06342 11.4525 1.76868 12.9966 1.76868C14.5587 1.76868 16.0223 2.06302 17.3873 2.6517C18.7524 3.24039 19.9398 4.03932 20.9496 5.0485C21.9594 6.05767 22.7588 7.24439 23.3478 8.60865C23.9368 9.97291 24.2313 11.4367 24.2313 13C24.2313 14.5446 23.9366 15.9988 23.3471 17.3625C22.7576 18.7262 21.9576 19.9169 20.9471 20.9347C19.9366 21.9524 18.7501 22.7538 17.3876 23.3387C16.0252 23.9236 14.5633 24.2161 13.0021 24.2161ZM13 22.0706C15.523 22.0706 17.6656 21.1883 19.4276 19.4237C21.1896 17.6591 22.0705 15.5179 22.0705 13C22.0705 10.477 21.1896 8.33443 19.4276 6.57245C17.6656 4.81046 15.5205 3.92947 12.9923 3.92947C10.4822 3.92947 8.3442 4.81046 6.57828 6.57245C4.81238 8.33443 3.92942 10.4795 3.92942 13.0077C3.92942 15.5178 4.81173 17.6558 6.57633 19.4217C8.34094 21.1876 10.4822 22.0706 13 22.0706Z" />
+                                </svg>
+                                <span class="font-normal">탐색</span>
+                            </a>
+                        </li>
+                        <li class="mb-2">
+                            <a href="#" class="flex items-center text-gray-700 p-3 rounded-lg transition-colors duration-200 sidebar-nav-item">
+                                <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.691h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.324 1.118l1.519 4.674c.3.921-.755 1.688-1.539 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.784.57-1.838-.197-1.539-1.118l1.519-4.674a1 1 0 00-.324-1.118L2.05 10.102c-.783-.57-.381-1.81.588-1.81h4.915a1 1 0 00.95-.691l1.519-4.674z" />
+                                </svg>
+                                <span class="font-normal">베스트</span>
+                            </a>
+                        </li>
+                        <li class="mb-2">
+                            <a href="#" class="flex items-center text-gray-700 p-3 rounded-lg transition-colors duration-200 sidebar-nav-item">
+                                <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M17 3H7a2 2 0 00-2 2v16l7-3.5 7 3.5V5a2 2 0 00-2-2z" />
+                                </svg>
+                                <span class="font-normal">저장됨</span>
+                            </a>
+                        </li>
+                        <li class="mb-2">
+                            <a href="#" class="flex items-center text-gray-700 p-3 rounded-lg transition-colors duration-200 sidebar-nav-item">
+                                <svg class="w-6 h-6 mr-3" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M14 2H6C4.9 2 4 2.9 4 4V20C4 21.1 4.9 22 6 22H18C19.1 22 20 21.1 20 20V8L14 2ZM18 20H6V4H13V9H18V20ZM12 11C10.34 11 9 12.34 9 14C9 15.66 10.34 17 12 17C13.66 17 15 15.66 15 14C15 12.34 13.66 11 12 11ZM12 15.5C11.17 15.5 10.5 14.83 10.5 14C10.5 13.17 11.17 12.5 12 12.5C12.83 12.5 13.5 13.17 13.5 14C13.5 14.83 12.83 15.5 12 15.5Z" />
+                                </svg>
+                                <span class="font-normal">퀘스트</span>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+            <div>
+            </div>
+        </aside>
+
+        <main class="main-content-area">
+            <section class="p-6 mb-8">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-xl font-semibold text-gray-800">따끈따끈 신작이 왔어요 (*´▽`*)ﾉ</h2>
+                    <a href="#" class="text-gray-600 hover:text-gray-800 font-normal">더보기</a>
+                </div>
+                <div class="relative">
+                    <div id="new-releases-carousel" class="flex overflow-x-scroll scroll-smooth pb-4">
+                        <div class="carousel-item">
+                            <img src="https://placehold.co/150x200/E0F2FE/3B82F6?text=신작+1" alt="사랑하지 않는 그가 네임을 지웠다" class="w-40 h-56 object-cover rounded-md mb-2 mx-auto">
+                            <h3 class="font-medium text-gray-900 text-sm mb-1 text-left">사랑하지 않는 그가 네임을 지웠다</h3>
+                            <p class="text-xs text-gray-600 text-left font-normal">김나나 로맨스</p>
+                            <div class="flex items-center text-xs text-gray-500 mt-1 justify-start font-normal">
+                                <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                                96
+                            </div>
+                        </div>
+                        <div class="carousel-item">
+                            <img src="https://placehold.co/150x200/E0F2FE/3B82F6?text=신작+2" alt="나인 드림" class="w-40 h-56 object-cover rounded-md mb-2 mx-auto">
+                            <h3 class="font-medium text-gray-900 text-sm mb-1 text-left">나인 드림</h3>
+                            <p class="text-xs text-gray-600 text-left font-normal">BL</p>
+                            <div class="flex items-center text-xs text-gray-500 mt-1 justify-start font-normal">
+                                <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                                438
+                            </div>
+                        </div>
+                        <div class="carousel-item">
+                            <img src="https://placehold.co/150x200/E0F2FE/3B82F6?text=신작+3" alt="백년손님" class="w-40 h-56 object-cover rounded-md mb-2 mx-auto">
+                            <h3 class="font-medium text-gray-900 text-sm mb-1 text-left">백년손님</h3>
+                            <p class="text-xs text-gray-600 text-left font-normal">소조금 BL</p>
+                            <div class="flex items-center text-xs text-gray-500 mt-1 justify-start font-normal">
+                                <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                                2.6천
+                            </div>
+                        </div>
+                        <div class="carousel-item">
+                            <img src="https://placehold.co/150x200/E0F2FE/3B82F6?text=신작+4" alt="하드 테이밍 (Hard Taming)" class="w-40 h-56 object-cover rounded-md mb-2 mx-auto">
+                            <h3 class="font-medium text-gray-900 text-sm mb-1 text-left">하드 테이밍 (Hard Taming)</h3>
+                            <p class="text-xs text-gray-600 text-left font-normal">모드 엔드 - BL</p>
+                            <div class="flex items-center text-xs text-gray-500 mt-1 justify-start font-normal">
+                                <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                                687
+                            </div>
+                        </div>
+                        <div class="carousel-item">
+                            <img src="https://placehold.co/150x200/E0F2FE/3B82F6?text=신작+5" alt="헤어진 거 끝난 건 아니잖아" class="w-40 h-56 object-cover rounded-md mb-2 mx-auto">
+                            <h3 class="font-medium text-gray-900 text-sm mb-1 text-left">헤어진 거 끝난 건 아니잖아</h3>
+                            <p class="text-xs text-gray-600 text-left font-normal">유유진 - BL</p>
+                            <div class="flex items-center text-xs text-gray-500 mt-1 justify-start font-normal">
+                                <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                                286
+                            </div>
+                        </div>
+                        <div class="carousel-item">
+                            <img src="https://placehold.co/150x200/FFD700/000000?text=신작+6" alt="새로운 이야기" class="w-40 h-56 object-cover rounded-md mb-2 mx-auto">
+                            <h3 class="font-medium text-gray-900 text-sm mb-1 text-left">새로운 이야기</h3>
+                            <p class="text-xs text-gray-600 text-left font-normal">판타지</p>
+                            <div class="flex items-center text-xs text-gray-500 mt-1 justify-start font-normal">
+                                <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                                123
+                            </div>
+                        </div>
+                    </div>
+                    <button id="carousel-prev" class="carousel-nav-button left-2">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+                    </button>
+                    <button id="carousel-next" class="carousel-nav-button right-2">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                    </button>
+                </div>
+            </section>
+
+            <section class="p-6 mb-8">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-xl font-semibold text-gray-800">지난주 독자들의 ♥ 가 듬뿍!</h2>
+                    <a href="#" class="text-gray-600 hover:text-gray-800 font-normal">더보기</a>
+                </div>
+                <div class="relative">
+                    <div id="popular-carousel" class="flex overflow-x-scroll scroll-smooth pb-4">
+                        <div class="carousel-item">
+                            <img src="https://placehold.co/150x200/FEE2E2/EF4444?text=인기+1" alt="정략 결혼을 피하는 방법" class="w-40 h-56 object-cover rounded-md mb-2 mx-auto">
+                            <h3 class="font-medium text-gray-900 text-sm mb-1 text-left">정략 결혼을 피하는 방법</h3>
+                            <p class="text-xs text-gray-600 font-normal text-left">나전 7 BL</p>
+                            <div class="flex items-center text-xs text-gray-500 mt-1 justify-start font-normal">
+                                <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                                26
+                            </div>
+                        </div>
+                        <div class="carousel-item">
+                            <img src="https://placehold.co/150x200/FEE2E2/EF4444?text=인기+2" alt="매니저를 그만두니 배우가 쫓아왔다" class="w-40 h-56 object-cover rounded-md mb-2 mx-auto">
+                            <h3 class="font-medium text-gray-900 text-sm mb-1 text-left">매니저를 그만두니 배우가 쫓아왔다</h3>
+                            <p class="text-xs text-gray-600 font-normal text-left">유우니 BL</p>
+                            <div class="flex items-center text-xs text-gray-500 mt-1 justify-start font-normal">
+                                <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                                286
+                            </div>
+                        </div>
+                        <div class="carousel-item">
+                            <img src="https://placehold.co/150x200/FEE2E2/EF4444?text=인기+3" alt="취수혼" class="w-40 h-56 object-cover rounded-md mb-2 mx-auto">
+                            <h3 class="font-medium text-gray-900 text-sm mb-1 text-left">취수혼</h3>
+                            <p class="text-xs text-gray-600 font-normal text-left">BL</p>
+                            <div class="flex items-center text-xs text-gray-500 mt-1 justify-start font-normal">
+                                <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                                687
+                            </div>
+                        </div>
+                        <div class="carousel-item">
+                            <img src="https://placehold.co/150x200/FEE2E2/EF4444?text=인기+4" alt="내 남자 친구의 남자 친구" class="w-40 h-56 object-cover rounded-md mb-2 mx-auto">
+                            <h3 class="font-medium text-gray-900 text-sm mb-1 text-left">내 남자 친구의 남자 친구</h3>
+                            <p class="text-xs text-gray-600 font-normal text-left">BOYFRIENDS</p>
+                            <div class="flex items-center text-xs text-gray-500 mt-1 justify-start font-normal">
+                                <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                                2.6천
+                            </div>
+                        </div>
+                        <div class="carousel-item">
+                            <img src="https://placehold.co/150x200/FEE2E2/EF4444?text=인기+5" alt="변호사 윤리 강령" class="w-40 h-56 object-cover rounded-md mb-2 mx-auto">
+                            <h3 class="font-medium text-gray-900 text-sm mb-1 text-left">변호사 윤리 강령</h3>
+                            <p class="text-xs text-gray-600 font-normal text-left">메이에르 BL</p>
+                            <div class="flex items-center text-xs text-gray-500 mt-1 justify-start font-normal">
+                                <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                                96
+                            </div>
+                        </div>
+                    </div>
+                    <button id="popular-carousel-prev" class="carousel-nav-button left-2">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+                    </button>
+                    <button id="popular-carousel-next" class="carousel-nav-button right-2">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                    </button>
+                </div>
+            </section>
+
+            <section class="p-6 mb-8">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-xl font-semibold text-gray-800">실시간 인기 주제</h2>
+                    <a href="#" class="text-gray-600 hover:text-gray-800 font-normal">더보기</a>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-200 flex items-center">
+                        <span class="text-lg font-bold text-blue-600 mr-3">1</span>
+                        <div>
+                            <h3 class="font-medium text-gray-900 text-base"># 로맨스 판타지</h3>
+                            <p class="text-sm text-gray-600 font-normal">지금 가장 뜨거운 장르!</p>
+                        </div>
+                    </div>
+                    <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-200 flex items-center">
+                        <span class="text-lg font-bold text-blue-600 mr-3">2</span>
+                        <div>
+                            <h3 class="font-medium text-gray-900 text-base"># 현대 로맨스</h3>
+                            <p class="text-sm text-gray-600 font-normal">현실 공감 100%</p>
+                        </div>
+                    </div>
+                    <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-200 flex items-center">
+                        <span class="text-lg font-bold text-blue-600 mr-3">3</span>
+                        <div>
+                            <h3 class="font-medium text-gray-900 text-base"># BL (Boys Love)</h3>
+                            <p class="text-sm text-gray-600 font-normal">매니아층 열광!</p>
+                        </div>
+                    </div>
+                    <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-200 flex items-center">
+                        <span class="text-lg font-bold text-blue-600 mr-3">4</span>
+                        <div>
+                            <h3 class="font-medium text-gray-900 text-base"># 스릴러/미스터리</h3>
+                            <p class="text-sm text-gray-600 font-normal">손에 땀을 쥐는 전개</p>
+                        </div>
+                    </div>
+                    <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-200 flex items-center">
+                        <span class="text-lg font-bold text-blue-600 mr-3">5</span>
+                        <div>
+                            <h3 class="font-medium text-gray-900 text-base"># 판타지 모험</h3>
+                            <p class="text-sm text-gray-600 font-normal">새로운 세계로 떠나요</p>
+                        </div>
+                    </div>
+                    <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-200 flex items-center">
+                        <span class="text-lg font-bold text-blue-600 mr-3">6</span>
+                        <div>
+                            <h3 class="font-medium text-gray-900 text-base"># 무협</h3>
+                            <p class="text-sm text-gray-600 font-normal">강호의 세계</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="p-6 mb-8">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-xl font-semibold text-gray-800">새롭게 떠오르는 작품</h2>
+                    <a href="#" class="text-gray-600 hover:text-gray-800 font-normal">더보기</a>
+                </div>
+                <div class="relative">
+                    <div id="rising-stars-carousel" class="flex overflow-x-scroll scroll-smooth pb-4">
+                        <div class="carousel-item">
+                            <img src="https://placehold.co/150x200/D1FAE5/059669?text=떠오르는+1" alt="환생한 빌런의 회귀" class="w-40 h-56 object-cover rounded-md mb-2 mx-auto">
+                            <h3 class="font-medium text-gray-900 text-sm mb-1 text-left">환생한 빌런의 회귀</h3>
+                            <p class="text-xs text-gray-600 text-left font-normal">액션 판타지</p>
+                            <div class="flex items-center text-xs text-gray-500 mt-1 justify-start font-normal">
+                                <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                                1.2천
+                            </div>
+                        </div>
+                        <div class="carousel-item">
+                            <img src="https://placehold.co/150x200/D1FAE5/059669?text=떠오르는+2" alt="마법 학교의 천재" class="w-40 h-56 object-cover rounded-md mb-2 mx-auto">
+                            <h3 class="font-medium text-gray-900 text-sm mb-1 text-left">마법 학교의 천재</h3>
+                            <p class="text-xs text-gray-600 text-left font-normal">판타지</p>
+                            <div class="flex items-center text-xs text-gray-500 mt-1 justify-start font-normal">
+                                <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                                890
+                            </div>
+                        </div>
+                        <div class="carousel-item">
+                            <img src="https://placehold.co/150x200/D1FAE5/059669?text=떠오르는+3" alt="악녀는 오늘도 평화롭다" class="w-40 h-56 object-cover rounded-md mb-2 mx-auto">
+                            <h3 class="font-medium text-gray-900 text-sm mb-1 text-left">악녀는 오늘도 평화롭다</h3>
+                            <p class="text-xs text-gray-600 text-left font-normal">로맨스 판타지</p>
+                            <div class="flex items-center text-xs text-gray-500 mt-1 justify-start font-normal">
+                                <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                                1.5천
+                            </div>
+                        </div>
+                        <div class="carousel-item">
+                            <img src="https://placehold.co/150x200/D1FAE5/059669?text=떠오르는+4" alt="회귀자의 두 번째 삶" class="w-40 h-56 object-cover rounded-md mb-2 mx-auto">
+                            <h3 class="font-medium text-gray-900 text-sm mb-1 text-left">회귀자의 두 번째 삶</h3>
+                            <p class="text-xs text-gray-600 text-left font-normal">현대 판타지</p>
+                            <div class="flex items-center text-xs text-gray-500 mt-1 justify-start font-normal">
+                                <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                                750
+                            </div>
+                        </div>
+                        <div class="carousel-item">
+                            <img src="https://placehold.co/150x200/D1FAE5/059669?text=떠오르는+5" alt="용사의 숨겨진 이야기" class="w-40 h-56 object-cover rounded-md mb-2 mx-auto">
+                            <h3 class="font-medium text-gray-900 text-sm mb-1 text-left">용사의 숨겨진 이야기</h3>
+                            <p class="text-xs text-gray-600 text-left font-normal">정통 판타지</p>
+                            <div class="flex items-center text-xs text-gray-500 mt-1 justify-start font-normal">
+                                <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                                1.1천
+                            </div>
+                        </div>
+                    </div>
+                    <button id="rising-stars-carousel-prev" class="carousel-nav-button left-2">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+                    </button>
+                    <button id="rising-stars-carousel-next" class="carousel-nav-button right-2">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                    </button>
+                </div>
+            </section>
+
+            <section class="p-6 mb-8">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-xl font-semibold text-gray-800">에디터의 추천작</h2>
+                    <a href="#" class="text-gray-600 hover:text-gray-800 font-normal">더보기</a>
+                </div>
+                <div class="relative">
+                    <div id="editors-pick-carousel" class="flex overflow-x-scroll scroll-smooth pb-4">
+                        <div class="carousel-item">
+                            <img src="https://placehold.co/150x200/DBEAFE/2563EB?text=추천+1" alt="황제와 나의 계약" class="w-40 h-56 object-cover rounded-md mb-2 mx-auto">
+                            <h3 class="font-medium text-gray-900 text-sm mb-1 text-left">황제와 나의 계약</h3>
+                            <p class="text-xs text-gray-600 text-left font-normal">로맨스 판타지</p>
+                            <div class="flex items-center text-xs text-gray-500 mt-1 justify-start font-normal">
+                                <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                                3.4천
+                            </div>
+                        </div>
+                        <div class="carousel-item">
+                            <img src="https://placehold.co/150x200/DBEAFE/2563EB?text=추천+2" alt="별이 빛나는 밤에" class="w-40 h-56 object-cover rounded-md mb-2 mx-auto">
+                            <h3 class="font-medium text-gray-900 text-sm mb-1 text-left">별이 빛나는 밤에</h3>
+                            <p class="text-xs text-gray-600 text-left font-normal">현대 로맨스</p>
+                            <div class="flex items-center text-xs text-gray-500 mt-1 justify-start font-normal">
+                                <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                                2.1천
+                            </div>
+                        </div>
+                        <div class="carousel-item">
+                            <img src="https://placehold.co/150x200/DBEAFE/2563EB?text=추천+3" alt="그림자 속의 영웅" class="w-40 h-56 object-cover rounded-md mb-2 mx-auto">
+                            <h3 class="font-medium text-gray-900 text-sm mb-1 text-left">그림자 속의 영웅</h3>
+                            <p class="text-xs text-gray-600 text-left font-normal">액션 판타지</p>
+                            <div class="flex items-center text-xs text-gray-500 mt-1 justify-start font-normal">
+                                <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                                2.8천
+                            </div>
+                        </div>
+                        <div class="carousel-item">
+                            <img src="https://placehold.co/150x200/DBEAFE/2563EB?text=추천+4" alt="시간 여행자의 일기" class="w-40 h-56 object-cover rounded-md mb-2 mx-auto">
+                            <h3 class="font-medium text-gray-900 text-sm mb-1 text-left">시간 여행자의 일기</h3>
+                            <p class="text-xs text-gray-600 text-left font-normal">SF</p>
+                            <div class="flex items-center text-xs text-gray-500 mt-1 justify-start font-normal">
+                                <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                                1.9천
+                            </div>
+                        </div>
+                        <div class="carousel-item">
+                            <img src="https://placehold.co/150x200/DBEAFE/2563EB?text=추천+5" alt="미래를 보는 소녀" class="w-40 h-56 object-cover rounded-md mb-2 mx-auto">
+                            <h3 class="font-medium text-gray-900 text-sm mb-1 text-left">미래를 보는 소녀</h3>
+                            <p class="text-xs text-gray-600 text-left font-normal">판타지</p>
+                            <div class="flex items-center text-xs text-gray-500 mt-1 justify-start font-normal">
+                                <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                                1.7천
+                            </div>
+                        </div>
+                    </div>
+                    <button id="editors-pick-carousel-prev" class="carousel-nav-button left-2">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+                    </button>
+                    <button id="editors-pick-carousel-next" class="carousel-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                    </button>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-300 p-2 shadow-lg lg:hidden z-1000">
+        <ul class="flex justify-around items-center h-full">
+            <li>
+                <a href="#" class="flex flex-col items-center p-2 rounded-lg text-blue-600">
+                    <svg class="w-6 h-6 mb-1" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M4 23V9.66667L13 3L22 9.66667V23H14.125V16.3333H11.875V23H4Z" />
+                    </svg>
+                    <span class="text-xs font-normal">홈</span>
+                </a>
+            </li>
+            <li>
+                <a href="#" class="flex flex-col items-center p-2 rounded-lg text-gray-700">
+                    <svg class="w-6 h-6 mb-1" fill="currentColor" viewBox="0 0 26 26" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M7.21474 18.7853L15.0995 15.1267L18.7581 7.24187L10.8733 10.9005L7.21474 18.7853ZM13 14.0834C12.693 14.0834 12.4357 13.9795 12.2281 13.7719C12.0205 13.5643 11.9166 13.307 11.9166 13C11.9166 12.6931 12.0205 12.4358 12.2281 12.2282C12.4357 12.0205 12.693 11.9167 13 11.9167C13.3069 11.9167 13.5642 12.0205 13.7719 12.2282C13.9795 12.4358 14.0833 12.6931 14.0833 13C14.0833 13.307 13.9795 13.5643 13.7719 13.7719C13.5642 13.9795 13.3069 14.0834 13 14.0834ZM13.0021 24.2161C11.4589 24.2161 10.0054 23.9236 8.64152 23.3387C7.27767 22.7538 6.08623 21.9518 5.06719 20.9328C4.04817 19.9138 3.24621 18.723 2.6613 17.3606C2.07639 15.9982 1.78394 14.5453 1.78394 13.0021C1.78394 11.4409 2.07639 9.97834 2.6613 8.61448C3.24621 7.25063 4.04738 6.06344 5.06481 5.05291C6.08222 4.04238 7.27253 3.24237 8.63572 2.65289C9.99892 2.06342 11.4525 1.76868 12.9966 1.76868C14.5587 1.76868 16.0223 2.06302 17.3873 2.6517C18.7524 3.24039 19.9398 4.03932 20.9496 5.0485C21.9594 6.05767 22.7588 7.24439 23.3478 8.60865C23.9368 9.97291 24.2313 11.4367 24.2313 13C24.2313 14.5446 23.9366 15.9988 23.3471 17.3625C22.7576 18.7262 21.9576 19.9169 20.9471 20.9347C19.9366 21.9524 18.7501 22.7538 17.3876 23.3387C16.0252 23.9236 14.5633 24.2161 13.0021 24.2161ZM13 22.0706C15.523 22.0706 17.6656 21.1883 19.4276 19.4237C21.1896 17.6591 22.0705 15.5179 22.0705 13C22.0705 10.477 21.1896 8.33443 19.4276 6.57245C17.6656 4.81046 15.5205 3.92947 12.9923 3.92947C10.4822 3.92947 8.3442 4.81046 6.57828 6.57245C4.81238 8.33443 3.92942 10.4795 3.92942 13.0077C3.92942 15.5178 4.81173 17.6558 6.57633 19.4217C8.34094 21.1876 10.4822 22.0706 13 22.0706Z" />
+                    </svg>
+                    <span class="text-xs font-normal">탐색</span>
+                </a>
+            </li>
+            <li>
+                <a href="#" class="flex flex-col items-center p-2 rounded-lg text-gray-700">
+                    <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.691h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.324 1.118l1.519 4.674c.3.921-.755 1.688-1.539 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.784.57-1.838-.197-1.539-1.118l1.519-4.674a1 1 0 00-.324-1.118L2.05 10.102c-.783-.57-.381-1.81.588-1.81h4.915a1 1 0 00.95-.691l1.519-4.674z" />
+                    </svg>
+                    <span class="text-xs font-normal">베스트</span>
+                </a>
+            </li>
+            <li>
+                <a href="#" class="flex flex-col items-center p-2 rounded-lg text-gray-700">
+                    <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M17 3H7a2 2 0 00-2 2v16l7-3.5 7 3.5V5a2 2 0 00-2-2z" />
+                    </svg>
+                    <span class="text-xs font-normal">저장됨</span>
+                </a>
+            </li>
+            <li>
+                <a href="#" class="flex flex-col items-center p-2 rounded-lg text-gray-700">
+                    <svg class="w-6 h-6 mb-1" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M14 2H6C4.9 2 4 2.9 4 4V20C4 21.1 4.9 22 6 22H18C19.1 22 20 21.1 20 20V8L14 2ZM18 20H6V4H13V9H18V20ZM12 11C10.34 11 9 12.34 9 14C9 15.66 10.34 17 12 17C13.66 17 15 15.66 15 14C15 12.34 13.66 11 12 11ZM12 15.5C11.17 15.5 10.5 14.83 10.5 14C10.5 13.17 11.17 12.5 12 12.5C12.83 12.5 13.5 13.17 13.5 14C13.5 14.83 12.83 15.5 12 15.5Z" />
+                    </svg>
+                    <span class="text-xs font-normal">퀘스트</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+
+    <script>
+        // 캐러셀 기능
+        const newReleasesCarousel = document.getElementById('new-releases-carousel');
+        const newReleasesPrevButton = document.getElementById('carousel-prev');
+        const newReleasesNextButton = document.getElementById('carousel-next');
+
+        const popularCarousel = document.getElementById('popular-carousel');
+        const popularPrevButton = document.getElementById('popular-carousel-prev');
+        const popularNextButton = document.getElementById('popular-carousel-next');
+
+        const risingStarsCarousel = document.getElementById('rising-stars-carousel');
+        const risingStarsPrevButton = document.getElementById('rising-stars-carousel-prev');
+        const risingStarsNextButton = document.getElementById('rising-stars-carousel-next');
+
+        const editorsPickCarousel = document.getElementById('editors-pick-carousel');
+        const editorsPickPrevButton = document.getElementById('editors-pick-carousel-prev');
+        const editorsPickNextButton = document.getElementById('editors-pick-carousel-next');
+
+        // 스크롤 단위 (아이템 너비 + 마진)
+        const scrollAmount = 160 + 16; // carousel-item width + margin-right
+
+        // 캐러셀 버튼 가시성 업데이트 함수
+        function updateCarouselButtons(carouselElement, prevButtonElement, nextButtonElement) {
+            // 이전 버튼
+            if (carouselElement.scrollLeft === 0) {
+                prevButtonElement.classList.add('hidden-button');
+            } else {
+                prevButtonElement.classList.remove('hidden-button');
+            }
+
+            // 다음 버튼
+            // scrollWidth: 콘텐츠의 총 너비
+            // clientWidth: 현재 보이는 뷰포트 너비
+            // scrollLeft: 현재 스크롤된 왼쪽 위치
+            // 오차 범위 1px을 고려하여 비교
+            if (carouselElement.scrollLeft + carouselElement.clientWidth >= carouselElement.scrollWidth - 1) {
+                nextButtonElement.classList.add('hidden-button');
+            } else {
+                nextButtonElement.classList.remove('hidden-button');
+            }
+        }
+
+        // 초기 로드 시 모든 캐러셀 버튼 상태 업데이트
+        window.addEventListener('load', () => {
+            updateCarouselButtons(newReleasesCarousel, newReleasesPrevButton, newReleasesNextButton);
+            updateCarouselButtons(popularCarousel, popularPrevButton, popularNextButton);
+            updateCarouselButtons(risingStarsCarousel, risingStarsPrevButton, risingStarsNextButton);
+            updateCarouselButtons(editorsPickCarousel, editorsPickPrevButton, editorsPickNextButton);
+        });
+
+        // 각 캐러셀 스크롤 시 버튼 상태 업데이트
+        newReleasesCarousel.addEventListener('scroll', () => {
+            updateCarouselButtons(newReleasesCarousel, newReleasesPrevButton, newReleasesNextButton);
+        });
+        popularCarousel.addEventListener('scroll', () => {
+            updateCarouselButtons(popularCarousel, popularPrevButton, popularNextButton);
+        });
+        risingStarsCarousel.addEventListener('scroll', () => {
+            updateCarouselButtons(risingStarsCarousel, risingStarsPrevButton, risingStarsNextButton);
+        });
+        editorsPickCarousel.addEventListener('scroll', () => {
+            updateCarouselButtons(editorsPickCarousel, editorsPickPrevButton, editorsPickNextButton);
+        });
+
+        // 윈도우 리사이즈 시 (콘텐츠 너비가 바뀔 수 있으므로) 모든 캐러셀 버튼 상태 업데이트
+        window.addEventListener('resize', () => {
+            updateCarouselButtons(newReleasesCarousel, newReleasesPrevButton, newReleasesNextButton);
+            updateCarouselButtons(popularCarousel, popularPrevButton, popularCarouselNextButton);
+            updateCarouselButtons(risingStarsCarousel, risingStarsPrevButton, risingStarsNextButton);
+            updateCarouselButtons(editorsPickCarousel, editorsPickPrevButton, editorsPickNextButton);
+        });
+
+
+        newReleasesPrevButton.addEventListener('click', () => {
+            newReleasesCarousel.scrollBy({
+                left: -scrollAmount,
+                behavior: 'smooth'
+            });
+        });
+
+        newReleasesNextButton.addEventListener('click', () => {
+            newReleasesCarousel.scrollBy({
+                left: scrollAmount,
+                behavior: 'smooth'
+            });
+        });
+
+        popularPrevButton.addEventListener('click', () => {
+            popularCarousel.scrollBy({
+                left: -scrollAmount,
+                behavior: 'smooth'
+            });
+        });
+
+        popularNextButton.addEventListener('click', () => {
+            popularCarousel.scrollBy({
+                left: scrollAmount,
+                behavior: 'smooth'
+            });
+        });
+
+        risingStarsPrevButton.addEventListener('click', () => {
+            risingStarsCarousel.scrollBy({
+                left: -scrollAmount,
+                behavior: 'smooth'
+            });
+        });
+
+        risingStarsNextButton.addEventListener('click', () => {
+            risingStarsCarousel.scrollBy({
+                left: scrollAmount,
+                behavior: 'smooth'
+            });
+        });
+
+        editorsPickPrevButton.addEventListener('click', () => {
+            editorsPickCarousel.scrollBy({
+                left: -scrollAmount,
+                behavior: 'smooth'
+            });
+        });
+
+        editorsPickNextButton.addEventListener('click', () => {
+            editorsPickCarousel.scrollBy({
+                left: scrollAmount,
+                behavior: 'smooth'
+            });
+        });
+    </script>
+</body>
+</html>
