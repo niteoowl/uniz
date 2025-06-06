@@ -220,7 +220,7 @@
         </div>
         <div class="flex items-center space-x-4 relative">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6 text-gray-600 cursor-pointer hover:text-blue-500 transition-colors duration-200">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7 0 0010.607 10.607z" />
+                <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
             </svg>
             <!-- 로그인 상태에 따라 조건부 렌더링될 요소 -->
             <div id="auth-status-container" class="relative">
@@ -642,15 +642,15 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
 
-        // Firebase configuration (Placeholder - Replace with your actual Firebase config)
+        // Firebase configuration (사용자가 제공한 실제 Firebase config로 교체됨)
         const firebaseConfig = {
-            apiKey: "YOUR_API_KEY", // 실제 Firebase API 키로 교체
-            authDomain: "YOUR_AUTH_DOMAIN",
-            projectId: "YOUR_PROJECT_ID",
-            storageBucket: "YOUR_STORAGE_BUCKET",
-            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-            appId: "YOUR_APP_ID",
-            measurementId: "YOUR_MEASUREMENT_ID"
+            apiKey: "AIzaSyDLzrMR2QVK4rWNDIg4bQv4rlYTkchnU58",
+            authDomain: "uniz-a.firebaseapp.com",
+            projectId: "uniz-a",
+            storageBucket: "uniz-a.firebasestorage.app",
+            messagingSenderId: "389183402425",
+            appId: "1:389183402425:web:1272bcca61cdf9720c0668",
+            measurementId: "G-RTWDXH8GKQ"
         };
 
         // Initialize Firebase
@@ -684,12 +684,14 @@
                 // 드롭다운 메뉴 토글 기능
                 const nicknameBtn = document.getElementById('nickname-btn');
                 const dropdownMenu = document.getElementById('dropdown-menu');
-                nicknameBtn.addEventListener('click', () => {
+                nicknameBtn.addEventListener('click', (event) => {
+                    event.stopPropagation(); // 버튼 클릭 시 이벤트 전파 중지
                     dropdownMenu.classList.toggle('hidden');
                 });
 
                 // 외부 클릭 시 드롭다운 닫기
                 document.addEventListener('click', (event) => {
+                    // 클릭된 요소가 드롭다운 컨테이너 내부에 없는 경우 드롭다운 숨김
                     if (!authStatusContainer.contains(event.target)) {
                         dropdownMenu.classList.add('hidden');
                     }
@@ -702,12 +704,12 @@
                     try {
                         await signOut(auth);
                         console.log("로그아웃 성공!");
-                        // 로그아웃 후 다시 홈 페이지로 리디렉션하거나 UI 업데이트 (onAuthStateChanged가 처리함)
+                        // 로그아웃 후 홈 페이지로 리디렉션하거나 UI 업데이트 (onAuthStateChanged가 처리함)
                         // window.location.href = '/'; 
                     } catch (error) {
                         console.error("로그아웃 실패:", error);
                         // 에러 메시지 표시 (예: 간단한 메시지 박스)
-                        alert("로그아웃에 실패했습니다. 다시 시도해주세요."); // 이 부분은 실제 앱에서는 커스텀 모달로 대체해야 합니다.
+                        // alert("로그아웃에 실패했습니다. 다시 시도해주세요."); // 실제 앱에서는 커스텀 모달로 대체해야 합니다.
                     }
                 });
 
