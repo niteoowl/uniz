@@ -215,8 +215,8 @@
 
     <header class="fixed-header flex items-center justify-between bg-white p-4 border-b border-gray-300">
         <div class="flex items-center">
-            <img src="https://placehold.co/40x40/60A5FA/FFFFFF?text=D" alt="로고" class="rounded-full mr-3">
-            <span class="text-2xl font-bold text-gray-800">diritto</span>
+            <!-- 로고 이미지를 둥근 테두리 없이 순수하게 표시 -->
+            <img src="/image/logo.png" alt="로고" class="w-10 h-10">
         </div>
         <div class="flex items-center space-x-4 relative">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6 text-gray-600 cursor-pointer hover:text-blue-500 transition-colors duration-200">
@@ -705,7 +705,7 @@
                         await signOut(auth);
                         console.log("로그아웃 성공!");
                         // 로그아웃 후 홈 페이지로 리디렉션하거나 UI 업데이트 (onAuthStateChanged가 처리함)
-                        // window.location.href = '/'; 
+                        // window.location.href = '/';
                     } catch (error) {
                         console.error("로그아웃 실패:", error);
                         // 에러 메시지 표시 (예: 간단한 메시지 박스)
