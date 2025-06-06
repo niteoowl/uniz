@@ -112,22 +112,37 @@
             color: #16a34a; /* text-green-700 */
             border: 1px solid #22c55e; /* border-green-500 */
         }
+        /* 로그인 텍스트 링크 스타일 (홈 페이지와 동일하게 추가) */
+        #login-btn {
+            color: #4b5563; /* 기본 텍스트 색상 */
+            padding: 0.5rem 1rem; /* 상하 0.5rem, 좌우 1rem 패딩 */
+            border-radius: 0.375rem; /* rounded-md */
+            font-weight: 500; /* font-medium */
+            transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out; /* 부드러운 전환 효과 */
+        }
+
+        #login-btn:hover {
+            background-color: #f3f4f6; /* 호버 시 투명한 배경처럼 보이는 밝은 회색 */
+            color: #1f2937; /* 호버 시 텍스트 색상 약간 진하게 */
+        }
     </style>
 </head>
 <body class="flex min-h-screen flex-col">
 
+    <!-- 홈 페이지와 동일한 헤더로 변경 -->
     <header class="fixed-header flex items-center justify-between bg-white p-4 border-b border-gray-300">
         <div class="flex items-center">
             <img src="https://placehold.co/40x40/60A5FA/FFFFFF?text=D" alt="로고" class="rounded-full mr-3">
             <span class="text-2xl font-bold text-gray-800">diritto</span>
         </div>
-        <div class="flex items-center space-x-4">
+        <div class="flex items-center space-x-4 relative">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6 text-gray-600 cursor-pointer hover:text-blue-500 transition-colors duration-200">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+                <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7 0 0010.607 10.607z" />
             </svg>
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6 text-gray-600 cursor-pointer hover:text-blue-500 transition-colors duration-200">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-            </svg>
+            <!-- 로그인 버튼을 텍스트 링크처럼 변경 -->
+            <a href="/SINGIN" id="login-btn" class="cursor-pointer text-gray-700 p-2 rounded-md hover:bg-gray-100 transition-colors duration-200">
+                로그인
+            </a>
         </div>
     </header>
 
@@ -209,9 +224,9 @@
             try {
                 const userCredential = await signInWithEmailAndPassword(auth, email, password);
                 console.log('로그인 성공:', userCredential.user);
-                showMessage('로그인 성공! 환영합니다.', 'success');
-                // 로그인 성공 후 리디렉션 또는 UI 업데이트
-                // 예: window.location.href = 'home-page.html';
+                showMessage('로그인 성공! 홈 페이지로 이동합니다.', 'success');
+                // 로그인 성공 후 홈 페이지로 리디렉션
+                window.location.href = '/'; 
             } catch (error) {
                 console.error('로그인 실패:', error);
                 let errorMessage = '로그인에 실패했습니다. 다시 시도해주세요.';
@@ -221,6 +236,8 @@
                     errorMessage = '유효하지 않은 이메일 주소입니다.';
                 } else if (error.code === 'auth/network-request-failed') {
                     errorMessage = '네트워크 오류가 발생했습니다. 인터넷 연결을 확인해주세요.';
+                } else if (error.code === 'auth/too-many-requests') {
+                    errorMessage = '너무 많은 로그인 시도가 있었습니다. 잠시 후 다시 시도해주세요.';
                 }
                 showMessage(`오류: ${errorMessage}`, 'error');
             } finally {
