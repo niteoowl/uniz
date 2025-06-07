@@ -269,7 +269,7 @@
                         <li class="mb-2">
                             <a href="#" class="flex items-center text-gray-700 p-3 rounded-lg transition-colors duration-200 sidebar-nav-item">
                                 <svg class="w-6 h-6 mr-3" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M14 2H6C4.9 2 4 2.9 4 4V20C4 21.1 4.9 22 6 22H18C19.1 22 20 21.1 20 20V8L14 2ZM18 20H6V4H13V9H18V20ZM12 11C10.34 11 9 12.34 9 14C9 15.66 10.34 17 12 17C13.66 17 15 15.66 15 14C15 12.34 13.66 11 12 11ZM12 15.5C11.17 15.5 10.5 14.83 10.5 14C10.5 13.17 11.17 12.5 12 12.5C12.83 12.5 13.5 13.17 13.5 14C13.5 14.83 12.83 15.5 12 15.5Z" />
+                                    <path d="M14 2H6C4.9 2 4 2.9 4 4V20C4 21.1 4.9 22 6 22H18C19.1 22 20 21.1 20 20V8L14 2ZM18 20H6V4H13V9H18V20ZM12 11C10.34 11 9 12.34 9 14C9 15.66 10.34 17 12 17C13.66 17 15 15.66 15 14C15 12.34 13.66 11 12 11ZM12 15.5C11.17 15.5 10.5 14.83 10.5 = 14C10.5 13.17 11.17 12.5 12 12.5C12.83 12.5 13.5 13.17 13.5 14C13.5 14.83 12.83 15.5 12 15.5Z" />
                                 </svg>
                                 <span class="font-normal">퀘스트</span>
                             </a>
@@ -541,19 +541,43 @@
             }
         }
 
+        // Firebase Auth initialization and handling
+        let authReadyPromise = Promise.resolve(); // 초기화는 완료된 Promise로 시작
+
+        if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+            // __initial_auth_token이 있으면 커스텀 토큰으로 로그인 시도
+            authReadyPromise = signInWithCustomToken(auth, __initial_auth_token)
+                .then(() => console.log("Signed in with custom token."))
+                .catch((error) => {
+                    console.error("Custom token sign-in failed:", error);
+                    // 익명 로그인으로 폴백하지 않음.
+                    // onAuthStateChanged가 null 사용자를 처리하도록 둠.
+                });
+        }
+        // __initial_auth_token이 정의되지 않은 경우, 여기서 로그인 시도는 없음.
+        // onAuthStateChanged가 null 사용자로 트리거될 것임.
+
         // Firebase 인증 상태 변경 감지
         onAuthStateChanged(auth, (user) => {
             updateHeader(user);
         });
 
-        // Initial sign-in with custom token if available (from Canvas environment)
-        if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-            signInWithCustomToken(auth, __initial_auth_token).catch((error) => {
-                console.error("Custom token sign-in failed:", error);
+        // authReadyPromise를 사용하여 Firestore 작업이 인증 준비 후에 실행되도록 함
+        // (public 데이터 읽기는 인증이 필수는 아니지만, 일관성을 위해)
+        authReadyPromise.then(() => {
+            // 로그인 상태와 관계없이 공개 토론 목록을 로드
+            carousels.forEach(carousel => {
+                setupCarouselNavigation(carousel.id, carousel.prev, carousel.next);
+                fetchAndRenderDiscussions(carousel.id, carousel.sortBy, carousel.limit);
             });
-        }
-        // If __initial_auth_token is not defined, we don't automatically sign in anonymously
-        // User will need to explicitly log in through the UI if authentication is required.
+        }).catch(error => {
+            console.error("Authentication setup failed, discussions might not load correctly if auth was required for other parts:", error);
+            // 인증 설정 실패 시에도 공개 토론 로드를 시도
+            carousels.forEach(carousel => {
+                setupCarouselNavigation(carousel.id, carousel.prev, carousel.next);
+                fetchAndRenderDiscussions(carousel.id, carousel.sortBy, carousel.limit);
+            });
+        });
 
 
         // 캐러셀 기능
@@ -697,14 +721,6 @@
                 console.error("Error fetching discussions: ", error);
             });
         }
-
-
-        // 모든 캐러셀 초기화 및 데이터 로드
-        carousels.forEach(carousel => {
-            setupCarouselNavigation(carousel.id, carousel.prev, carousel.next);
-            fetchAndRenderDiscussions(carousel.id, carousel.sortBy, carousel.limit);
-        });
-
     </script>
 </body>
 </html>
