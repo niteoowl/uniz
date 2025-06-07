@@ -267,6 +267,12 @@
             border-bottom-right-radius: 0.375rem; /* rounded-md */
             border-color: #d1d5db; /* gray-300 */
         }
+        /* 폼 비활성화 시 스타일 */
+        form:disabled,
+        .form-disabled {
+            opacity: 0.7;
+            pointer-events: none;
+        }
     </style>
 </head>
 <body class="flex min-h-screen flex-col">
@@ -274,7 +280,7 @@
     <header class="fixed-header flex items-center justify-between bg-white p-4 border-b border-gray-300">
         <div class="flex items-center">
             <!-- 로고 이미지를 헤더 높이에 적절히 맞추고 너비는 비율에 따라 자동 조절 -->
-            <img src="/image/logo.png" alt="로고" class="h-10 w-auto max-w-full">
+            <img src="https://placehold.co/100x40/000000/FFFFFF?text=DIRITO+LOGO" alt="디리토 로고" class="h-10 w-auto max-w-full">
         </div>
         <div class="flex items-center space-x-4 relative">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6 text-gray-600 cursor-pointer hover:text-blue-500 transition-colors duration-200">
@@ -327,7 +333,7 @@
                         <li class="mb-2">
                             <a href="#" class="flex items-center text-gray-700 p-3 rounded-lg transition-colors duration-200 sidebar-nav-item">
                                 <svg class="w-6 h-6 mr-3" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M14 2H6C4.9 2 4 2.9 4 4V20C4 21.1 4.9 22 6 22H18C19.1 22 20 21.1 20 20V8L14 2ZM18 20H6V4H13V9H18V20ZM12 11C10.34 11 9 12.34 9 14C9 15.66 10.34 17 12 17C13.66 17 15 15.66 15 14C15 12.34 13.66 11 12 11ZM12 15.5C11.17 15.5 10.5 14.83 10.5 14C10.5 13.17 11.17 12.5 12 12.5C12.83 12.5 13.5 13.17 13.5 14C13.5 14.83 12.83 15.5 12 15.5Z" />
+                                    <path d="M14 2H6C4.9 2 4 2.9 4 4V20C4 21.1 4.9 22 6 22H18C19.1 22 20 21.1 20 20V8L14 2ZM18 20H6V4H13V9H18V20ZM12 11C10.34 11 9 12.34 9 14C9 15.66 10.34 17 12 17C13.66 17 15 15.66 15 14C15 12.34 13.66 11 12 11ZM12 15.5C11.17 15.5 10.5 = 14.83 10.5 = 14C10.5 = 13.17 11.17 = 12.5 12 = 12.5C12.83 = 12.5 13.5 = 13.17 13.5 = 14C13.5 = 14.83 12.83 = 15.5 12 = 15.5Z" />
                                 </svg>
                                 <span class="font-normal">퀘스트</span>
                             </a>
@@ -349,12 +355,7 @@
                     <span class="block sm:inline">토론을 생성하려면 먼저 로그인해야 합니다.</span>
                 </div>
 
-                <!-- Form submission message display area -->
-                <div id="form-message" class="hidden px-4 py-3 rounded-md mb-4" role="alert">
-                    <span class="block sm:inline" id="form-message-text"></span>
-                </div>
-
-                <form id="create-discussion-form" class="space-y-6">
+                <form id="create-discussion-form" class="space-y-6 form-disabled" disabled>
                     <div>
                         <label for="discussion-title" class="block text-gray-700 text-sm font-semibold mb-2">제목</label>
                         <input type="text" id="discussion-title" name="title" placeholder="토론 제목을 입력하세요"
@@ -433,7 +434,7 @@
                                 <div>
                                     <label for="time-jury-judgment" class="block text-gray-700 text-sm font-medium mb-1">배심원 판단</label>
                                     <input type="number" id="time-jury-judgment" name="time_jury_judgment" placeholder="분" min="0" value="5"
-                                           class="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200">
+                                           class="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-500 transition-all duration-200">
                                 </div>
                             </div>
                         </div>
@@ -506,10 +507,10 @@
                 <a href="#" class="flex flex-col items-center p-2 rounded-lg text-gray-700">
                     <svg class="w-6 h-6 mb-1" fill="currentColor" viewBox="0 0 26 26" xmlns="http://www.w3.org/2000/svg">
                         <path d="M7.21474 18.7853L15.0995 15.1267L18.7581 7.24187L10.8733 10.9005L7.21474 18.7853ZM13 14.0834C12.693 14.0834 12.4357 13.9795 12.2281 13.7719C12.0205 13.5643 11.9166 13.307 11.9166 13C11.9166 12.6931 12.0205 12.4358 12.2281 12.2282C12.4357 12.0205 12.693 11.9167 13 11.9167C13.3069 11.9167 13.5642 12.0205 13.7719 12.2282C13.9795 12.4358 14.0833 12.6931 14.0833 13C14.0833 13.307 13.9795 13.5643 13.7719 13.7719C13.5642 13.9795 13.3069 14.0834 13 14.0834ZM13.0021 24.2161C11.4589 24.2161 10.0054 23.9236 8.64152 23.3387C7.27767 22.7538 6.08623 21.9518 5.06719 20.9328C4.04817 19.9138 3.24621 18.723 2.6613 17.3606C2.07639 15.9982 1.78394 14.5453 1.78394 13.0021C1.78394 11.4409 2.07639 9.97834 2.6613 8.61448C3.24621 7.25063 4.04738 6.06344 5.06481 5.05291C6.08222 4.04238 7.27253 3.24237 8.63572 2.65289C9.99892 2.06342 11.4525 1.76868 12.9966 1.76868C14.5587 1.76868 16.0223 2.06302 17.3873 2.6517C18.7524 3.24039 19.9398 4.03932 20.9496 5.0485C21.9594 6.05767 22.7588 7.24439 23.3478 8.60865C23.9368 9.97291 24.2313 11.4367 24.2313 13C24.2313 14.5446 23.9366 15.9988 23.3471 17.3625C22.7576 18.7262 21.9576 19.9169 20.9471 20.9347C19.9366 21.9524 18.7501 22.7538 17.3876 23.3387C16.0252 23.9236 14.5633 24.2161 13.0021 24.2161ZM13 22.0706C15.523 22.0706 17.6656 21.1883 19.4276 19.4237C21.1896 17.6591 22.0705 15.5179 22.0705 13C22.0705 10.477 21.1896 8.33443 19.4276 6.57245C17.6656 4.81046 15.5205 3.92947 12.9923 3.92947C10.4822 3.92947 8.3442 4.81046 6.57828 6.57245C4.81238 8.33443 3.92942 10.4795 3.92942 13.0077C3.92942 15.5178 4.81173 17.6558 6.57633 19.4217C8.34094 21.1876 10.4822 22.0706 13 22.0706Z" />
-                    </svg>
-                    <span class="text-xs font-normal">탐색</span>
-                </a>
-            </li>
+                                </svg>
+                                <span class="text-xs font-normal">탐색</span>
+                            </a>
+                        </li>
             <li>
                 <a href="#" class="flex flex-col items-center p-2 rounded-lg text-gray-700">
                     <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -529,7 +530,7 @@
             <li>
                 <a href="#" class="flex flex-col items-center p-2 rounded-lg text-gray-700">
                     <svg class="w-6 h-6 mb-1" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M14 2H6C4.9 2 4 2.9 4 4V20C4 21.1 4.9 22 6 22H18C19.1 22 20 21.1 20 20V8L14 2ZM18 20H6V4H13V9H18V20ZM12 11C10.34 11 9 12.34 9 14C9 15.66 10.34 17 12 17C13.66 17 15 15.66 15 14C15 12.34 13.66 11 12 11ZM12 15.5C11.17 15.5 10.5 14.83 10.5 14C10.5 13.17 11.17 12.5 12 12.5C12.83 12.5 13.5 13.17 13.5 14C13.5 14.83 12.83 15.5 12 15.5Z" />
+                        <path d="M14 2H6C4.9 2 4 2.9 4 4V20C4 21.1 4.9 22 6 = 22H18C19.1 22 20 21.1 20 20V8L14 2ZM18 20H6V4H13V9H18V20ZM12 11C10.34 11 9 12.34 9 14C9 15.66 10.34 17 12 17C13.66 17 15 15.66 15 14C15 12.34 13.66 11 12 11ZM12 15.5C11.17 15.5 10.5 = 14.83 10.5 = 14C10.5 = 13.17 11.17 = 12.5 12 = 12.5C12.83 = 12.5 13.5 = 13.17 13.5 = 14C13.5 = 14.83 12.83 = 15.5 12 = 15.5Z" />
                     </svg>
                     <span class="text-xs font-normal">퀘스트</span>
                 </a>
@@ -542,25 +543,50 @@
     <script type="module">
         // Firebase SDK imports
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getAuth, onAuthStateChanged, signOut, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, Timestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // Firebase configuration (using global variables provided by Canvas environment)
-        const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyDLzrMR2QVK4rWNDIg4bQv4rlYTkchnU58",
+            authDomain: "uniz-a.firebaseapp.com",
+            projectId: "uniz-a",
+            storageBucket: "uniz-a.firebasestorage.app",
+            messagingSenderId: "389183402425",
+            appId: "1:389183402425:web:1272bcca61cdf9720c0668",
+            measurementId: "G-RTWDXH8GKQ"
+        };
 
-        // Initialize Firebase services
+        // Initialize Firebase
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
-        const db = getFirestore(app);
+        const db = getFirestore(app); // Initialize Firestore
 
         const authStatusContainer = document.getElementById('auth-status-container');
         const defaultNickname = "사용자"; // Default nickname if not logged in
         const authMessageDiv = document.getElementById('auth-message'); // Authentication message div
-        const formMessageDiv = document.getElementById('form-message'); // Form submission message div
-        const formMessageText = document.getElementById('form-message-text'); // Text inside form message
+        const createDiscussionForm = document.getElementById('create-discussion-form'); // Form element
 
-        let currentUserNickname = defaultNickname; // To store user's nickname for form submission
+        // Global variable for app ID
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+
+        // Function to set form enabled/disabled state
+        function setFormEnabled(enabled) {
+            const formElements = createDiscussionForm.querySelectorAll('input, select, button');
+            if (enabled) {
+                createDiscussionForm.classList.remove('form-disabled');
+                createDiscussionForm.removeAttribute('disabled');
+            } else {
+                createDiscussionForm.classList.add('form-disabled');
+                createDiscussionForm.setAttribute('disabled', 'true');
+            }
+            formElements.forEach(element => {
+                element.disabled = !enabled;
+            });
+            // Quill editors need special handling
+            contentQuill.enable(enabled);
+            thumbnailQuill.enable(enabled);
+        }
 
         // Function to update header based on auth state
         function updateHeader(user) {
@@ -569,14 +595,11 @@
             if (user) {
                 // Logged in: Display nickname and dropdown menu
                 const displayName = user.displayName || user.email || defaultNickname;
-                currentUserNickname = displayName.split('@')[0]; // Use part before @ for email or full display name
-                if (!currentUserNickname) { // Fallback if split results in empty string (e.g., if email is just "@example.com")
-                    currentUserNickname = defaultNickname;
-                }
+                const userNickname = displayName.split('@')[0]; // Use part before @ for email
 
                 const loggedInHtml = `
                     <button id="nickname-btn" class="cursor-pointer text-gray-700 p-2 rounded-md hover:bg-gray-100 transition-colors duration-200 flex items-center">
-                        <span class="mr-1">${currentUserNickname}</span>
+                        <span class="mr-1">${userNickname}</span>
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                     </button>
                     <div id="dropdown-menu" class="dropdown-menu hidden">
@@ -589,50 +612,74 @@
                 // Dropdown menu toggle
                 const nicknameBtn = document.getElementById('nickname-btn');
                 const dropdownMenu = document.getElementById('dropdown-menu');
-                if (nicknameBtn && dropdownMenu) {
-                    nicknameBtn.addEventListener('click', (event) => {
-                        event.stopPropagation(); // Stop event propagation
-                        dropdownMenu.classList.toggle('hidden');
-                    });
+                nicknameBtn.addEventListener('click', (event) => {
+                    event.stopPropagation(); // Stop event propagation
+                    dropdownMenu.classList.toggle('hidden');
+                });
 
-                    // Close dropdown when clicking outside
-                    document.addEventListener('click', (event) => {
-                        if (!authStatusContainer.contains(event.target)) {
-                            dropdownMenu.classList.add('hidden');
-                        }
-                    });
-                }
-
+                // Close dropdown when clicking outside
+                document.addEventListener('click', (event) => {
+                    if (!authStatusContainer.contains(event.target)) {
+                        dropdownMenu.classList.add('hidden');
+                    }
+                });
 
                 // Logout button functionality
                 const logoutBtn = document.getElementById('logout-btn');
-                if (logoutBtn) {
-                    logoutBtn.addEventListener('click', async (event) => {
-                        event.preventDefault();
-                        try {
-                            await signOut(auth);
-                            console.log("로그아웃 성공!");
-                        } catch (error) {
-                            console.error("로그아웃 실패:", error);
-                        }
-                    });
-                }
-
+                logoutBtn.addEventListener('click', async (event) => {
+                    event.preventDefault();
+                    try {
+                        await signOut(auth);
+                        console.log("로그아웃 성공!");
+                    } catch (error) {
+                        console.error("로그아웃 실패:", error);
+                    }
+                });
+                authMessageDiv.classList.add('hidden'); // Hide message if user is logged in
+                setFormEnabled(true); // Enable form
             } else {
                 // Logged out: Display login button
                 const loggedOutHtml = `
-                    <a href="/SIGNIN" id="login-btn" class="cursor-pointer text-gray-700 p-2 rounded-md hover:bg-gray-100 transition-colors duration-200">
+                    <a href="/SINGIN" id="login-btn" class="cursor-pointer text-gray-700 p-2 rounded-md hover:bg-gray-100 transition-colors duration-200">
                         로그인
                     </a>
                 `;
                 authStatusContainer.insertAdjacentHTML('afterbegin', loggedOutHtml);
+                authMessageDiv.classList.remove('hidden'); // Show login required message
+                setFormEnabled(false); // Disable form
             }
         }
 
-        // Detect Firebase auth state changes
+        // Firebase Auth initialization and handling
+        let authReadyPromise = Promise.resolve(); // 초기화는 완료된 Promise로 시작
+
+        if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+            // __initial_auth_token이 있으면 커스텀 토큰으로 로그인 시도
+            authReadyPromise = signInWithCustomToken(auth, __initial_auth_token)
+                .then(() => console.log("Signed in with custom token."))
+                .catch((error) => {
+                    console.error("Custom token sign-in failed:", error);
+                    // 익명 로그인으로 폴백하지 않음.
+                    // onAuthStateChanged가 null 사용자를 처리하도록 둠.
+                });
+        }
+        // __initial_auth_token이 정의되지 않은 경우, 여기서 로그인 시도는 없음.
+        // onAuthStateChanged가 null 사용자로 트리거될 것임.
+
         onAuthStateChanged(auth, (user) => {
-            updateHeader(user);
+            updateHeader(user); // 이 함수가 헤더를 업데이트하고 폼 활성화/비활성화를 처리
         });
+
+        // authReadyPromise를 사용하여 폼 상태 업데이트가 인증 준비 후에 실행되도록 함
+        authReadyPromise.then(() => {
+            // 인증이 준비되면, 현재 사용자 상태에 따라 폼 활성화 상태를 업데이트
+            updateHeader(auth.currentUser); // 올바른 폼 상태를 보장하기 위해 updateHeader를 다시 실행
+        }).catch(error => {
+            console.error("Authentication setup failed, could not enable form:", error);
+            setFormEnabled(false); // 인증 설정 실패 시 폼을 명시적으로 비활성화
+            authMessageDiv.classList.remove('hidden'); // 인증 메시지 표시
+        });
+
 
         // --- 태그 입력 및 관리 기능 ---
         const tagsInput = document.getElementById('discussion-tags-input');
@@ -681,7 +728,15 @@
         const juryRequiredHiddenInput = document.getElementById('jury-required-hidden');
 
         // 초기 상태 설정
-        if (juryToggle) {
+        if (juryToggle.checked) {
+            juryStatusText.textContent = '필요함';
+            juryRequiredHiddenInput.value = 'yes';
+        } else {
+            juryStatusText.textContent = '필요 없음';
+            juryRequiredHiddenInput.value = 'no';
+        }
+
+        juryToggle.addEventListener('change', () => {
             if (juryToggle.checked) {
                 juryStatusText.textContent = '필요함';
                 juryRequiredHiddenInput.value = 'yes';
@@ -689,18 +744,7 @@
                 juryStatusText.textContent = '필요 없음';
                 juryRequiredHiddenInput.value = 'no';
             }
-
-            juryToggle.addEventListener('change', () => {
-                if (juryToggle.checked) {
-                    juryStatusText.textContent = '필요함';
-                    juryRequiredHiddenInput.value = 'yes';
-                } else {
-                    juryStatusText.textContent = '필요 없음';
-                    juryRequiredHiddenInput.value = 'no';
-                }
-            });
-        }
-
+        });
 
         // --- 토론 형식에 따른 옵션 표시/숨김 ---
         const discussionFormatSelect = document.getElementById('discussion-format');
@@ -728,16 +772,14 @@
         }
 
         // 초기 로드 시 설정
-        if (discussionFormatSelect) {
-            toggleProConOptions();
-            // 토론 형식 드롭다운 변경 시
-            discussionFormatSelect.addEventListener('change', toggleProConOptions);
-        }
+        toggleProConOptions();
 
+        // 토론 형식 드롭다운 변경 시
+        discussionFormatSelect.addEventListener('change', toggleProConOptions);
 
         // 토론 유형 (팀 토론/1 vs 1 토론) 라디오 버튼 변경 시
-        if (debateTypeTeamRadio) debateTypeTeamRadio.addEventListener('change', toggleTeamMembersOption);
-        if (debateType1v1Radio) debateType1v1Radio.addEventListener('change', toggleTeamMembersOption);
+        debateTypeTeamRadio.addEventListener('change', toggleTeamMembersOption);
+        debateType1v1Radio.addEventListener('change', toggleTeamMembersOption);
 
 
         // --- Quill 에디터 초기화 ---
@@ -782,26 +824,7 @@
             theme: 'snow'
         });
 
-        // Function to show form messages
-        function showFormMessage(message, type = 'success') {
-            formMessageText.textContent = message;
-            formMessageDiv.classList.remove('hidden', 'bg-green-100', 'bg-red-100', 'border-green-400', 'border-red-400', 'text-green-700', 'text-red-700');
-
-            if (type === 'success') {
-                formMessageDiv.classList.add('bg-green-100', 'border-green-400', 'text-green-700');
-            } else if (type === 'error') {
-                formMessageDiv.classList.add('bg-red-100', 'border-red-400', 'text-red-700');
-            }
-            formMessageDiv.classList.remove('hidden');
-
-            // Hide message after 5 seconds
-            setTimeout(() => {
-                formMessageDiv.classList.add('hidden');
-            }, 5000);
-        }
-
         // --- 폼 제출 처리 ---
-        const createDiscussionForm = document.getElementById('create-discussion-form');
         if (createDiscussionForm) {
             createDiscussionForm.addEventListener('submit', async (event) => {
                 event.preventDefault(); // 기본 폼 제출 방지
@@ -809,10 +832,6 @@
                 // Check if user is logged in
                 if (!auth.currentUser) {
                     authMessageDiv.classList.remove('hidden');
-                    // Hide message after 5 seconds
-                    setTimeout(() => {
-                        authMessageDiv.classList.add('hidden');
-                    }, 5000);
                     return; // Stop form submission
                 } else {
                     authMessageDiv.classList.add('hidden'); // Hide message if user is logged in
@@ -823,67 +842,66 @@
                 // 썸네일 이미지 에디터의 내용을 hidden input에 저장 (주로 첫 번째 이미지 태그의 src를 추출)
                 const thumbnailContent = thumbnailQuill.root.innerHTML;
                 const imgMatch = thumbnailContent.match(/<img[^>]+src="([^">]+)"/);
-                document.getElementById('thumbnail-image-hidden').value = imgMatch ? imgMatch[1] : '';
+                const thumbnailImage = imgMatch ? imgMatch[1] : '';
+                document.getElementById('thumbnail-image-hidden').value = thumbnailImage;
 
                 const title = document.getElementById('discussion-title').value;
                 const category = document.getElementById('discussion-category').value;
                 const format = document.getElementById('discussion-format').value;
                 const content = document.getElementById('discussion-content-hidden').value; // Quill 에디터 내용
-                const thumbnailImage = document.getElementById('thumbnail-image-hidden').value; // 썸네일 이미지
-                const submittedTags = tagsHiddenInput.value.split(',').filter(tag => tag.trim() !== ''); // Filter empty tags
-                const submittedJuryRequired = juryRequiredHiddenInput.value;
+                const submittedTags = tagsHiddenInput.value.split(',').filter(tag => tag.trim() !== ''); // 태그 배열로 변환
+                const submittedJuryRequired = juryRequiredHiddenInput.value === 'yes'; // boolean으로 변환
 
                 let debateType = null;
                 let teamMembers = null;
                 const timeSettings = {};
 
                 if (format === '찬반 토론') {
-                    debateType = document.querySelector('input[name="debate_type"]:checked')?.value || null;
+                    debateType = document.querySelector('input[name="debate_type"]:checked').value;
                     if (debateType === 'team') {
-                        teamMembers = parseInt(document.getElementById('team-members')?.value) || 0;
+                        teamMembers = parseInt(document.getElementById('team-members').value, 10);
                     }
 
-                    timeSettings.proposition = parseInt(document.getElementById('time-proposition')?.value) || 0;
-                    timeSettings.opening = parseInt(document.getElementById('time-opening')?.value) || 0;
-                    timeSettings.rebuttal = parseInt(document.getElementById('time-rebuttal')?.value) || 0;
-                    timeSettings.final = parseInt(document.getElementById('time-final')?.value) || 0;
-                    timeSettings.juryJudgment = parseInt(document.getElementById('time-jury-judgment')?.value) || 0;
+                    timeSettings.proposition = parseInt(document.getElementById('time-proposition').value, 10);
+                    timeSettings.opening = parseInt(document.getElementById('time-opening').value, 10);
+                    timeSettings.rebuttal = parseInt(document.getElementById('time-rebuttal').value, 10);
+                    timeSettings.final = parseInt(document.getElementById('time-final').value, 10);
+                    timeSettings.juryJudgment = parseInt(document.getElementById('time-jury-judgment').value, 10);
                 }
 
-                const userId = auth.currentUser.uid;
-                const discussionCollectionPath = `artifacts/${appId}/users/${userId}/discussions`;
-
-                const discussionData = {
-                    title: title,
-                    category: category,
-                    format: format,
-                    content: content,
-                    thumbnailImage: thumbnailImage,
-                    tags: submittedTags,
-                    juryRequired: submittedJuryRequired === 'yes',
-                    createdAt: new Date(),
-                    authorId: userId,
-                    authorNickname: currentUserNickname,
-                    // Pro/Con debate specific fields if applicable
-                    debate: format === '찬반 토론' ? {
-                        type: debateType,
-                        teamMembers: teamMembers,
-                        timeSettings: timeSettings
-                    } : null,
-                };
-
                 try {
-                    const docRef = await addDoc(collection(db, discussionCollectionPath), discussionData);
-                    console.log("Document written with ID: ", docRef.id);
-                    showFormMessage("토론이 성공적으로 생성되었습니다!", "success");
-                    createDiscussionForm.reset(); // Optionally reset form after success
-                    contentQuill.setContents([]); // Clear Quill content
-                    thumbnailQuill.setContents([]); // Clear thumbnail Quill content
-                    tags = []; // Clear tags array
-                    renderTags(); // Update tags UI
+                    const discussionData = {
+                        title: title,
+                        category: category,
+                        format: format,
+                        content: content,
+                        thumbnailImage: thumbnailImage,
+                        tags: submittedTags,
+                        juryRequired: submittedJuryRequired,
+                        debateType: debateType,
+                        teamMembers: teamMembers,
+                        timeSettings: timeSettings,
+                        authorId: auth.currentUser.uid, // 작성자 ID
+                        authorNickname: auth.currentUser.displayName || auth.currentUser.email.split('@')[0], // 작성자 닉네임
+                        createdAt: Timestamp.now(), // 생성 시간
+                        views: 0, // 조회수 초기값
+                        likes: 0 // 좋아요 초기값
+                    };
+
+                    // Firestore에 데이터 저장
+                    const docRef = await addDoc(collection(db, `artifacts/${appId}/public/data/discussions`), discussionData);
+                    console.log("토론이 성공적으로 생성되었습니다. 문서 ID: ", docRef.id);
+
+                    // 폼 초기화 및 성공 메시지 표시 (임시)
+                    createDiscussionForm.reset();
+                    contentQuill.setContents([]); // Quill 에디터 초기화
+                    thumbnailQuill.setContents([]); // 썸네일 에디터 초기화
+                    tags = [];
+                    renderTags();
+                    alert("토론이 성공적으로 생성되었습니다!"); // 실제 앱에서는 커스텀 모달로 대체
                 } catch (e) {
-                    console.error("Error adding document: ", e);
-                    showFormMessage(`토론 생성에 실패했습니다: ${e.message}`, "error");
+                    console.error("토론 생성 중 오류 발생: ", e);
+                    alert("토론 생성에 실패했습니다. 다시 시도해주세요."); // 실제 앱에서는 커스텀 모달로 대체
                 }
             });
         }
