@@ -3,10 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>토론 자세히 보기 - 디리토</title>
+    <title>토론 상세보기 - UNIZ</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
+        /* Pretendard 폰트 임포트 */
         @font-face {
             font-family: 'Pretendard-Regular';
             src: url('https://fastly.jsdelivr.net/gh/Project-Noonnu/noonfonts_2107@1.1/Pretendard-Regular.woff') format('woff');
@@ -14,88 +15,50 @@
             font-style: normal;
         }
         body {
-            font-family: 'Pretendard-Regular', 'Inter', sans-serif;
-            background-color: #f0f2f5;
+            font-family: 'Pretendard-Regular', 'Inter', sans-serif; /* Pretendard 폰트 적용 */
+            background-color: #f0f2f5; /* 밝은 회색 배경 */
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
         }
+        /* 고정 헤더를 위한 스타일 */
         .fixed-header {
             position: fixed;
             top: 0;
             left: 0;
             right: 0;
-            height: 64px;
-            z-index: 1000;
+            height: 64px; /* 헤더 높이 고정 */
+            z-index: 1000; /* 다른 요소 위에 오도록 설정 */
         }
-        .fixed-sidebar {
-            position: fixed;
-            top: 64px;
-            left: 0;
-            bottom: 0;
-            width: 16rem;
-            background-color: #ffffff;
-            border-right: 1px solid #d1d5db;
-            z-index: 999;
-            display: none;
-            flex-direction: column;
-            justify-content: space-between;
-            padding: 1.5rem;
-        }
-        @media (min-width: 1024px) {
-            .fixed-sidebar {
-                display: flex;
-            }
-        }
+        /* 메인 콘텐츠 영역이 헤더와 하단 내비게이션 바를 피하도록 조정 */
         .main-content-area {
-            margin-top: 64px;
+            margin-top: 64px; /* 헤더 높이만큼 위쪽 마진 */
             flex: 1;
             overflow-y: auto;
             background-color: #ffffff;
-            padding-left: 0;
-            padding-right: 0;
-            margin-left: 0;
-            padding-bottom: 4rem;
+            padding: 1rem; /* 모바일 기본 패딩 */
+            padding-bottom: 4rem; /* 하단 내비게이션 바 높이에 맞춰 패딩 조정 */
         }
+        /* 대형 화면 (lg)에서 메인 콘텐츠 영역 패딩 조정 */
         @media (min-width: 1024px) {
             .main-content-area {
-                margin-left: 16rem;
-                padding: 2rem;
-                padding-bottom: 2rem;
+                padding: 2rem; /* 데스크톱에서는 패딩을 2rem (32px)으로 유지 */
             }
         }
-        .selected-nav-item {
-            color: #2563eb;
-            background-color: #eff6ff;
-        }
-        .selected-nav-item:hover {
-            background-color: #eff6ff;
-            color: #2563eb;
-        }
-        .sidebar-nav-item:hover {
-            background-color: transparent;
-            color: inherit;
-        }
-        #login-btn {
-            color: #4b5563;
-            padding: 0.5rem 1rem;
-            border-radius: 0.375rem;
-            font-weight: 500;
-            transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
-        }
-        #login-btn:hover {
-            background-color: #f3f4f6;
-            color: #1f2937;
-        }
+        /* 드롭다운 메뉴 스타일 */
         .dropdown-menu {
             position: absolute;
-            top: 100%;
+            top: 100%; /* 헤더 바로 아래 */
             right: 0;
             background-color: white;
             border: 1px solid #d1d5db;
             border-radius: 0.375rem;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             min-width: 160px;
-            z-index: 1001;
+            z-index: 1001; /* 헤더보다 위에 */
             padding: 0.5rem 0;
         }
+
         .dropdown-menu a {
             display: block;
             padding: 0.75rem 1rem;
@@ -103,29 +66,15 @@
             font-weight: 500;
             transition: background-color 0.2s ease-in-out;
         }
+
         .dropdown-menu a:hover {
             background-color: #f3f4f6;
-        }
-        .comment-input-area:disabled, .comment-input-area[disabled] {
-            opacity: 0.7;
-            pointer-events: none;
-            background-color: #e5e7eb; /* bg-gray-200 */
-        }
-        .loading-spinner {
-            border: 4px solid rgba(0, 0, 0, 0.1);
-            border-left-color: #2563eb;
-            border-radius: 50%;
-            width: 24px;
-            height: 24px;
-            animation: spin 1s linear infinite;
-        }
-        @keyframes spin {
-            to { transform: rotate(360deg); }
         }
     </style>
 </head>
 <body class="flex min-h-screen flex-col">
 
+    <!-- 헤더 섹션 (홈 페이지와 동일) -->
     <header class="fixed-header flex items-center justify-between bg-white p-4 border-b border-gray-300">
         <div class="flex items-center">
             <img src="/image/logo.png" alt="UNIZ 로고" class="h-10 w-auto max-w-full">
@@ -134,159 +83,42 @@
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6 text-gray-600 cursor-pointer hover:text-blue-500 transition-colors duration-200">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
             </svg>
-            <div id="auth-status-container" class="relative"></div>
+            <!-- 로그인 상태에 따라 조건부 렌더링될 요소 -->
+            <div id="auth-status-container" class="relative">
+                <!-- 여기에 로그인 버튼 또는 닉네임/드롭다운이 들어갑니다. -->
+            </div>
         </div>
     </header>
 
-    <div class="flex flex-1">
-        <aside class="fixed-sidebar">
-            <div>
-                <nav>
-                    <ul>
-                        <li class="mb-2">
-                            <a href="#" class="flex items-center p-3 rounded-lg transition-colors duration-200 selected-nav-item">
-                                <svg class="w-6 h-6 mr-3" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M4 23V9.66667L13 3L22 9.66667V23H14.125V16.3333H11.875V23H4Z" />
-                                </svg>
-                                <span class="font-normal">홈</span>
-                            </a>
-                        </li>
-                        <li class="mb-2">
-                            <a href="#" class="flex items-center text-gray-700 p-3 rounded-lg transition-colors duration-200 sidebar-nav-item">
-                                <svg class="w-6 h-6 mr-3" fill="currentColor" viewBox="0 0 26 26" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M7.21474 18.7853L15.0995 15.1267L18.7581 7.24187L10.8733 10.9005L7.21474 18.7853ZM13 14.0834C12.693 14.0834 12.4357 13.9795 12.2281 13.7719C12.0205 13.5643 11.9166 13.307 11.9166 = 13C11.9166 12.6931 12.0205 12.4358 12.2281 12.2282C12.4357 12.0205 12.693 11.9167 13 11.9167C13.3069 11.9167 13.5642 12.0205 13.7719 12.2282C13.9795 12.4358 14.0833 12.6931 14.0833 13C14.0833 13.307 13.9795 13.5643 13.7719 13.7719C13.5642 13.9795 13.3069 14.0834 13 14.0834ZM13.0021 24.2161C11.4589 24.2161 10.0054 23.9236 8.64152 23.3387C7.27767 22.7538 6.08623 21.9518 5.06719 20.9328C4.04817 19.9138 3.24621 18.723 2.6613 17.3606C2.07639 15.9982 1.78394 14.5453 1.78394 13.0021C1.78394 11.4409 2.07639 9.97834 2.6613 8.61448C3.24621 7.25063 4.04738 6.06344 5.06481 5.05291C6.08222 4.04238 7.27253 3.24237 8.63572 2.65289C9.99892 2.06342 11.4525 1.76868 12.9966 1.76868C14.5587 1.76868 16.0223 2.06302 17.3873 2.6517C18.7524 3.24039 19.9398 4.03932 20.9496 5.0485C21.9594 6.05767 22.7588 7.24439 23.3478 8.60865C23.9368 9.97291 24.2313 11.4367 24.2313 13C24.2313 14.5446 23.9366 15.9988 23.3471 17.3625C22.7576 18.7262 21.9576 19.9169 20.9471 20.9347C19.9366 21.9524 18.7501 22.7538 17.3876 23.3387C16.0252 23.9236 14.5633 24.2161 13.0021 24.2161ZM13 22.0706C15.523 22.0706 17.6656 21.1883 19.4276 19.4237C21.1896 17.6591 22.0705 15.5179 22.0705 13C22.0705 10.477 21.1896 8.33443 19.4276 6.57245C17.6656 4.81046 15.5205 3.92947 12.9923 3.92947C10.4822 3.92947 8.3442 4.81046 6.57828 6.57245C4.81238 8.33443 3.92942 10.4795 3.92942 13.0077C3.92942 15.5178 4.81173 17.6558 6.57633 19.4217C8.34094 21.1876 10.4822 22.0706 13 22.0706Z" />
-                                </svg>
-                                <span class="font-normal">탐색</span>
-                            </a>
-                        </li>
-                        <li class="mb-2">
-                            <a href="#" class="flex items-center text-gray-700 p-3 rounded-lg transition-colors duration-200 sidebar-nav-item">
-                                <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.691h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.324 1.118l1.519 4.674c.3.921-.755 1.688-1.539 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.784.57-1.838-.197-1.539-1.118l1.519-4.674a1 1 0 00-.324-1.118L2.05 10.102c-.783-.57-.381-1.81.588-1.81h4.915a1 1 0 00.95-.691l1.519-4.674z" />
-                                </svg>
-                                <span class="font-normal">베스트</span>
-                            </a>
-                        </li>
-                        <li class="mb-2">
-                            <a href="#" class="flex items-center text-gray-700 p-3 rounded-lg transition-colors duration-200 sidebar-nav-item">
-                                <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M17 3H7a2 2 0 00-2 2v16l7-3.5 7 3.5V5a2 2 0 00-2-2z" />
-                                </svg>
-                                <span class="font-normal">저장됨</span>
-                            </a>
-                        </li>
-                        <li class="mb-2">
-                            <a href="#" class="flex items-center text-gray-700 p-3 rounded-lg transition-colors duration-200 sidebar-nav-item">
-                                <svg class="w-6 h-6 mr-3" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M14 2H6C4.9 2 4 2.9 4 4V20C4 21.1 4.9 22 6 22H18C19.1 22 20 21.1 20 20V8L14 2ZM18 20H6V4H13V9H18V20ZM12 11C10.34 11 9 12.34 9 14C9 15.66 10.34 17 12 17C13.66 17 15 15.66 15 14C15 12.34 13.66 11 12 11ZM12 15.5C11.17 15.5 10.5 14.83 10.5 14C10.5 13.17 11.17 12.5 12 12.5C12.83 12.5 13.5 13.17 13.5 14C13.5 14.83 12.83 15.5 12 15.5Z" />
-                                </svg>
-                                <span class="font-normal">퀘스트</span>
-                            </a>
-                        </li>
-                    </ul>
-                </nav>
+    <!-- 메인 콘텐츠 영역 -->
+    <main class="main-content-area lg:max-w-4xl lg:mx-auto w-full">
+        <div id="discussion-detail" class="bg-white p-6 rounded-lg shadow-lg">
+            <!-- 토론 상세 내용이 여기에 동적으로 로드됩니다 -->
+            <div class="flex justify-center items-center h-48" id="loading-spinner">
+                <div class="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-blue-500"></div>
+                <p class="ml-4 text-gray-600">내용을 불러오는 중...</p>
             </div>
-            <div></div>
-        </aside>
+        </div>
 
-        <main class="main-content-area px-4 py-8 lg:px-8">
-            <div id="loading-indicator" class="flex justify-center items-center h-64">
-                <div class="loading-spinner"></div>
-                <p class="ml-4 text-gray-600">토론을 불러오는 중...</p>
+        <!-- 댓글 섹션 -->
+        <section class="mt-8 bg-white p-6 rounded-lg shadow-lg">
+            <h2 class="text-xl font-semibold text-gray-800 mb-4">댓글</h2>
+            <div id="comments-list" class="space-y-4 mb-6">
+                <!-- 댓글이 여기에 동적으로 로드됩니다 -->
+                <p class="text-gray-500 text-center" id="no-comments-message">아직 댓글이 없습니다. 첫 댓글을 남겨주세요!</p>
             </div>
-
-            <div id="discussion-detail-content" class="hidden max-w-3xl mx-auto bg-white p-6 rounded-lg shadow-md border border-gray-200">
-                <!-- Discussion Title -->
-                <h1 id="discussion-title" class="text-3xl font-bold text-gray-900 mb-2"></h1>
-                <!-- Author and Category -->
-                <p class="text-gray-600 text-sm mb-4">
-                    <span id="discussion-author" class="font-semibold"></span>
-                    - <span id="discussion-category"></span>
-                    (<span id="discussion-format"></span>)
-                </p>
-
-                <!-- Thumbnail Image -->
-                <div id="discussion-thumbnail-container" class="mb-6 flex justify-center hidden">
-                    <img id="discussion-thumbnail" src="" alt="썸네일 이미지" class="w-full max-h-80 object-cover rounded-md shadow-sm">
-                </div>
-
-                <!-- Tags -->
-                <div id="discussion-tags" class="flex flex-wrap gap-2 mb-6"></div>
-
-                <!-- Debate specific details -->
-                <div id="debate-details" class="mb-6 bg-blue-50 border border-blue-200 rounded-md p-4 hidden">
-                    <h3 class="text-lg font-semibold text-blue-800 mb-2">찬반 토론 상세 정보</h3>
-                    <p class="text-gray-700 text-sm mb-1">
-                        <span class="font-medium">토론 유형:</span> <span id="debate-type"></span>
-                    </p>
-                    <p id="team-members-display" class="text-gray-700 text-sm mb-1 hidden">
-                        <span class="font-medium">팀당 인원:</span> <span id="team-members-count"></span>명
-                    </p>
-                    <h4 class="text-base font-semibold text-blue-700 mt-3 mb-2">토론 절차별 시간 (분)</h4>
-                    <ul class="list-disc list-inside text-gray-700 text-sm">
-                        <li><span class="font-medium">논제 제시:</span> <span id="time-proposition"></span>분</li>
-                        <li><span class="font-medium">입론 (주장 제시):</span> <span id="time-opening"></span>분</li>
-                        <li><span class="font-medium">반론 (논리적 반박):</span> <span id="time-rebuttal"></span>분</li>
-                        <li><span class="font-medium">최종 변론:</span> <span id="time-final"></span>분</li>
-                        <li><span class="font-medium">배심원 판단:</span> <span id="time-jury-judgment"></span>분</li>
-                    </ul>
-                    <p class="text-gray-700 text-sm mt-3">
-                        <span class="font-medium">배심원 참여:</span> <span id="jury-required-display"></span>
-                    </p>
-                </div>
-
-
-                <!-- Discussion Content -->
-                <div id="discussion-content" class="prose max-w-none mb-6 text-gray-800 leading-relaxed border-t border-b border-gray-200 py-6"></div>
-
-                <!-- Likes, Views, Share -->
-                <div class="flex items-center justify-between border-t border-gray-200 pt-4 mt-6">
-                    <div class="flex items-center space-x-4">
-                        <button id="like-button" class="flex items-center text-gray-600 hover:text-red-500 transition-colors duration-200 focus:outline-none">
-                            <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 22.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path></svg>
-                            <span id="likes-count">0</span>
-                        </button>
-                        <div class="flex items-center text-gray-600">
-                            <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
-                            <span id="views-count">0</span>
-                        </div>
-                    </div>
-                    <button class="flex items-center text-gray-600 hover:text-blue-500 transition-colors duration-200">
-                        <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.865 13.103 9 12.785 9 12c0-.785-.135-1.103-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 4.421a3 3 0 002.864 0M8.684 10.658L15.316 6.237a3 3 0 012.864 0" /></svg>
-                        공유
-                    </button>
-                </div>
-
-                <!-- Comments Section -->
-                <div class="mt-8 pt-4 border-t border-gray-200">
-                    <h3 class="text-xl font-bold text-gray-800 mb-4">댓글</h3>
-
-                    <div id="comment-input-area" class="mb-6 bg-gray-50 p-4 rounded-lg shadow-sm">
-                        <textarea id="comment-textarea"
-                                  class="comment-input-area w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200"
-                                  rows="3" placeholder="댓글을 입력하세요..." disabled></textarea>
-                        <div id="comment-auth-message" class="text-red-600 text-sm mt-2 hidden">
-                            댓글을 작성하려면 로그인해야 합니다.
-                        </div>
-                        <button id="submit-comment-btn"
-                                class="w-full mt-3 px-6 py-3 bg-blue-600 text-white rounded-md font-medium hover:bg-blue-700 transition-colors duration-200 shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
-                                disabled>
-                            댓글 달기
-                        </button>
-                    </div>
-
-                    <div id="comments-list" class="space-y-4">
-                        <!-- Comments will be dynamically loaded here -->
-                    </div>
-                </div>
+            <div class="border-t border-gray-200 pt-6">
+                <textarea id="comment-input" rows="3" class="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="댓글을 입력하세요..."></textarea>
+                <button id="submit-comment-btn" class="mt-3 px-6 py-2 bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-700 transition-colors duration-200">댓글 작성</button>
             </div>
-        </main>
-    </div>
+        </section>
+    </main>
 
+    <!-- 하단 내비게이션 바 (모바일 전용, 홈 페이지와 동일) -->
     <nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-300 py-0.5 px-2 shadow-lg lg:hidden z-1000">
         <ul class="flex justify-around items-center h-full">
             <li>
-                <a href="#" class="flex flex-col items-center p-2 rounded-lg text-blue-600">
+                <a href="/" class="flex flex-col items-center p-2 rounded-lg text-gray-700">
                     <svg class="w-6 h-6 mb-1" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                         <path d="M4 23V9.66667L13 3L22 9.66667V23H14.125V16.3333H11.875V23H4Z" />
                     </svg>
@@ -297,152 +129,10 @@
                 <a href="#" class="flex flex-col items-center p-2 rounded-lg text-gray-700">
                     <svg class="w-6 h-6 mb-1" fill="currentColor" viewBox="0 0 26 26" xmlns="http://www.w3.org/2000/svg">
                         <path d="M7.21474 18.7853L15.0995 15.1267L18.7581 7.24187L10.8733 10.9005L7.21474 18.7853ZM13 14.0834C12.693 14.0834 12.4357 13.9795 12.2281 13.7719C12.0205 13.5643 11.9166 13.307 11.9166 13C11.9166 12.6931 12.0205 12.4358 12.2281 12.2282C12.4357 12.0205 12.693 11.9167 13 11.9167C13.3069 11.9167 13.5642 12.0205 13.7719 12.2282C13.9795 12.4358 14.0833 12.6931 14.0833 13C14.0833 13.307 13.9795 13.5643 13.7719 13.7719C13.5642 13.9795 13.3069 14.0834 13 14.0834ZM13.0021 24.2161C11.4589 24.2161 10.0054 23.9236 8.64152 23.3387C7.27767 22.7538 6.08623 21.9518 5.06719 20.9328C4.04817 19.9138 3.24621 18.723 2.6613 17.3606C2.07639 15.9982 1.78394 14.5453 1.78394 13.0021C1.78394 11.4409 2.07639 9.97834 2.6613 8.61448C3.24621 7.25063 4.04738 6.06344 5.06481 5.05291C6.08222 4.04238 7.27253 3.24237 8.63572 2.65289C9.99892 2.06342 11.4525 1.76868 12.9966 1.76868C14.5587 1.76868 16.0223 2.06302 17.3873 2.6517C18.7524 3.24039 19.9398 4.03932 20.9496 5.0485C21.9594 6.05767 22.7588 7.24439 23.3478 8.60865C23.9368 9.97291 24.2313 11.4367 24.2313 13C24.2313 14.5446 23.9366 15.9988 23.3471 17.3625C22.7576 18.7262 21.9576 19.9169 20.9471 20.9347C19.9366 21.9524 18.7501 22.7538 17.3876 23.3387C16.0252 23.9236 14.5633 24.2161 13.0021 24.2161ZM13 22.0706C15.523 22.0706 17.6656 21.1883 19.4276 19.4237C21.1896 17.6591 22.0705 15.5179 22.0705 13C22.0705 10.477 21.1896 8.33443 19.4276 6.57245C17.6656 4.81046 15.5205 3.92947 12.9923 3.92947C10.4822 3.92947 8.3442 4.81046 6.57828 6.57245C4.81238 8.33443 3.92942 10.4795 3.92942 13.0077C3.92942 15.5178 4.81173 17.6558 6.57633 19.4217C8.34094 21.1876 10.4822 22.0706 13 22.0706Z" />
-                                </svg>
-                                <span class="font-normal">탐색</span>
-                            </a>
-                        </li>
-                        <li class="mb-2">
-                            <a href="#" class="flex items-center text-gray-700 p-3 rounded-lg transition-colors duration-200 sidebar-nav-item">
-                                <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.691h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.324 1.118l1.519 4.674c.3.921-.755 1.688-1.539 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.784.57-1.838-.197-1.539-1.118l1.519-4.674a1 1 0 00-.324-1.118L2.05 10.102c-.783-.57-.381-1.81.588-1.81h4.915a1 1 0 00.95-.691l1.519-4.674z" />
-                                </svg>
-                                <span class="font-normal">베스트</span>
-                            </a>
-                        </li>
-                        <li class="mb-2">
-                            <a href="#" class="flex items-center text-gray-700 p-3 rounded-lg transition-colors duration-200 sidebar-nav-item">
-                                <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M17 3H7a2 2 0 00-2 2v16l7-3.5 7 3.5V5a2 2 0 00-2-2z" />
-                                </svg>
-                                <span class="font-normal">저장됨</span>
-                            </a>
-                        </li>
-                        <li class="mb-2">
-                            <a href="#" class="flex items-center text-gray-700 p-3 rounded-lg transition-colors duration-200 sidebar-nav-item">
-                                <svg class="w-6 h-6 mr-3" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M14 2H6C4.9 2 4 2.9 4 4V20C4 21.1 4.9 22 6 22H18C19.1 22 20 21.1 20 20V8L14 2ZM18 20H6V4H13V9H18V20ZM12 11C10.34 11 9 12.34 9 14C9 15.66 10.34 17 12 17C13.66 17 15 15.66 15 14C15 12.34 13.66 11 12 11ZM12 15.5C11.17 15.5 10.5 14.83 10.5 14C10.5 13.17 11.17 12.5 12 12.5C12.83 12.5 13.5 13.17 13.5 14C13.5 14.83 12.83 15.5 12 15.5Z" />
-                                </svg>
-                                <span class="font-normal">퀘스트</span>
-                            </a>
-                        </li>
-                    </ul>
-                </nav>
-            </div>
-            <div></div>
-        </aside>
-
-        <main class="main-content-area px-4 py-8 lg:px-8">
-            <div id="loading-indicator" class="flex justify-center items-center h-64">
-                <div class="loading-spinner"></div>
-                <p class="ml-4 text-gray-600">토론을 불러오는 중...</p>
-            </div>
-
-            <div id="discussion-detail-content" class="hidden max-w-3xl mx-auto bg-white p-6 rounded-lg shadow-md border border-gray-200">
-                <!-- Discussion Title -->
-                <h1 id="discussion-title" class="text-3xl font-bold text-gray-900 mb-2"></h1>
-                <!-- Author and Category -->
-                <p class="text-gray-600 text-sm mb-4">
-                    <span id="discussion-author" class="font-semibold"></span>
-                    - <span id="discussion-category"></span>
-                    (<span id="discussion-format"></span>)
-                </p>
-
-                <!-- Thumbnail Image -->
-                <div id="discussion-thumbnail-container" class="mb-6 flex justify-center hidden">
-                    <img id="discussion-thumbnail" src="" alt="썸네일 이미지" class="w-full max-h-80 object-cover rounded-md shadow-sm">
-                </div>
-
-                <!-- Tags -->
-                <div id="discussion-tags" class="flex flex-wrap gap-2 mb-6"></div>
-
-                <!-- Debate specific details -->
-                <div id="debate-details" class="mb-6 bg-blue-50 border border-blue-200 rounded-md p-4 hidden">
-                    <h3 class="text-lg font-semibold text-blue-800 mb-2">찬반 토론 상세 정보</h3>
-                    <p class="text-gray-700 text-sm mb-1">
-                        <span class="font-medium">토론 유형:</span> <span id="debate-type"></span>
-                    </p>
-                    <p id="team-members-display" class="text-gray-700 text-sm mb-1 hidden">
-                        <span class="font-medium">팀당 인원:</span> <span id="team-members-count"></span>명
-                    </p>
-                    <h4 class="text-base font-semibold text-blue-700 mt-3 mb-2">토론 절차별 시간 (분)</h4>
-                    <ul class="list-disc list-inside text-gray-700 text-sm">
-                        <li><span class="font-medium">논제 제시:</span> <span id="time-proposition"></span>분</li>
-                        <li><span class="font-medium">입론 (주장 제시):</span> <span id="time-opening"></span>분</li>
-                        <li><span class="font-medium">반론 (논리적 반박):</span> <span id="time-rebuttal"></span>분</li>
-                        <li><span class="font-medium">최종 변론:</span> <span id="time-final"></span>분</li>
-                        <li><span class="font-medium">배심원 판단:</span> <span id="time-jury-judgment"></span>분</li>
-                    </ul>
-                    <p class="text-gray-700 text-sm mt-3">
-                        <span class="font-medium">배심원 참여:</span> <span id="jury-required-display"></span>
-                    </p>
-                </div>
-
-
-                <!-- Discussion Content -->
-                <div id="discussion-content" class="prose max-w-none mb-6 text-gray-800 leading-relaxed border-t border-b border-gray-200 py-6"></div>
-
-                <!-- Likes, Views, Share -->
-                <div class="flex items-center justify-between border-t border-gray-200 pt-4 mt-6">
-                    <div class="flex items-center space-x-4">
-                        <button id="like-button" class="flex items-center text-gray-600 hover:text-red-500 transition-colors duration-200 focus:outline-none">
-                            <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 22.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path></svg>
-                            <span id="likes-count">0</span>
-                        </button>
-                        <div class="flex items-center text-gray-600">
-                            <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
-                            <span id="views-count">0</span>
-                        </div>
-                    </div>
-                    <button class="flex items-center text-gray-600 hover:text-blue-500 transition-colors duration-200">
-                        <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.865 13.103 9 12.785 9 12c0-.785-.135-1.103-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 4.421a3 3 0 002.864 0M8.684 10.658L15.316 6.237a3 3 0 012.864 0" /></svg>
-                        공유
-                    </button>
-                </div>
-
-                <!-- Comments Section -->
-                <div class="mt-8 pt-4 border-t border-gray-200">
-                    <h3 class="text-xl font-bold text-gray-800 mb-4">댓글</h3>
-
-                    <div id="comment-input-area" class="mb-6 bg-gray-50 p-4 rounded-lg shadow-sm">
-                        <textarea id="comment-textarea"
-                                  class="comment-input-area w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200"
-                                  rows="3" placeholder="댓글을 입력하세요..." disabled></textarea>
-                        <div id="comment-auth-message" class="text-red-600 text-sm mt-2 hidden">
-                            댓글을 작성하려면 로그인해야 합니다.
-                        </div>
-                        <button id="submit-comment-btn"
-                                class="w-full mt-3 px-6 py-3 bg-blue-600 text-white rounded-md font-medium hover:bg-blue-700 transition-colors duration-200 shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
-                                disabled>
-                            댓글 달기
-                        </button>
-                    </div>
-
-                    <div id="comments-list" class="space-y-4">
-                        <!-- Comments will be dynamically loaded here -->
-                    </div>
-                </div>
-            </div>
-        </main>
-    </div>
-
-    <nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-300 py-0.5 px-2 shadow-lg lg:hidden z-1000">
-        <ul class="flex justify-around items-center h-full">
-            <li>
-                <a href="#" class="flex flex-col items-center p-2 rounded-lg text-blue-600">
-                    <svg class="w-6 h-6 mb-1" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M4 23V9.66667L13 3L22 9.66667V23H14.125V16.3333H11.875V23H4Z" />
                     </svg>
-                    <span class="text-xs font-normal">홈</span>
+                    <span class="text-xs font-normal">탐색</span>
                 </a>
             </li>
-            <li>
-                <a href="#" class="flex flex-col items-center p-2 rounded-lg text-gray-700">
-                    <svg class="w-6 h-6 mb-1" fill="currentColor" viewBox="0 0 26 26" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M7.21474 18.7853L15.0995 15.1267L18.7581 7.24187L10.8733 10.9005L7.21474 18.7853ZM13 14.0834C12.693 14.0834 12.4357 13.9795 12.2281 13.7719C12.0205 13.5643 11.9166 13.307 11.9166 = 13C11.9166 12.6931 12.0205 12.4358 12.2281 12.2282C12.4357 12.0205 12.693 11.9167 13 11.9167C13.3069 11.9167 13.5642 12.0205 13.7719 12.2282C13.9795 12.4358 14.0833 12.6931 14.0833 13C14.0833 13.307 13.9795 13.5643 13.7719 13.7719C13.5642 = 13.9795 13.3069 = 14.0834 13 = 14.0834ZM13.0021 24.2161C11.4589 = 24.2161 10.0054 = 23.9236 8.64152 = 23.3387C7.27767 = 22.7538 6.08623 = 21.9518 5.06719 = 20.9328C4.04817 = 19.9138 3.24621 = 18.723 2.6613 = 17.3606C2.07639 = 15.9982 1.78394 = 14.5453 1.78394 = 13.0021C1.78394 = 11.4409 2.07639 = 9.97834 2.6613 = 8.61448C3.24621 = 7.25063 4.04738 = 6.06344 5.06481 = 5.05291C6.08222 = 4.04238 7.27253 = 3.24237 8.63572 = 2.65289C9.99892 = 2.06342 11.4525 = 1.76868 12.9966 = 1.76868C14.5587 = 1.76868 16.0223 = 2.06302 17.3873 = 2.6517C18.7524 = 3.24039 19.9398 = 4.03932 20.9496 = 5.0485C21.9594 = 6.05767 22.7588 = 7.24439 23.3478 = 8.60865C23.9368 = 9.97291 24.2313 = 11.4367 24.2313 = 13C24.2313 = 14.5446 23.9366 = 15.9988 23.3471 = 17.3625C22.7576 = 18.7262 21.9576 = 19.9169 20.9471 = 20.9347C19.9366 = 21.9524 18.7501 = 22.7538 17.3876 = 23.3387C16.0252 = 23.9236 14.5633 = 24.2161 13.0021 = 24.2161ZM13 = 22.0706C15.523 = 22.0706 17.6656 = 21.1883 19.4276 = 19.4237C21.1896 = 17.6591 22.0705 = 15.5179 22.0705 = 13C22.0705 = 10.477 21.1896 = 8.33443 19.4276 = 6.57245C17.6656 = 4.81046 15.5205 = 3.92947 12.9923 = 3.92947C10.4822 = 3.92947 8.3442 = 4.81046 6.57828 = 6.57245C4.81238 = 8.33443 3.92942 = 10.4795 3.92942 = 13.0077C3.92942 = 15.5178 4.81173 = 17.6558 6.57633 = 19.4217C8.34094 = 21.1876 10.4822 = 22.0706 13 = 22.0706Z" />
-                                </svg>
-                                <span class="text-xs font-normal">탐색</span>
-                            </a>
-                        </li>
             <li>
                 <a href="#" class="flex flex-col items-center p-2 rounded-lg text-gray-700">
                     <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -462,7 +152,7 @@
             <li>
                 <a href="#" class="flex flex-col items-center p-2 rounded-lg text-gray-700">
                     <svg class="w-6 h-6 mb-1" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M14 2H6C4.9 2 4 2.9 4 4V20C4 21.1 4.9 22 6 22H18C19.1 22 20 21.1 20 20V8L14 2ZM18 20H6V4H13V9H18V20ZM12 11C10.34 11 9 12.34 9 14C9 15.66 10.34 17 12 17C13.66 17 15 15.66 15 14C15 12.34 13.66 11 12 11ZM12 15.5C11.17 15.5 10.5 14.83 10.5 14C10.5 13.17 11.17 12.5 12 12.5C12.83 12.5 13.5 13.17 13.5 14C13.5 14.83 12.83 15.5 12 15.5Z" />
+                        <path d="M14 2H6C4.9 2 4 2.9 4 4V20C4 21.1 4.9 22 6 = 22H18C19.1 22 20 21.1 20 20V8L14 2ZM18 20H6V4H13V9H18V20ZM12 11C10.34 11 9 12.34 9 14C9 15.66 10.34 17 12 17C13.66 17 15 15.66 15 14C15 12.34 13.66 11 12 11ZM12 15.5C11.17 15.5 10.5 = 14.83 10.5 = 14C10.5 = 13.17 11.17 = 12.5 12 = 12.5C12.83 = 12.5 13.5 = 13.17 13.5 = 14C13.5 = 14.83 12.83 = 15.5 12 = 15.5Z" />
                     </svg>
                     <span class="text-xs font-normal">퀘스트</span>
                 </a>
@@ -471,9 +161,10 @@
     </nav>
 
     <script type="module">
+        // Firebase SDK imports
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, onAuthStateChanged, signOut, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, getDoc, updateDoc, collection, addDoc, query, orderBy, Timestamp, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, doc, getDoc, updateDoc, collection, onSnapshot, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // Firebase configuration (사용자가 제공한 실제 Firebase config로 교체됨)
         const firebaseConfig = {
@@ -486,54 +177,24 @@
             measurementId: "G-RTWDXH8GKQ"
         };
 
+        // Initialize Firebase
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
 
         const authStatusContainer = document.getElementById('auth-status-container');
-        const defaultNickname = "사용자";
+        const defaultNickname = "사용자"; // 로그인하지 않은 경우의 닉네임
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
 
-        const loadingIndicator = document.getElementById('loading-indicator');
-        const discussionDetailContent = document.getElementById('discussion-detail-content');
-
-        const discussionTitleElem = document.getElementById('discussion-title');
-        const discussionAuthorElem = document.getElementById('discussion-author');
-        const discussionCategoryElem = document.getElementById('discussion-category');
-        const discussionFormatElem = document.getElementById('discussion-format');
-        const discussionThumbnailContainerElem = document.getElementById('discussion-thumbnail-container');
-        const discussionThumbnailElem = document.getElementById('discussion-thumbnail');
-        const discussionTagsElem = document.getElementById('discussion-tags');
-        const discussionContentElem = document.getElementById('discussion-content');
-        const likesCountElem = document.getElementById('likes-count');
-        const viewsCountElem = document.getElementById('views-count');
-        const likeButton = document.getElementById('like-button');
-
-        const debateDetailsElem = document.getElementById('debate-details');
-        const debateTypeElem = document.getElementById('debate-type');
-        const teamMembersDisplayElem = document.getElementById('team-members-display');
-        const teamMembersCountElem = document.getElementById('team-members-count');
-        const timePropositionElem = document.getElementById('time-proposition');
-        const timeOpeningElem = document.getElementById('time-opening');
-        const timeRebuttalElem = document.getElementById('time-rebuttal');
-        const timeFinalElem = document.getElementById('time-final');
-        const timeJuryJudgmentElem = document.getElementById('time-jury-judgment');
-        const juryRequiredDisplayElem = document.getElementById('jury-required-display');
-
-        const commentTextarea = document.getElementById('comment-textarea');
-        const submitCommentBtn = document.getElementById('submit-comment-btn');
-        const commentAuthMessage = document.getElementById('comment-auth-message');
-        const commentsList = document.getElementById('comments-list');
-
-        let currentDiscussionId = null; // 현재 페이지에 표시되는 토론 ID
+        let currentUserId = null; // 현재 로그인된 사용자 ID
 
         // Function to update header based on auth state
         function updateHeader(user) {
-            authStatusContainer.innerHTML = ''; // Clear existing content
-
+            authStatusContainer.innerHTML = ''; // 기존 내용 지우기
             if (user) {
+                currentUserId = user.uid; // 사용자 ID 업데이트
                 const displayName = user.displayName || user.email || defaultNickname;
-                const userNickname = displayName.split('@')[0];
+                const userNickname = displayName.split('@')[0]; // 이메일에서 @ 앞부분만 사용
 
                 const loggedInHtml = `
                     <button id="nickname-btn" class="cursor-pointer text-gray-700 p-2 rounded-md hover:bg-gray-100 transition-colors duration-200 flex items-center">
@@ -547,19 +208,23 @@
                 `;
                 authStatusContainer.insertAdjacentHTML('afterbegin', loggedInHtml);
 
+                // 드롭다운 메뉴 토글 기능
                 const nicknameBtn = document.getElementById('nickname-btn');
                 const dropdownMenu = document.getElementById('dropdown-menu');
                 nicknameBtn.addEventListener('click', (event) => {
-                    event.stopPropagation();
+                    event.stopPropagation(); // 버튼 클릭 시 이벤트 전파 중지
                     dropdownMenu.classList.toggle('hidden');
                 });
 
+                // 외부 클릭 시 드롭다운 닫기
                 document.addEventListener('click', (event) => {
+                    // 클릭된 요소가 드롭다운 컨테이너 내부에 없는 경우 드롭다운 숨김
                     if (!authStatusContainer.contains(event.target)) {
                         dropdownMenu.classList.add('hidden');
                     }
                 });
 
+                // 로그아웃 버튼 기능
                 const logoutBtn = document.getElementById('logout-btn');
                 logoutBtn.addEventListener('click', async (event) => {
                     event.preventDefault();
@@ -570,27 +235,24 @@
                         console.error("로그아웃 실패:", error);
                     }
                 });
-                // 로그인 시 댓글 입력 활성화
-                commentTextarea.disabled = false;
-                submitCommentBtn.disabled = false;
-                commentAuthMessage.classList.add('hidden');
+
             } else {
+                currentUserId = null; // 사용자 ID 초기화
+                // 로그아웃 상태: 로그인 버튼 표시
                 const loggedOutHtml = `
                     <a href="/SINGIN" id="login-btn" class="cursor-pointer text-gray-700 p-2 rounded-md hover:bg-gray-100 transition-colors duration-200">
                         로그인
                     </a>
                 `;
                 authStatusContainer.insertAdjacentHTML('afterbegin', loggedOutHtml);
-                // 로그아웃 시 댓글 입력 비활성화
-                commentTextarea.disabled = true;
-                submitCommentBtn.disabled = true;
-                commentAuthMessage.classList.remove('hidden');
             }
         }
 
-        let authReadyPromise = Promise.resolve();
+        // Firebase Auth initialization and handling
+        let authReadyPromise = Promise.resolve(); // 초기화는 완료된 Promise로 시작
 
         if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+            // __initial_auth_token이 있으면 커스텀 토큰으로 로그인 시도
             authReadyPromise = signInWithCustomToken(auth, __initial_auth_token)
                 .then(() => console.log("Signed in with custom token."))
                 .catch((error) => {
@@ -598,217 +260,210 @@
                 });
         }
 
+        // Firebase 인증 상태 변경 감지
         onAuthStateChanged(auth, (user) => {
             updateHeader(user);
         });
 
-        // URL에서 토론 ID 가져오기 (clean URL format: /view/{id})
+        // URL에서 토론 ID 추출
         function getDiscussionIdFromUrl() {
-            const pathSegments = window.location.pathname.split('/').filter(s => s !== ''); // Filter out empty segments
-            // After filtering, if URL is /view/some_id, pathSegments will be ["view", "some_id"]
-            // If URL is /view/, pathSegments will be ["view"]
-            if (pathSegments.length > 0) {
-                const lastSegment = pathSegments[pathSegments.length - 1];
-                // Check if the last segment is the actual ID and not just a route prefix
-                // This ensures that URLs like /view/ or /discussion-detail-canvas do not return an empty ID.
-                if (lastSegment !== 'view' && lastSegment !== 'discussion-detail-canvas') {
-                    return lastSegment;
-                }
+            const path = window.location.pathname;
+            const parts = path.split('/');
+            // 예: /view/discussion_id -> parts[2]가 ID
+            if (parts.length > 2 && parts[1] === 'view') {
+                return parts[2];
             }
-            return null; // No valid ID found
+            return null;
         }
 
-        // 토론 상세 정보 로드 및 렌더링
-        async function loadDiscussionDetail(discussionId) {
+        // 토론 상세 정보를 가져와 렌더링
+        async function fetchAndRenderDiscussionDetail() {
+            const discussionId = getDiscussionIdFromUrl();
+            const discussionDetailElement = document.getElementById('discussion-detail');
+            const loadingSpinner = document.getElementById('loading-spinner');
+
             if (!discussionId) {
-                console.error("토론 ID가 없습니다.");
-                loadingIndicator.innerHTML = '<p class="text-red-600">오류: 토론 ID를 찾을 수 없습니다. 올바른 토론 URL을 확인해주세요.</p>';
+                if (discussionDetailElement) {
+                    discussionDetailElement.innerHTML = '<p class="text-red-600 text-center text-lg">토론 ID를 찾을 수 없습니다.</p>';
+                }
+                if (loadingSpinner) loadingSpinner.classList.add('hidden');
                 return;
             }
 
-            loadingIndicator.classList.remove('hidden');
-            discussionDetailContent.classList.add('hidden');
+            // 로딩 스피너 표시
+            if (loadingSpinner) loadingSpinner.classList.remove('hidden');
+
+            const discussionRef = doc(db, `artifacts/${appId}/public/data/discussions`, discussionId);
 
             try {
-                const discussionDocRef = doc(db, `artifacts/${appId}/public/data/discussions`, discussionId);
-                const discussionDocSnap = await getDoc(discussionDocRef);
+                const docSnap = await getDoc(discussionRef);
 
-                if (discussionDocSnap.exists()) {
-                    const data = discussionDocSnap.data();
-                    currentDiscussionId = discussionId; // 현재 토론 ID 설정
+                if (docSnap.exists()) {
+                    const discussion = docSnap.data();
 
-                    discussionTitleElem.textContent = data.title || '제목 없음';
-                    discussionAuthorElem.textContent = data.authorNickname || '익명';
-                    discussionCategoryElem.textContent = data.category || '카테고리 없음';
-                    discussionFormatElem.textContent = data.format || '자유 토론';
-                    discussionContentElem.innerHTML = data.content || '<p>내용 없음</p>';
+                    // 조회수 증가
+                    await updateDoc(discussionRef, {
+                        views: (discussion.views || 0) + 1
+                    });
+                    discussion.views = (discussion.views || 0) + 1; // UI 업데이트를 위해 로컬에서 뷰 카운트 업데이트
 
-                    if (data.thumbnailImage) {
-                        discussionThumbnailElem.src = data.thumbnailImage;
-                        discussionThumbnailContainerElem.classList.remove('hidden');
-                    } else {
-                        discussionThumbnailContainerElem.classList.add('hidden');
-                        discussionThumbnailElem.src = '';
-                    }
+                    const formattedDate = discussion.createdAt ? new Date(discussion.createdAt.toDate()).toLocaleDateString('ko-KR') : '날짜 미상';
+                    const detailHtml = `
+                        <h1 class="text-3xl font-bold text-gray-900 mb-4">${discussion.title}</h1>
+                        <div class="flex items-center text-gray-600 text-sm mb-6 space-x-4">
+                            <span>${discussion.authorNickname || '익명'}</span>
+                            <span>|</span>
+                            <span>${discussion.category || '기타'}</span>
+                            <span>|</span>
+                            <span>${formattedDate}</span>
+                            <span>|</span>
+                            <div class="flex items-center">
+                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                                <span>${discussion.views}</span>
+                            </div>
+                        </div>
+                        <div class="prose max-w-none text-gray-800 leading-relaxed mb-8">
+                            <p>${discussion.content || '내용이 없습니다.'}</p>
+                            ${discussion.thumbnailImage ? `<img src="${discussion.thumbnailImage}" alt="썸네일 이미지" class="mt-4 rounded-md w-full h-auto object-cover max-h-96">` : ''}
+                        </div>
+                        <div class="flex items-center justify-center space-x-6 py-4 border-t border-b border-gray-200">
+                            <button id="like-btn" class="flex items-center text-gray-600 hover:text-blue-600 transition-colors duration-200">
+                                <svg class="w-6 h-6 mr-1" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M7 11V18H4C3.45 18 3 17.55 3 17V11C3 10.45 3.45 10 4 10H7ZM21 11C21 10.45 20.55 10 20 10H14.5L15.46 6.36C15.68 5.68 15.34 5.38 14.89 5.38C14.67 5.38 14.45 5.46 14.28 5.63L9.67 10.29C9.25 10.71 9 11.29 9 11.95V17.05C9 17.71 9.25 18.29 9.67 18.71L14.28 23.37C14.45 23.54 14.67 23.62 14.89 23.62C15.34 23.62 15.68 23.32 15.46 22.64L14.5 19H20C20.55 19 21 18.55 21 18V11Z"/></svg>
+                                <span id="like-count">${discussion.likes || 0}</span>
+                            </button>
+                            <button id="comment-btn" class="flex items-center text-gray-600 hover:text-blue-600 transition-colors duration-200">
+                                <svg class="w-6 h-6 mr-1" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20 2H4C2.9 2 2 2.9 2 4V22L6 18H20C21.1 18 22 17.1 22 16V4C22 2.9 21.1 2 20 2ZM6 9H18V11H6V9ZM14 13H6V15H14V13Z"/></svg>
+                                <span id="comment-count">0</span>
+                            </button>
+                        </div>
+                    `;
+                    discussionDetailElement.innerHTML = detailHtml;
 
-                    // 태그 렌더링
-                    discussionTagsElem.innerHTML = '';
-                    if (data.tags && data.tags.length > 0) {
-                        data.tags.forEach(tag => {
-                            const tagSpan = document.createElement('span');
-                            tagSpan.className = 'inline-flex items-center px-3 py-1 rounded-full bg-gray-200 text-gray-800 text-sm font-medium';
-                            tagSpan.textContent = `#${tag}`;
-                            discussionTagsElem.appendChild(tagSpan);
-                        });
-                    }
+                    // 좋아요 버튼 기능 (예시, 실제 데이터 업데이트 필요)
+                    const likeBtn = document.getElementById('like-btn');
+                    const likeCountSpan = document.getElementById('like-count');
+                    let currentLikes = discussion.likes || 0;
+                    likeBtn.addEventListener('click', async () => {
+                        currentLikes++;
+                        likeCountSpan.textContent = currentLikes;
+                        // Firestore 업데이트 로직 추가 (예: updateDoc)
+                        await updateDoc(discussionRef, { likes: currentLikes });
+                    });
 
-                    // 조회수 및 좋아요 수 업데이트
-                    const currentViews = (data.views || 0) + 1;
-                    await updateDoc(discussionDocRef, { views: currentViews });
-                    viewsCountElem.textContent = currentViews;
-                    likesCountElem.textContent = data.likes || 0;
-
-                    // 찬반 토론 상세 정보 표시
-                    if (data.format === '찬반 토론') {
-                        debateDetailsElem.classList.remove('hidden');
-                        debateTypeElem.textContent = data.debateType === 'team' ? '팀 토론' : '1 vs 1 토론';
-                        if (data.debateType === 'team' && data.teamMembers) {
-                            teamMembersDisplayElem.classList.remove('hidden');
-                            teamMembersCountElem.textContent = data.teamMembers;
-                        } else {
-                            teamMembersDisplayElem.classList.add('hidden');
-                        }
-                        timePropositionElem.textContent = data.timeSettings?.proposition || 0;
-                        timeOpeningElem.textContent = data.timeSettings?.opening || 0;
-                        timeRebuttalElem.textContent = data.timeSettings?.rebuttal || 0;
-                        timeFinalElem.textContent = data.timeSettings?.final || 0;
-                        timeJuryJudgmentElem.textContent = data.timeSettings?.juryJudgment || 0;
-                        juryRequiredDisplayElem.textContent = data.juryRequired ? '필요함' : '필요 없음';
-                    } else {
-                        debateDetailsElem.classList.add('hidden');
-                    }
-
-                    loadingIndicator.classList.add('hidden');
-                    discussionDetailContent.classList.remove('hidden');
-
-                    // 댓글 로드 시작
-                    loadComments(discussionId);
+                    fetchAndRenderComments(discussionId);
 
                 } else {
-                    loadingIndicator.innerHTML = '<p class="text-red-600">오류: 토론을 찾을 수 없습니다. 문서가 존재하지 않거나 삭제되었을 수 있습니다.</p>';
-                    console.error("문서가 존재하지 않습니다!");
-                }
-            }
-            catch (error) {
-                // 이 부분은 네트워크 문제, Firestore 권한 문제 등 다른 원인일 수 있습니다.
-                loadingIndicator.innerHTML = '<p class="text-red-600">토론 로드 중 오류 발생. 다시 시도해 주세요.</p>';
-                console.error("토론 로드 중 오류 발생: ", error);
-            }
-        }
-
-        // 좋아요 버튼 클릭 이벤트
-        likeButton.addEventListener('click', async () => {
-            if (!auth.currentUser) {
-                alert("좋아요를 누르려면 로그인해야 합니다."); // 실제 앱에서는 커스텀 모달로 대체
-                return;
-            }
-
-            if (!currentDiscussionId) {
-                console.error("현재 토론 ID가 없습니다.");
-                return;
-            }
-
-            try {
-                const discussionDocRef = doc(db, `artifacts/${appId}/public/data/discussions`, currentDiscussionId);
-                const discussionDocSnap = await getDoc(discussionDocRef);
-
-                if (discussionDocSnap.exists()) {
-                    const currentLikes = (discussionDocSnap.data().likes || 0) + 1;
-                    await updateDoc(discussionDocRef, { likes: currentLikes });
-                    likesCountElem.textContent = currentLikes;
+                    discussionDetailElement.innerHTML = '<p class="text-red-600 text-center text-lg">해당 토론을 찾을 수 없습니다.</p>';
                 }
             } catch (error) {
-                console.error("좋아요 업데이트 중 오류 발생: ", error);
+                console.error("토론 상세 정보 불러오기 실패:", error);
+                discussionDetailElement.innerHTML = '<p class="text-red-600 text-center text-lg">토론을 불러오는 중 오류가 발생했습니다.</p>';
+            } finally {
+                if (loadingSpinner) loadingSpinner.classList.add('hidden');
             }
-        });
+        }
 
         // 댓글 렌더링 함수
         function renderComment(comment) {
-            const commentDate = comment.createdAt ? new Date(comment.createdAt.toDate()).toLocaleString() : '날짜 없음';
+            const formattedDate = comment.createdAt ? new Date(comment.createdAt.toDate()).toLocaleString('ko-KR') : '날짜 미상';
             return `
-                <div class="bg-gray-50 p-4 rounded-lg shadow-sm">
+                <div class="bg-gray-50 p-4 rounded-md border border-gray-200">
                     <div class="flex items-center mb-2">
-                        <span class="font-semibold text-gray-800">${comment.authorNickname || '익명'}</span>
-                        <span class="text-gray-500 text-xs ml-2">${commentDate}</span>
+                        <p class="font-semibold text-gray-800 mr-2">${comment.authorNickname || '익명'}</p>
+                        <p class="text-xs text-gray-500">${formattedDate}</p>
                     </div>
-                    <p class="text-gray-700 text-sm">${comment.content}</p>
+                    <p class="text-gray-700">${comment.content}</p>
                 </div>
             `;
         }
 
-        // 댓글 로드 및 실시간 업데이트 (onSnapshot)
-        function loadComments(discussionId) {
-            const commentsCollectionRef = collection(db, `artifacts/${appId}/public/data/discussions/${discussionId}/comments`);
-            const q = query(commentsCollectionRef, orderBy('createdAt', 'desc')); // 최신 댓글이 위에 오도록
+        // 댓글 목록 가져오기 및 렌더링
+        async function fetchAndRenderComments(discussionId) {
+            const commentsListElement = document.getElementById('comments-list');
+            const noCommentsMessage = document.getElementById('no-comments-message');
+            const commentCountSpan = document.getElementById('comment-count');
 
-            onSnapshot(q, (snapshot) => {
-                commentsList.innerHTML = ''; // 기존 댓글 지우기
-                if (snapshot.empty) {
-                    commentsList.innerHTML = '<p class="text-gray-600 text-center">아직 댓글이 없습니다. 첫 댓글을 남겨주세요!</p>';
+            const commentsCollectionRef = collection(db, `artifacts/${appId}/public/data/discussions/${discussionId}/comments`);
+
+            onSnapshot(commentsCollectionRef, (snapshot) => {
+                let comments = [];
+                snapshot.forEach((doc) => {
+                    comments.push({ id: doc.id, ...doc.data() });
+                });
+
+                // 최신 댓글이 위에 오도록 정렬
+                comments.sort((a, b) => {
+                    if (a.createdAt && b.createdAt) {
+                        return b.createdAt.toDate().getTime() - a.createdAt.toDate().getTime();
+                    }
+                    return 0;
+                });
+
+                if (comments.length > 0) {
+                    commentsListElement.innerHTML = comments.map(renderComment).join('');
+                    noCommentsMessage.classList.add('hidden');
                 } else {
-                    snapshot.forEach((doc) => {
-                        commentsList.insertAdjacentHTML('beforeend', renderComment(doc.data()));
-                    });
+                    commentsListElement.innerHTML = ''; // 기존 댓글 비우기
+                    noCommentsMessage.classList.remove('hidden');
                 }
+                commentCountSpan.textContent = comments.length;
+
             }, (error) => {
-                console.error("댓글 로드 중 오류 발생: ", error);
-                commentsList.innerHTML = '<p class="text-red-600 text-center">댓글을 불러오는 데 실패했습니다.</p>';
+                console.error("댓글 불러오기 실패:", error);
+                commentsListElement.innerHTML = '<p class="text-red-600 text-center">댓글을 불러오는 중 오류가 발생했습니다.</p>';
+                noCommentsMessage.classList.add('hidden');
             });
         }
 
-        // 댓글 제출 이벤트
-        submitCommentBtn.addEventListener('click', async () => {
-            if (!auth.currentUser) {
-                alert("댓글을 작성하려면 로그인해야 합니다.");
-                return;
-            }
-            if (!currentDiscussionId) {
-                console.error("현재 토론 ID가 없습니다.");
-                alert("댓글을 작성할 토론을 찾을 수 없습니다.");
+        // 댓글 작성 기능
+        async function submitComment() {
+            if (!currentUserId) {
+                // 사용자에게 로그인 메시지를 표시하는 사용자 지정 모달 또는 인라인 메시지를 사용합니다.
+                console.log("댓글을 작성하려면 로그인해야 합니다.");
+                alert("댓글을 작성하려면 로그인해야 합니다."); // 실제 앱에서는 커스텀 모달 사용
                 return;
             }
 
-            const commentContent = commentTextarea.value.trim();
-            if (commentContent === "") {
-                alert("댓글 내용을 입력해주세요.");
+            const discussionId = getDiscussionIdFromUrl();
+            const commentInput = document.getElementById('comment-input');
+            const commentContent = commentInput.value.trim();
+
+            if (!discussionId || !commentContent) {
+                console.log("댓글 내용이 비어 있거나 토론 ID를 찾을 수 없습니다.");
                 return;
             }
 
             try {
-                await addDoc(collection(db, `artifacts/${appId}/public/data/discussions/${currentDiscussionId}/comments`), {
-                    content: commentContent,
-                    authorId: auth.currentUser.uid,
-                    authorNickname: auth.currentUser.displayName || auth.currentUser.email.split('@')[0],
-                    createdAt: Timestamp.now()
-                });
-                commentTextarea.value = ''; // 댓글 입력창 초기화
-                console.log("댓글이 성공적으로 추가되었습니다.");
-            } catch (error) {
-                console.error("댓글 추가 중 오류 발생: ", error);
-                alert("댓글 추가에 실패했습니다. 다시 시도해주세요.");
-            }
-        });
+                const commentsCollectionRef = collection(db, `artifacts/${appId}/public/data/discussions/${discussionId}/comments`);
+                const userNickname = auth.currentUser?.displayName || auth.currentUser?.email?.split('@')[0] || defaultNickname;
 
-        // 페이지 로드 시
-        window.addEventListener('load', () => {
-            const discussionId = getDiscussionIdFromUrl();
-            if (discussionId) {
-                loadDiscussionDetail(discussionId);
-            } else {
-                // 토론 ID가 없으면 로딩 메시지를 업데이트하여 사용자에게 명확히 전달
-                loadingIndicator.innerHTML = '<p class="text-red-600">오류: 토론 ID가 URL에 지정되지 않았습니다. 올바른 URL을 확인해주세요.</p>';
-                loadingIndicator.classList.remove('hidden'); // 로딩 인디케이터를 유지하면서 메시지 표시
-                discussionDetailContent.classList.add('hidden');
+                await addDoc(commentsCollectionRef, {
+                    authorId: currentUserId,
+                    authorNickname: userNickname,
+                    content: commentContent,
+                    createdAt: serverTimestamp() // 서버 타임스탬프 사용
+                });
+                commentInput.value = ''; // 입력 필드 초기화
+                console.log("댓글 작성 성공!");
+            } catch (error) {
+                console.error("댓글 작성 실패:", error);
+                alert("댓글 작성에 실패했습니다. 다시 시도해 주세요."); // 실제 앱에서는 커스텀 모달 사용
+            }
+        }
+
+        // DOM 로드 후 초기화
+        document.addEventListener('DOMContentLoaded', () => {
+            // 인증이 준비되면 토론 상세 정보 로드
+            authReadyPromise.then(() => {
+                fetchAndRenderDiscussionDetail();
+            }).catch(error => {
+                console.error("인증 설정 실패, 토론 상세 정보를 로드할 수 없습니다:", error);
+                fetchAndRenderDiscussionDetail(); // 인증 실패해도 시도
+            });
+
+            const submitCommentBtn = document.getElementById('submit-comment-btn');
+            if (submitCommentBtn) {
+                submitCommentBtn.addEventListener('click', submitComment);
             }
         });
     </script>
