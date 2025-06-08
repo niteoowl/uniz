@@ -16,7 +16,7 @@
         }
         body {
             font-family: 'Pretendard-Regular', 'Inter', sans-serif; /* Pretendard 폰트 적용 */
-            background-color: #f0f2f5; /* 밝은 회색 배경 */
+            background-color: #ffffff; /* 배경 흰색으로 변경 */
             display: flex;
             flex-direction: column;
             min-height: 100vh;
@@ -58,7 +58,7 @@
             flex: 1; /* 가용한 공간을 모두 차지하도록 설정 */
             overflow-y: auto;
             overflow-x: hidden; /* 수평 스크롤 방지 */
-            background-color: #f0f2f5; /* 메인 콘텐츠 배경색도 통일 */
+            background-color: #ffffff; /* 메인 콘텐츠 배경색도 흰색으로 통일 */
             padding: 1rem; /* 모바일 기본 패딩 */
             padding-bottom: 4rem; /* 하단 내비게이션 바 높이에 맞춰 패딩 조정 */
             margin-left: 0; /* 모바일에서는 왼쪽 마진 없음 */
@@ -200,8 +200,8 @@
 
         <!-- 메인 콘텐츠 영역 -->
         <main class="main-content-area">
-            <div class="max-w-4xl mx-auto w-full"> <!-- 이 div가 중앙 정렬과 최대 너비를 담당 -->
-                <div id="discussion-detail" class="w-full bg-white p-8 rounded-lg shadow-md mb-8">
+            <div class="max-w-6xl mx-auto w-full"> <!-- 너비를 max-w-4xl에서 max-w-6xl로 확장 -->
+                <div id="discussion-detail" class="w-full bg-white p-8 rounded-lg border border-gray-300 mb-8">
                     <!-- 토론 상세 내용이 여기에 동적으로 로드됩니다 -->
                     <div class="flex justify-center items-center h-48" id="loading-spinner">
                         <div class="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-blue-500"></div>
@@ -210,7 +210,7 @@
                 </div>
 
                 <!-- 댓글 섹션 -->
-                <section class="bg-white p-8 rounded-lg shadow-md">
+                <section class="bg-white p-8 rounded-lg border border-gray-300">
                     <h2 class="text-2xl font-bold text-gray-800 mb-6">댓글</h2>
                     <div id="comments-list" class="space-y-5 mb-6">
                         <!-- 댓글이 여기에 동적으로 로드됩니다 -->
@@ -435,7 +435,7 @@
                         </div>
                         <div class="prose max-w-none text-gray-800 leading-relaxed mb-10">
                             <p>${discussion.content || '내용이 없습니다.'}</p>
-                            ${discussion.thumbnailImage ? `<img src="${discussion.thumbnailImage}" alt="썸네일 이미지" class="mt-6 rounded-md w-full h-auto object-cover max-h-96 shadow-md">` : ''}
+                            ${discussion.thumbnailImage ? `<img src="${discussion.thumbnailImage}" alt="썸네일 이미지" class="mt-6 rounded-md w-full h-auto object-cover max-h-96 border border-gray-300">` : ''} <!-- 그림자 제거, 테두리 추가 -->
                         </div>
                         <div class="flex items-center justify-center space-x-8 py-4 border-t border-b border-gray-200">
                             <button id="like-btn" class="flex items-center text-gray-600 hover:text-blue-600 interactive-btn font-medium">
