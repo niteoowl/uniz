@@ -201,11 +201,18 @@
         <!-- 메인 콘텐츠 영역 -->
         <main class="main-content-area">
             <div class="max-w-6xl mx-auto w-full"> <!-- 너비를 max-w-4xl에서 max-w-6xl로 확장 -->
-                <div id="discussion-detail" class="w-full bg-white p-8 rounded-lg border border-gray-300 mb-8">
+                <div id="discussion-detail" class="w-full bg-white p-8 rounded-lg border border-gray-300 mb-8 relative"> <!-- relative 클래스 추가 -->
                     <!-- 토론 상세 내용이 여기에 동적으로 로드됩니다 -->
                     <div class="flex justify-center items-center h-48" id="loading-spinner">
                         <div class="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-blue-500"></div>
                         <p class="ml-4 text-gray-600">내용을 불러오는 중...</p>
+                    </div>
+
+                    <!-- 토론 참여하기 버튼 이동 -->
+                    <div class="absolute top-4 right-4 z-10"> <!-- absolute 및 top-4, right-4 클래스 추가 -->
+                        <button id="join-discussion-btn" class="px-6 py-2 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition-colors duration-200 shadow-md hover:shadow-lg text-sm">
+                            토론 참여하기
+                        </button>
                     </div>
                 </div>
 
@@ -298,6 +305,7 @@
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
 
         let currentUserId = null; // 현재 로그인된 사용자 ID
+        let currentDiscussionId = null; // 현재 토론 ID
 
         // Function to update header based on auth state
         function updateHeader(user) {
@@ -390,6 +398,7 @@
         // 토론 상세 정보를 가져와 렌더링
         async function fetchAndRenderDiscussionDetail() {
             const discussionId = getDiscussionIdFromUrl();
+            currentDiscussionId = discussionId; // 현재 토론 ID 저장
             const discussionDetailElement = document.getElementById('discussion-detail');
             const loadingSpinner = document.getElementById('loading-spinner');
 
@@ -454,12 +463,14 @@
                     const likeBtn = document.getElementById('like-btn');
                     const likeCountSpan = document.getElementById('like-count');
                     let currentLikes = discussion.likes || 0;
-                    likeBtn.addEventListener('click', async () => {
-                        currentLikes++;
-                        likeCountSpan.textContent = currentLikes;
-                        // Firestore 업데이트 로직 추가 (예: updateDoc)
-                        await updateDoc(discussionRef, { likes: currentLikes });
-                    });
+                    if (likeBtn) {
+                        likeBtn.addEventListener('click', async () => {
+                            currentLikes++;
+                            likeCountSpan.textContent = currentLikes;
+                            // Firestore 업데이트 로직 추가 (예: updateDoc)
+                            await updateDoc(discussionRef, { likes: currentLikes });
+                        });
+                    }
 
                     fetchAndRenderComments(discussionId);
 
@@ -612,6 +623,18 @@
             const submitCommentBtn = document.getElementById('submit-comment-btn');
             if (submitCommentBtn) {
                 submitCommentBtn.addEventListener('click', submitComment);
+            }
+
+            // 토론 참여하기 버튼 클릭 이벤트
+            const joinDiscussionBtn = document.getElementById('join-discussion-btn');
+            if (joinDiscussionBtn) {
+                joinDiscussionBtn.addEventListener('click', () => {
+                    if (currentDiscussionId) {
+                        window.location.href = `/play/${currentDiscussionId}`;
+                    } else {
+                        showCustomMessage("토론 ID를 찾을 수 없습니다. 다시 시도해 주세요.", "error");
+                    }
+                });
             }
         });
     </script>
