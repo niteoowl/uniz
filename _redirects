@@ -4,6 +4,8 @@
 # 200 상태 코드는 브라우저의 URL은 변경하지 않고, 내부적으로 view.html을 서빙하라는 의미입니다.
 /view/* /view.html 200
 
+# /play/로 시작하는 모든 요청을 play.html로 내부적으로 재작성합니다.
+/play/* /play.html 200
 
 # (선택 사항) SPA(Single Page Application)를 위한 일반적인 폴백(fallback) 규칙입니다.
 # 만약 요청된 경로가 실제 파일과 일치하지 않으면 index.html을 서빙합니다.
