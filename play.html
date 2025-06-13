@@ -1,0 +1,1292 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>카카오톡 채팅 목업</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Quill.js CSS -->
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #FFFFFF; /* 배경색을 흰색으로 변경 */
+        }
+        /* 스크롤바 숨기기 (선택 사항, 필요에 따라 사용) */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;  /* IE and Edge */
+            scrollbar-width: none;  /* Firefox */
+        }
+
+        /* 모달 내 Quill 에디터 스타일링 */
+        #modalEditorContainer, #sharedDocEditorContainer {
+            flex-grow: 1; /* 에디터가 남은 공간을 채우도록 */
+            display: flex;
+            flex-direction: column;
+            border: 1px solid #e5e7eb; /* border border-gray-200 */
+            border-radius: 0.5rem; /* rounded-md for the editor container */
+            overflow: hidden; /* Prevent toolbar from overflowing corners */
+            margin-top: 0.5rem;
+            min-height: 200px; /* 에디터의 최소 높이 */
+        }
+
+        #modalEditorContainer .ql-toolbar.ql-snow, #sharedDocEditorContainer .ql-toolbar.ql-snow {
+            border: none; /* Quill 기본 툴바 테두리 제거 */
+            border-bottom: 1px solid #e5e7eb; /* 툴바와 에디터 사이 구분선 */
+            padding: 0.5rem 1rem; /* 툴바 패딩 조정 */
+            background-color: transparent; /* 배경 투명하게 */
+        }
+        #modalEditorContainer .ql-container.ql-snow, #sharedDocEditorContainer .ql-container.ql-snow {
+            border: none; /* Quill 기본 컨테이너 테두리 제거 */
+            flex-grow: 1; /* 에디터 영역이 남은 공간을 차지하도록 */
+            overflow-y: auto; /* 에디터 내용이 넘치면 스크롤바 표시 */
+            padding: 0.5rem 1rem; /* 에디터 내용 패딩 조정 */
+        }
+        #modalEditorContainer .ql-editor, #sharedDocEditorContainer .ql-editor {
+            font-size: 0.875rem; /* text-sm */
+            line-height: 1.5;
+            padding: 0; /* ql-container에서 패딩을 조절했으므로 여기서는 제거 */
+        }
+
+        /* 텍스트 게시물 미리보기 스타일 */
+        .text-post-preview, .dictionary-post-preview, .ai-chat-preview, .shared-doc-preview {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 80px; /* 너비 */
+            height: 80px; /* 높이 */
+            background-color: #E0E0E0; /* 연한 회색 배경 */
+            border: 2px solid #FFFFFF; /* 흰색 테두리 */
+            border-radius: 0.5rem; /* 둥근 모서리 (rounded-lg) */
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); /* 그림자 */
+            font-size: 0.75rem; /* 텍스트 크기 */
+            font-weight: 600; /* 글꼴 두께 */
+            color: #404040; /* 텍스트 색상 */
+            text-align: center;
+            overflow: hidden; /* 텍스트가 넘치면 숨김 */
+            word-break: break-all; /* 긴 단어 줄바꿈 */
+            padding: 5px; /* 내부 여백 */
+            cursor: pointer;
+            transition: transform 0.1s ease-in-out;
+            position: relative; /* Close button positioning */
+        }
+
+        .text-post-preview:hover, .dictionary-post-preview:hover, .ai-chat-preview:hover, .shared-doc-preview:hover {
+            transform: scale(1.05);
+        }
+
+        /* Preview close button */
+        .preview-close-button {
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            background-color: rgba(0, 0, 0, 0.5);
+            color: white;
+            border-radius: 50%;
+            width: 18px;
+            height: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            cursor: pointer;
+            line-height: 1;
+            padding: 0;
+            border: none;
+        }
+
+
+        /* AI 채팅 메시지 스타일 */
+        .ai-message-bubble {
+            background-color: #F0F0F0;
+            padding: 0.75rem;
+            border-radius: 0.75rem;
+            max-width: 80%;
+            align-self: flex-start;
+            margin-bottom: 0.5rem;
+        }
+
+        .user-message-bubble {
+            background-color: #FEE500;
+            padding: 0.75rem;
+            border-radius: 0.75rem;
+            max-width: 80%;
+            align-self: flex-end;
+            margin-bottom: 0.5rem;
+        }
+
+        /* Quill content display styles for messages */
+        .message-content-ql-editor {
+            font-size: 0.875rem; /* text-sm */
+            line-height: 1.5;
+            padding: 0;
+            min-height: auto;
+        }
+        .message-content-ql-editor img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 0.5rem;
+            margin-top: 0.5rem;
+        }
+        .message-content-ql-editor p {
+            margin-bottom: 0.5rem;
+        }
+        .message-content-ql-editor h1, .message-content-ql-editor h2,
+        .message-content-ql-editor h3, .message-content-ql-editor h4,
+        .message-content-ql-editor h5, .message-content-ql-editor h6 {
+            font-weight: bold;
+            margin-top: 1em;
+            margin-bottom: 0.5em;
+        }
+        .message-content-ql-editor h1 { font-size: 1.5em; }
+        .message-content-ql-editor h2 { font-size: 1.3em; }
+        .message-content-ql-editor a {
+            color: #2563eb;
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body class="flex flex-col h-screen">
+
+    <!-- 상단 바 -->
+    <header class="bg-[#FEE500] p-4 flex items-center justify-between shadow-sm sticky top-0 z-10">
+        <div class="flex items-center space-x-2">
+            <!-- 뒤로가기 아이콘 -->
+            <button id="backButton" class="p-1 rounded-full hover:bg-gray-100 transition-colors">
+                <svg class="w-6 h-6 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                </svg>
+            </button>
+            <h1 id="chatRoomTitle" class="text-lg font-semibold text-gray-800">새로운 채팅방</h1>
+        </div>
+        <div class="flex items-center space-x-4">
+            <!-- 검색 아이콘 (상단 바에 여전히 존재할 수 있음) -->
+            <button class="p-1 rounded-full hover:bg-gray-100 transition-colors">
+                <svg class="w-6 h-6 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                </svg>
+            </button>
+            <!-- 메뉴 아이콘 -->
+            <button class="p-1 rounded-full hover:bg-gray-100 transition-colors">
+                <svg class="w-6 h-6 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                </svg>
+            </button>
+        </div>
+    </header>
+
+    <!-- 채팅 메시지 영역 -->
+    <main id="chat-messages-container" class="flex-1 p-4 overflow-y-auto no-scrollbar flex flex-col">
+        <!-- Messages will be dynamically loaded here -->
+        <div class="flex justify-center my-4">
+            <span class="bg-gray-200 text-gray-600 text-xs px-3 py-1 rounded-full">채팅을 시작하세요!</span>
+        </div>
+    </main>
+
+    <!-- Content Options Section (initially hidden) -->
+    <div id="contentOptions" class="hidden bg-white p-4 border-t border-gray-100 flex justify-around items-center">
+        <!-- Photo Option -->
+        <div class="flex flex-col items-center space-y-1">
+            <button id="photoOptionButton" class="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center text-gray-600 hover:bg-gray-200 transition-colors">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+            </button>
+            <span class="text-xs text-gray-500">사진</span>
+        </div>
+        <!-- Dictionary Option -->
+        <div class="flex flex-col items-center space-y-1">
+            <button id="dictionaryOptionButton" class="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center text-gray-600 hover:bg-gray-200 transition-colors">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13.5m0-13.5c-4.142 0-7.5 3.12-7.5 7.5s3.358 7.5 7.5 7.5s7.5-3.12 7.5-7.5s-3.358-7.5-7.5-7.5z"></path></svg>
+            </button>
+            <span class="text-xs text-gray-500">위키</span>
+        </div>
+        <!-- AI Chat Option -->
+        <div class="flex flex-col items-center space-y-1">
+            <button id="aiChatOptionButton" class="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center text-gray-600 hover:bg-gray-200 transition-colors">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+                </svg>
+            </button>
+            <span class="text-xs text-gray-500">AI챗</span>
+        </div>
+        <!-- Shared Document Option (replaces Location Option) -->
+        <div class="flex flex-col items-center space-y-1">
+            <button id="sharedDocOptionButton" class="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center text-gray-600 hover:bg-gray-200 transition-colors">
+                <!-- Icon for shared document (e.g., document with people or collaboration symbol) -->
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 15l-2 2m0 0l-2-2m2 2V9m6 0a2 2 0 11-4 0 2 2 0 014 0zm0 0v2a6 6 0 00-6 6v2a6 6 0 00-6-6v-2a6 6 0 00-6-6V7a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                </svg>
+            </button>
+            <span class="text-xs text-gray-500">공유 문서</span>
+        </div>
+        <!-- Text Option -->
+        <div class="flex flex-col items-center space-y-1">
+            <button id="textOptionButton" class="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center text-gray-600 hover:bg-gray-200 transition-colors">
+                <!-- SVG for text/document icon -->
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                </svg>
+            </button>
+            <span class="text-xs text-gray-500">글</span>
+        </div>
+    </div>
+
+    <!-- Bottom Input and Send Bar -->
+    <footer class="bg-white p-4 flex flex-col shadow-md sticky bottom-0 z-10">
+        <!-- Container for uploaded image/text previews -->
+        <div id="uploadedContentPreviews" class="flex flex-wrap gap-2 items-center justify-start mb-2 hidden">
+            <!-- Content previews will be dynamically added here -->
+        </div>
+
+        <div class="flex items-center w-full">
+            <!-- Plus Icon -->
+            <button id="toggleOptionsButton" class="mr-3 p-2 rounded-full hover:bg-gray-100 transition-colors">
+                <svg class="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                </svg>
+            </button>
+            <!-- Message Input Field -->
+            <div class="flex-1 min-w-0">
+                <input type="text" id="messageInput" placeholder="메시지를 입력하세요..." class="w-full p-3 rounded-full bg-gray-100 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#FEE500] transition-all">
+            </div>
+            <!-- Emoji Icon -->
+            <button class="ml-3 p-2 rounded-full hover:bg-gray-100 transition-colors">
+                <svg class="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+            </button>
+            <!-- Send Button -->
+            <button id="mainSendButton" class="ml-3 bg-[#FEE500] p-2 rounded-full hover:bg-[#FEE500]/90 transition-colors flex items-center justify-center">
+                <svg class="w-6 h-6 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path>
+                </svg>
+            </button>
+        </div>
+    </footer>
+
+    <!-- Hidden file input for image upload -->
+    <input type="file" id="imageUploadInput" accept="image/*" multiple class="hidden">
+
+    <!-- Rich Text Editor Modal (for '글쓰기') -->
+    <div id="richTextModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white p-6 rounded-lg shadow-xl w-11/12 max-w-lg relative flex flex-col h-3/4">
+            <!-- Modal Header -->
+            <div class="flex justify-between items-center mb-4">
+                <h2 id="modalTitle" class="text-xl font-bold text-gray-800">글쓰기</h2>
+                <button id="closeRichTextModalButton" class="text-gray-500 hover:text-gray-700 transition-colors p-1 rounded-full">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+
+            <!-- Title Input for Rich Text Editor -->
+            <input type="text" id="richTextTitleInput" placeholder="제목을 입력하세요..." class="w-full p-2 mb-3 rounded-md bg-gray-100 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#FEE500] text-sm">
+
+            <!-- Quill Editor Container -->
+            <div id="modalEditorContainer" class="mb-4">
+                <div id="modalEditor" class="h-full bg-white"></div>
+            </div>
+
+            <!-- Modal Bottom Buttons -->
+            <div class="flex justify-end space-x-3 mt-auto">
+                <button id="cancelRichTextButton" class="px-5 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors font-medium">취소</button>
+                <button id="sendRichTextButton" class="px-5 py-2 bg-[#FEE500] text-gray-800 rounded-lg hover:bg-[#FEE500]/90 transition-colors font-bold">보내기</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Full Content Display Modal -->
+    <div id="fullContentModal" class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 hidden">
+        <div class="bg-white p-6 rounded-lg shadow-xl w-11/12 max-w-lg relative flex flex-col h-3/4 overflow-hidden">
+            <!-- Modal Header -->
+            <div class="flex justify-between items-center mb-4">
+                <h2 id="fullContentModalTitle" class="text-xl font-bold text-gray-800">글 내용</h2>
+                <button id="closeFullContentModalButton" class="text-gray-500 hover:text-gray-700 transition-colors p-1 rounded-full">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+            <!-- Content Display Area -->
+            <div id="fullContentDisplayArea" class="flex-1 overflow-y-auto ql-editor px-4 py-2 bg-gray-50 rounded-lg border border-gray-200">
+                <!-- Rich text content will be displayed here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Dictionary Modal -->
+    <div id="dictionaryModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white p-6 rounded-lg shadow-xl w-11/12 max-w-lg relative flex flex-col h-3/4">
+            <!-- Modal Header -->
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-bold text-gray-800">위키</h2>
+                <button id="closeDictionaryModalButton" class="text-gray-500 hover:text-gray-700 transition-colors p-1 rounded-full">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+
+            <!-- Dictionary Input -->
+            <div class="flex items-center mb-4">
+                <input type="text" id="dictionaryInput" placeholder="단어를 입력하세요..." class="flex-1 p-2 rounded-lg bg-gray-100 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#FEE500] text-sm">
+                <button id="performLookupButton" class="ml-2 px-4 py-2 bg-[#FEE500] text-gray-800 rounded-lg hover:bg-[#FEE500]/90 transition-colors font-medium">찾기</button>
+            </div>
+
+            <!-- Dictionary Results Placeholder -->
+            <div id="dictionaryResults" class="flex-1 overflow-y-auto bg-gray-50 p-4 rounded-lg border border-gray-200 text-sm text-gray-700 mb-4">
+                <p class="font-bold mb-2">환영합니다! 이 곳은 위키백과 사전입니다.</p>
+                <p>찾고 싶은 단어를 위에 입력하고 <span class="font-bold">찾기</span> 버튼을 눌러보세요.</p>
+                <p class="mt-2">예시:<br/><span class="font-bold text-lg">대한민국</span><br/>[명사] 동아시아에 있는 공화국.<br/>출처: <a href="https://ko.wikipedia.org/wiki/%EB%8C%80%ED%95%9C%EB%AF%BC%EA%B5%AD" target="_blank" class="text-blue-600 hover:underline">위키백과</a></p>
+            </div>
+
+            <!-- Modal Bottom Buttons -->
+            <div class="flex justify-end space-x-3 mt-auto">
+                <button id="shareDictionaryButton" class="px-5 py-2 bg-[#FEE500] text-gray-800 rounded-lg hover:bg-[#FEE500]/90 transition-colors font-bold">공유</button>
+                <button id="cancelDictionaryButton" class="px-5 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-[#FEE500]/90 transition-colors font-medium">닫기</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- AI Chat Modal -->
+    <div id="aiChatModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white p-6 rounded-lg shadow-xl w-11/12 max-w-lg relative flex flex-col h-3/4">
+            <!-- Modal Header -->
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-bold text-gray-800">AI챗</h2>
+                <button id="closeAiChatModalButton" class="text-gray-500 hover:text-gray-700 transition-colors p-1 rounded-full">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+
+            <!-- AI Chat History Display -->
+            <div id="aiChatHistory" class="flex-1 overflow-y-auto bg-gray-50 p-4 rounded-lg border border-gray-200 text-sm text-gray-700 mb-4 flex flex-col">
+                <p class="font-bold mb-2 text-center">AI챗에 오신 것을 환영합니다!</p>
+                <div class="ai-message-bubble text-sm">안녕하세요! 무엇을 도와드릴까요?</div>
+            </div>
+
+            <!-- AI Chat Input -->
+            <div class="flex items-center">
+                <input type="text" id="aiMessageInput" placeholder="AI에게 메시지를 보내세요..." class="flex-1 p-2 rounded-lg bg-gray-100 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#FEE500] text-sm">
+                <button id="sendAiMessageButton" class="ml-2 px-4 py-2 bg-[#FEE500] text-gray-800 rounded-lg hover:bg-[#FEE500]/90 transition-colors font-medium">보내기</button>
+            </div>
+
+            <!-- Modal Bottom Buttons -->
+            <div class="flex justify-end space-x-3 mt-4">
+                <button id="shareAiChatButton" class="px-5 py-2 bg-[#FEE500] text-gray-800 rounded-lg hover:bg-[#FEE500]/90 transition-colors font-bold">공유</button>
+                <button id="cancelAiChatButton" class="px-5 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-[#FEE500]/90 transition-colors font-medium">닫기</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Shared Document Modal (New) -->
+    <div id="sharedDocModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white p-6 rounded-lg shadow-xl w-11/12 max-w-lg relative flex flex-col h-3/4">
+            <!-- Modal Header -->
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-bold text-gray-800">공유 문서</h2>
+                <button id="closeSharedDocModalButton" class="text-gray-500 hover:text-gray-700 transition-colors p-1 rounded-full">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+
+            <!-- Title Input for Shared Document -->
+            <input type="text" id="sharedDocTitleInput" placeholder="문서 제목을 입력하세요..." class="w-full p-2 mb-3 rounded-md bg-gray-100 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#FEE500] text-sm">
+
+            <!-- Quill Editor Container for Shared Document -->
+            <div id="sharedDocEditorContainer" class="mb-4">
+                <div id="sharedDocEditor" class="h-full bg-white"></div>
+            </div>
+
+            <!-- Modal Bottom Buttons -->
+            <div class="flex justify-end space-x-3 mt-auto">
+                <button id="cancelSharedDocButton" class="px-5 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors font-medium">취소</button>
+                <button id="sendSharedDocButton" class="px-5 py-2 bg-[#FEE500] text-gray-800 rounded-lg hover:bg-[#FEE500]/90 transition-colors font-bold">공유</button>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Quill.js JavaScript -->
+    <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+    <!-- Firebase SDKs -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, serverTimestamp, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Firebase configuration (사용자가 제공한 실제 Firebase config로 교체됨)
+        const firebaseConfig = {
+            apiKey: "AIzaSyDLzrMR2QVK4rWNDIg4bQv4rlYTkchnU58",
+            authDomain: "uniz-a.firebaseapp.com",
+            projectId: "uniz-a",
+            storageBucket: "uniz-a.firebasestorage.app",
+            messagingSenderId: "389183402425",
+            appId: "1:389183402425:web:1272bcca61cdf9720c0668",
+            measurementId: "G-RTWDXH8GKQ"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        let quill = null; // '글쓰기' 모달용 Quill 인스턴스
+        let sharedDocQuill = null; // '공유 문서' 모달용 Quill 인스턴스
+        let aiChatHistoryData = [{ role: "model", parts: [{ text: "안녕하세요! 무엇을 도와드릴까요?" }] }]; // AI 채팅 기록 (공유용)
+
+        // DOM 요소 참조 가져오기
+        const toggleButton = document.getElementById('toggleOptionsButton');
+        const contentOptions = document.getElementById('contentOptions');
+        const textOptionButton = document.getElementById('textOptionButton');
+        const photoOptionButton = document.getElementById('photoOptionButton');
+        const dictionaryOptionButton = document.getElementById('dictionaryOptionButton');
+        const aiChatOptionButton = document.getElementById('aiChatOptionButton');
+        const sharedDocOptionButton = document.getElementById('sharedDocOptionButton'); // 공유 문서 버튼 추가
+
+        const messageInput = document.getElementById('messageInput');
+        const uploadedContentPreviews = document.getElementById('uploadedContentPreviews');
+        const mainSendButton = document.getElementById('mainSendButton');
+
+        const richTextModal = document.getElementById('richTextModal');
+        const richTextTitleInput = document.getElementById('richTextTitleInput');
+        const modalEditorDiv = document.getElementById('modalEditor');
+        const modalTitle = document.getElementById('modalTitle');
+        const sendRichTextButton = document.getElementById('sendRichTextButton');
+        const cancelRichTextButton = document.getElementById('cancelRichTextButton');
+        const closeRichTextModalButton = document.getElementById('closeRichTextModalButton');
+
+        const imageUploadInput = document.getElementById('imageUploadInput');
+
+        const fullContentModal = document.getElementById('fullContentModal');
+        const fullContentModalTitle = document.getElementById('fullContentModalTitle');
+        const fullContentDisplayArea = document.getElementById('fullContentDisplayArea');
+        const closeFullContentModalButton = document.getElementById('closeFullContentModalButton');
+
+        const dictionaryModal = document.getElementById('dictionaryModal');
+        const dictionaryInput = document.getElementById('dictionaryInput');
+        const performLookupButton = document.getElementById('performLookupButton');
+        const dictionaryResults = document.getElementById('dictionaryResults');
+        const shareDictionaryButton = document.getElementById('shareDictionaryButton');
+        const cancelDictionaryButton = document.getElementById('cancelDictionaryButton');
+        const closeDictionaryModalButton = document.getElementById('closeDictionaryModalButton');
+
+        const aiChatModal = document.getElementById('aiChatModal');
+        const aiChatHistory = document.getElementById('aiChatHistory');
+        const aiMessageInput = document.getElementById('aiMessageInput');
+        const sendAiMessageButton = document.getElementById('sendAiMessageButton');
+        const shareAiChatButton = document.getElementById('shareAiChatButton');
+        const cancelAiChatButton = document.getElementById('cancelAiChatButton');
+        const closeAiChatModalButton = document.getElementById('closeAiChatModalButton');
+
+        // 공유 문서 모달 관련 요소 (새로 추가)
+        const sharedDocModal = document.getElementById('sharedDocModal');
+        const sharedDocTitleInput = document.getElementById('sharedDocTitleInput');
+        const sharedDocEditorDiv = document.getElementById('sharedDocEditor');
+        const sendSharedDocButton = document.getElementById('sendSharedDocButton');
+        const cancelSharedDocButton = document.getElementById('cancelSharedDocButton');
+        const closeSharedDocModalButton = document.getElementById('closeSharedDocModalButton');
+
+        // Chat specific elements
+        const chatMessagesContainer = document.getElementById('chat-messages-container');
+        const backButton = document.getElementById('backButton');
+        const chatRoomTitle = document.getElementById('chatRoomTitle');
+
+        const defaultProfileImage = "https://placehold.co/40x40/FFDDC1/000000?text=P";
+
+        let currentUserId = null;
+        let currentUserNickname = "익명";
+        let currentDiscussionId = null; // Discussion ID from URL
+
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+
+        // Get Discussion ID from URL
+        function getDiscussionIdFromUrl() {
+            const path = window.location.pathname;
+            const parts = path.split('/');
+            if (parts.length > 2 && parts[1] === 'play') {
+                return parts[2];
+            }
+            return null;
+        }
+
+        // Fetch discussion details to get its title
+        async function fetchDiscussionTitle(discussionId) {
+            if (!discussionId) {
+                chatRoomTitle.textContent = "채팅방을 찾을 수 없음";
+                return;
+            }
+            try {
+                const discussionRef = doc(db, `artifacts/${appId}/public/data/discussions`, discussionId);
+                const docSnap = await getDoc(discussionRef);
+                if (docSnap.exists()) {
+                    chatRoomTitle.textContent = docSnap.data().title || "채팅방";
+                } else {
+                    chatRoomTitle.textContent = "채팅방";
+                }
+            } catch (error) {
+                console.error("Failed to fetch discussion title:", error);
+                chatRoomTitle.textContent = "채팅방 (오류)";
+            }
+        }
+
+        // Quill 툴바 설정
+        const quillToolbarOptions = [
+            ['bold', 'italic', 'underline', 'strike'],
+            ['blockquote', 'code-block'],
+            [{ 'header': 1 }, { 'header': 2 }],
+            [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+            [{ 'script': 'sub'}, { 'script': 'super' }],
+            [{ 'indent': '-1'}, { 'indent': '+1' }],
+            [{ 'direction': 'rtl' }],
+            [{ 'size': ['small', false, 'large', 'huge'] }],
+            [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
+            [{ 'color': [] }, { 'background': [] }],
+            [{ 'font': [] }],
+            [{ 'align': [] }],
+            ['clean']
+        ];
+
+        // 리치 텍스트 에디터 모달을 여는 함수 (글쓰기용)
+        const openRichTextEditorModal = (title) => {
+            contentOptions.classList.add('hidden');
+            richTextModal.classList.remove('hidden');
+            modalTitle.textContent = title;
+
+            // Ensure the modal has background for proper overlay effect
+            richTextModal.classList.remove('bg-transparent');
+            richTextModal.classList.add('bg-black', 'bg-opacity-50');
+
+            richTextTitleInput.classList.remove('hidden');
+            richTextTitleInput.value = '';
+
+            if (!quill) {
+                quill = new Quill(modalEditorDiv, {
+                    theme: 'snow',
+                    placeholder: '여기에 메시지를 입력하세요...',
+                    modules: {
+                        toolbar: quillToolbarOptions
+                    }
+                });
+            } else {
+                quill.setContents([]);
+            }
+            quill.focus();
+        };
+
+        // 공유 문서 모달을 여는 함수
+        const openSharedDocumentModal = () => {
+            contentOptions.classList.add('hidden');
+            sharedDocModal.classList.remove('hidden');
+            
+            sharedDocTitleInput.value = ''; // 제목 필드 초기화
+
+            if (!sharedDocQuill) {
+                sharedDocQuill = new Quill(sharedDocEditorDiv, {
+                    theme: 'snow',
+                    placeholder: '여기에 공유 문서를 작성하세요...',
+                    modules: {
+                        toolbar: quillToolbarOptions
+                    }
+                });
+            } else {
+                sharedDocQuill.setContents([]); // 내용 초기화
+            }
+            sharedDocQuill.focus();
+        };
+
+        // 모든 업로드된 콘텐츠 미리보기 초기화 함수
+        const clearAllUploadedContent = () => {
+            uploadedContentPreviews.innerHTML = '';
+            uploadedContentPreviews.classList.add('hidden');
+            messageInput.value = '';
+            imageUploadInput.value = ''; // Clear file input
+        };
+
+        // 메시지 렌더링 함수
+        function renderMessage(message) {
+            const isMyMessage = message.authorId === currentUserId;
+            const messageWrapper = document.createElement('div');
+            messageWrapper.classList.add('flex', 'mb-4', isMyMessage ? 'justify-end' : 'items-start');
+
+            let messageHtml = '';
+
+            if (!isMyMessage) {
+                // 상대방 메시지인 경우 프로필 이미지와 닉네임 추가
+                messageHtml += `
+                    <img src="${defaultProfileImage}" alt="프로필" class="w-10 h-10 rounded-full mr-3">
+                    <div class="flex flex-col">
+                        <span class="text-xs text-gray-600 mb-1">${message.authorNickname || '익명'}</span>
+                        <div class="bg-white border border-gray-400 p-3 rounded-lg rounded-tl-none max-w-xs md:max-w-md break-words">
+                `;
+            } else {
+                // 내 메시지인 경우
+                messageHtml += `
+                    <div class="bg-[#FEE500] p-3 rounded-lg rounded-br-none max-w-xs md:max-w-md break-words">
+                `;
+            }
+
+            // 메시지 타입에 따른 내용 렌더링
+            if (message.type === 'text') {
+                messageHtml += `<p class="text-sm">${message.content}</p>`;
+            } else if (message.type === 'image') {
+                messageHtml += `<img src="${message.imageUrl || 'https://placehold.co/300x200/F0F0F0/808080?text=사진+예시'}" alt="이미지 메시지" class="rounded-lg w-full">`;
+                if (message.content) { // Optional caption
+                    messageHtml += `<p class="text-sm mt-2">${message.content}</p>`;
+                }
+            } else if (message.type === 'richtext' || message.type === 'shared_doc') {
+                messageHtml += `<div class="font-bold text-base mb-1">${message.title || '제목 없음'}</div>`;
+                messageHtml += `<div class="message-content-ql-editor">${message.content}</div>`;
+            } else if (message.type === 'dictionary') {
+                messageHtml += `<div class="font-bold text-base mb-1">위키: ${message.query}</div>`;
+                messageHtml += `<div class="message-content-ql-editor">${message.htmlContent}</div>`;
+            } else if (message.type === 'aichat') {
+                messageHtml += `<div class="font-bold text-base mb-1">AI챗 대화 기록</div>`;
+                messageHtml += `<div class="message-content-ql-editor">${message.htmlContent}</div>`;
+            }
+            
+            messageHtml += `</div>`; // Close message bubble div
+
+            if (!isMyMessage) {
+                messageHtml += `</div>`; // Close flex-col for recipient
+            }
+
+            messageWrapper.innerHTML = messageHtml;
+            chatMessagesContainer.appendChild(messageWrapper);
+            chatMessagesContainer.scrollTop = chatMessagesContainer.scrollHeight; // Scroll to bottom
+        }
+
+        // Firebase Auth initialization and handling
+        let authReadyPromise = new Promise((resolve) => {
+            onAuthStateChanged(auth, async (user) => {
+                if (user) {
+                    currentUserId = user.uid;
+                    currentUserNickname = user.displayName || user.email?.split('@')[0] || "익명";
+                    console.log("Authenticated as:", currentUserNickname, "(UID:", currentUserId, ")");
+                } else {
+                    // Sign in anonymously if no user is found
+                    // This is for demonstration; in a real app, you might prompt for login
+                    try {
+                        // Check if __initial_auth_token is provided and use it
+                        if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                            await signInWithCustomToken(auth, __initial_auth_token);
+                            console.log("Signed in with custom token.");
+                            currentUserId = auth.currentUser.uid;
+                            currentUserNickname = auth.currentUser.displayName || auth.currentUser.email?.split('@')[0] || "익명";
+                        } else {
+                            await signInAnonymously(auth);
+                            console.log("Signed in anonymously.");
+                            currentUserId = auth.currentUser.uid;
+                            currentUserNickname = "익명 사용자 " + currentUserId.substring(0, 4); // Simpler anonymous name
+                        }
+                    } catch (error) {
+                        console.error("Firebase authentication failed:", error);
+                        // Fallback if anonymous sign-in also fails
+                        currentUserId = "guest_" + Date.now(); // Generate a unique ID for unauthenticated state
+                        currentUserNickname = "게스트";
+                        showCustomMessage("인증에 실패했습니다. 일부 기능이 제한될 수 있습니다.", "error");
+                    }
+                }
+                resolve(); // Resolve the promise once auth state is determined
+            });
+        });
+
+        // Initialize chat messages listener AFTER authentication is ready
+        authReadyPromise.then(() => {
+            currentDiscussionId = getDiscussionIdFromUrl();
+            fetchDiscussionTitle(currentDiscussionId); // Fetch and set chat room title
+
+            if (currentDiscussionId) {
+                const messagesCollectionRef = collection(db, `artifacts/${appId}/public/data/discussions/${currentDiscussionId}/messages`);
+                const q = query(messagesCollectionRef, orderBy('timestamp')); // Order by timestamp
+
+                onSnapshot(q, (snapshot) => {
+                    // Clear existing messages to prevent duplicates on update
+                    chatMessagesContainer.innerHTML = '';
+                    snapshot.forEach((doc) => {
+                        const message = doc.data();
+                        renderMessage(message);
+                    });
+                }, (error) => {
+                    console.error("Error listening to messages:", error);
+                    showCustomMessage("채팅 메시지를 불러오는 데 실패했습니다.", "error");
+                });
+            } else {
+                showCustomMessage("유효한 토론 ID가 없습니다. 채팅을 시작할 수 없습니다.", "error");
+                chatMessagesContainer.innerHTML = '<div class="flex justify-center my-4"><span class="bg-gray-200 text-red-600 text-xs px-3 py-1 rounded-full">유효한 토론 ID가 없습니다.</span></div>';
+            }
+        }).catch(error => {
+            console.error("Error during authentication promise:", error);
+        });
+
+        // Preview close button handler
+        uploadedContentPreviews.addEventListener('click', (event) => {
+            if (event.target.classList.contains('preview-close-button')) {
+                event.target.parentElement.remove(); // Remove the parent preview div
+                if (uploadedContentPreviews.children.length === 0) {
+                    uploadedContentPreviews.classList.add('hidden');
+                }
+            }
+        });
+
+        // '+' 버튼 클릭 시 옵션 메뉴 토글
+        toggleButton.addEventListener('click', () => {
+            contentOptions.classList.toggle('hidden');
+            if (contentOptions.classList.contains('hidden')) {
+                if (uploadedContentPreviews.children.length > 0) {
+                    uploadedContentPreviews.classList.remove('hidden');
+                }
+            } else {
+                // If options are shown, hide previews to allow fresh selection
+                // Or, keep previews if user is just navigating options.
+                // For now, let's keep it simple: if options shown, previews remain if any.
+            }
+        });
+
+        // '글' 버튼 클릭 시 리치 텍스트 에디터 모달 표시
+        textOptionButton.addEventListener('click', () => {
+            openRichTextEditorModal('글쓰기');
+        });
+
+        // '사진' 버튼 클릭 시 숨겨진 파일 입력 트리거
+        photoOptionButton.addEventListener('click', () => {
+            contentOptions.classList.add('hidden');
+            imageUploadInput.click();
+        });
+
+        // '위키' 버튼 클릭 시 사전 모달 표시
+        dictionaryOptionButton.addEventListener('click', () => {
+            contentOptions.classList.add('hidden');
+            dictionaryModal.classList.remove('hidden');
+            dictionaryInput.value = '';
+            dictionaryResults.innerHTML = `
+                <p class="font-bold mb-2">환영합니다! 이 곳은 위키백과 사전입니다.</p>
+                <p>찾고 싶은 단어를 위에 입력하고 <span class="font-bold">찾기</span> 버튼을 눌러보세요.</p>
+                <p class="mt-2">예시:<br/><span class="font-bold text-lg">대한민국</span><br/>[명사] 동아시아에 있는 공화국.<br/>출처: <a href="https://ko.wikipedia.org/wiki/%EB%8C%80%ED%95%9C%EB%AF%BC%EA%B5%AD" target="_blank" class="text-blue-600 hover:underline">위키백과</a></p>
+            `;
+            dictionaryInput.focus();
+        });
+
+        // 'AI챗' 버튼 클릭 시 AI 채팅 모달 표시
+        aiChatOptionButton.addEventListener('click', () => {
+            contentOptions.classList.add('hidden');
+            aiChatModal.classList.remove('hidden');
+            aiMessageInput.value = '';
+            // AI 채팅 기록 초기화 (모달 열 때마다 새로 시작)
+            aiChatHistoryData = [{ role: "model", parts: [{ text: "안녕하세요! 무엇을 도와드릴까요?" }] }];
+            aiChatHistory.innerHTML = '<p class="font-bold mb-2 text-center">AI챗에 오신 것을 환영합니다!</p><div class="ai-message-bubble text-sm">안녕하세요! 무엇을 도와드릴까요?</div>';
+            aiChatHistory.scrollTop = aiChatHistory.scrollHeight;
+            aiMessageInput.focus();
+        });
+
+        // '공유 문서' 버튼 클릭 시 공유 문서 모달 표시
+        sharedDocOptionButton.addEventListener('click', () => {
+            openSharedDocumentModal();
+        });
+
+        // 숨겨진 입력에서 파일 선택 처리
+        imageUploadInput.addEventListener('change', (event) => {
+            const files = event.target.files;
+            if (files.length > 0) {
+                uploadedContentPreviews.classList.remove('hidden');
+                Array.from(files).forEach((file, index) => {
+                    if (file.type.startsWith('image/')) {
+                        const reader = new FileReader();
+                        reader.onload = (e) => {
+                            const img = document.createElement('img');
+                            img.src = e.target.result;
+                            img.alt = `업로드된 사진 ${index + 1}`;
+                            img.classList.add('w-20', 'h-20', 'object-cover', 'rounded-lg', 'border-2', 'border-white', 'shadow-sm');
+                            
+                            const previewWrapper = document.createElement('div');
+                            previewWrapper.classList.add('text-post-preview'); // Reusing this class for general preview styling
+                            previewWrapper.dataset.type = 'image';
+                            previewWrapper.dataset.imageUrl = img.src; // Store base64 or URL
+                            previewWrapper.innerHTML = `<button class="preview-close-button">x</button>`;
+                            previewWrapper.appendChild(img); // Append image to wrapper
+                            uploadedContentPreviews.appendChild(previewWrapper);
+                        };
+                        try {
+                             reader.readAsDataURL(file);
+                        } catch (error) {
+                            console.error("파일을 읽는 중 오류 발생:", error);
+                        }
+                    }
+                });
+            }
+            imageUploadInput.value = ''; // Clear file input
+        });
+
+        // '글쓰기' 모달에서 '보내기' 버튼 클릭 시
+        sendRichTextButton.addEventListener('click', () => {
+            if (quill) {
+                const editorContent = quill.root.innerHTML;
+                const postTitle = richTextTitleInput.value.trim();
+
+                if (editorContent.trim() === "<p><br></p>" && !postTitle) {
+                    showCustomMessage("내용이나 제목을 입력해주세요.", "warning");
+                    return;
+                }
+
+                uploadedContentPreviews.classList.remove('hidden');
+
+                const postPreview = document.createElement('div');
+                postPreview.classList.add('text-post-preview');
+                postPreview.textContent = postTitle || '제목 없음';
+                postPreview.dataset.fullContent = editorContent;
+                postPreview.dataset.type = 'richtext';
+                postPreview.dataset.title = postTitle;
+                postPreview.innerHTML = `<button class="preview-close-button">x</button>${postPreview.innerHTML}`; // Add close button
+
+                postPreview.addEventListener('click', (e) => {
+                    if (!e.target.classList.contains('preview-close-button')) { // Prevent modal from opening if close button is clicked
+                        fullContentModalTitle.textContent = postTitle || '제목 없음';
+                        fullContentDisplayArea.innerHTML = editorContent;
+                        fullContentModal.classList.remove('hidden');
+                    }
+                });
+                uploadedContentPreviews.appendChild(postPreview);
+
+                quill.setContents([]);
+                richTextTitleInput.value = '';
+                richTextModal.classList.add('hidden');
+            }
+        });
+
+        // '글쓰기' 모달에서 '취소' 또는 'X' 버튼 클릭 시
+        const closeAndClearQuill = () => {
+            if (quill) {
+                quill.setContents([]);
+            }
+            richTextTitleInput.value = '';
+            richTextModal.classList.add('hidden');
+            // Do not clear all previews here, only specific ones are removed by their 'x' button
+        };
+
+        cancelRichTextButton.addEventListener('click', closeAndClearQuill);
+        closeRichTextModalButton.addEventListener('click', closeAndClearQuill);
+
+        // 전체 내용 표시 모달 닫기 버튼
+        closeFullContentModalButton.addEventListener('click', () => {
+            fullContentModal.classList.add('hidden');
+            fullContentDisplayArea.innerHTML = '';
+        });
+
+        // 사전 모달에서 '찾기' 버튼 클릭 시 (Google 검색 API 연동)
+        performLookupButton.addEventListener('click', async () => {
+            const query = dictionaryInput.value.trim();
+            if (!query) {
+                dictionaryResults.innerHTML = '<p class="text-red-500">단어를 입력해주세요.</p>';
+                return;
+            }
+
+            dictionaryResults.innerHTML = '<p class="text-center text-gray-500">사전 검색 중...</p>';
+
+            try {
+                let chatHistory = [];
+                // Query in both Korean and English for broader results
+                const searchPrompt = `${query} 위키백과 OR ${query} wikipedia`;
+                chatHistory.push({ role: "user", parts: [{ text: `Perform a Google search for: "${searchPrompt}" and provide results in JSON format with snippet, source_title, and url for each result.` }] });
+
+                const payload = {
+                    contents: chatHistory,
+                    generationConfig: {
+                        responseMimeType: "application/json",
+                        responseSchema: {
+                            type: "OBJECT",
+                            properties: {
+                                query: { "type": "STRING" },
+                                results: {
+                                    type: "ARRAY",
+                                    items: {
+                                        type: "OBJECT",
+                                        properties: {
+                                            index: { "type": "STRING" },
+                                            publication_time: { "type": "STRING" },
+                                            snippet: { "type": "STRING" },
+                                            source_title: { "type": "STRING" },
+                                            url: { "type": "STRING" }
+                                        }
+                                    }
+                                }
+                            },
+                            propertyOrdering: ["query", "results"]
+                        }
+                    }
+                };
+                const apiKey = "";
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                const result = await response.json();
+                console.log("Gemini API Response (Dictionary):", result);
+
+                if (result.candidates && result.candidates.length > 0 &&
+                    result.candidates[0].content && result.candidates[0].content.parts &&
+                    result.candidates[0].content.parts.length > 0) {
+                    const toolOutput = result.candidates[0].content.parts[0].text;
+                    try {
+                        const searchData = JSON.parse(toolOutput);
+                        let wikipediaResult = null;
+
+                        if (searchData.results && searchData.results.length > 0) {
+                            for (const item of searchData.results) {
+                                if (item.url && (item.url.includes('wikipedia.org') || item.url.includes('namu.wiki')) || // Include 나무위키
+                                    (item.source_title && (item.source_title.includes('위키백과') || item.source_title.includes('Wikipedia') || item.source_title.includes('나무위키')))) {
+                                    wikipediaResult = item;
+                                    break;
+                                }
+                            }
+                        }
+
+                        if (wikipediaResult) {
+                            let resultsHtml = `<p class="font-bold text-lg mb-1">${query}</p>`;
+                            resultsHtml += `<p class="text-sm">${wikipediaResult.snippet || '정의를 찾을 수 없습니다.'}</p>`;
+                            resultsHtml += `<p class="text-xs text-gray-500 mt-2">출처: <a href="${wikipediaResult.url}" target="_blank" class="text-blue-600 hover:underline">${wikipediaResult.source_title || '위키백과'}</a></p>`;
+                            dictionaryResults.innerHTML = resultsHtml;
+                        } else {
+                            dictionaryResults.innerHTML = `<p>위키백과 또는 나무위키에서 "${query}" 단어의 의미를 찾을 수 없습니다.</p><p class="mt-2 text-gray-500">다른 단어로 다시 시도해보세요.</p>`;
+                        }
+                    } catch (parseError) {
+                        console.error("툴 출력 파싱 중 오류 발생:", parseError, toolOutput);
+                        dictionaryResults.innerHTML = '<p class="text-red-500">사전 결과를 처리하는 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.</p>';
+                    }
+                } else {
+                    dictionaryResults.innerHTML = '<p class="text-red-500">사전 결과를 가져오지 못했습니다.</p>';
+                }
+            } catch (error) {
+                console.error("사전 API 호출 중 오류 발생:", error);
+                dictionaryResults.innerHTML = '<p class="text-red-500">사전 요청에 실패했습니다. 네트워크 연결을 확인하거나 다시 시도해주세요.</p>';
+            }
+        });
+
+        // 사전 모달에서 '공유' 버튼 클릭 시
+        shareDictionaryButton.addEventListener('click', () => {
+            const query = dictionaryInput.value.trim();
+            const resultHtml = dictionaryResults.innerHTML;
+
+            // Check if results are actual definitions, not initial or error messages
+            if (resultHtml.includes("환영합니다! 이 곳은 위키백과 사전입니다.") || resultHtml.includes("사전 검색 중...") || resultHtml.includes("사전 결과를 가져오지 못했습니다.") || resultHtml.includes("사전 요청에 실패했습니다.") || resultHtml.includes("단어를 입력해주세요.")) {
+                showCustomMessage("공유할 사전 내용이 없습니다. 먼저 단어를 찾아주세요.", "warning");
+                return;
+            }
+
+            uploadedContentPreviews.classList.remove('hidden');
+
+            const dictionaryPreview = document.createElement('div');
+            dictionaryPreview.classList.add('dictionary-post-preview');
+            dictionaryPreview.textContent = query ? `위키: ${query}` : '사전 결과';
+            dictionaryPreview.dataset.fullContent = resultHtml;
+            dictionaryPreview.dataset.type = 'dictionary';
+            dictionaryPreview.dataset.query = query;
+            dictionaryPreview.innerHTML = `<button class="preview-close-button">x</button>${dictionaryPreview.innerHTML}`; // Add close button
+
+            dictionaryPreview.addEventListener('click', (e) => {
+                if (!e.target.classList.contains('preview-close-button')) {
+                    fullContentModalTitle.textContent = query ? `사전 결과: ${query}` : '사전 결과';
+                    fullContentDisplayArea.innerHTML = dictionaryPreview.dataset.fullContent;
+                    fullContentModal.classList.remove('hidden');
+                }
+            });
+            uploadedContentPreviews.appendChild(dictionaryPreview);
+
+            dictionaryModal.classList.add('hidden');
+            dictionaryInput.value = '';
+            dictionaryResults.innerHTML = `
+                <p class="font-bold mb-2">환영합니다! 이 곳은 위키백과 사전입니다.</p>
+                <p>찾고 싶은 단어를 위에 입력하고 <span class="font-bold">찾기</span> 버튼을 눌러보세요.</p>
+                <p class="mt-2">예시:<br/><span class="font-bold text-lg">대한민국</span><br/>[명사] 동아시아에 있는 공화국.<br/>출처: <a href="https://ko.wikipedia.org/wiki/%EB%8C%80%ED%95%9C%EB%AF%BC%EA%B5%AD" target="_blank" class="text-blue-600 hover:underline">위키백과</a></p>
+            `;
+        });
+
+        // 사전 모달에서 '닫기' 또는 'X' 버튼 클릭 시
+        const closeDictionaryModal = () => {
+            dictionaryModal.classList.add('hidden');
+            dictionaryInput.value = '';
+            dictionaryResults.innerHTML = `
+                <p class="font-bold mb-2">환영합니다! 이 곳은 위키백과 사전입니다.</p>
+                <p>찾고 싶은 단어를 위에 입력하고 <span class="font-bold">찾기</span> 버튼을 눌러보세요.</p>
+                <p class="mt-2">예시:<br/><span class="font-bold text-lg">대한민국</span><br/>[명사] 동아시아에 있는 공화국.<br/>출처: <a href="https://ko.wikipedia.org/wiki/%EB%8C%80%ED%95%9C%EB%AF%BC%EA%B5%AD" target="_blank" class="text-blue-600 hover:underline">위키백과</a></p>
+            `;
+        };
+
+        cancelDictionaryButton.addEventListener('click', closeDictionaryModal);
+        closeDictionaryModalButton.addEventListener('click', closeDictionaryModal);
+
+        // AI 채팅 메시지 전송 함수
+        sendAiMessageButton.addEventListener('click', async () => {
+            const userMessage = aiMessageInput.value.trim();
+            if (!userMessage) return;
+
+            aiChatHistory.innerHTML += `<div class="user-message-bubble">${userMessage}</div>`;
+            aiChatHistoryData.push({ role: "user", parts: [{ text: userMessage }] });
+            aiMessageInput.value = '';
+            aiChatHistory.scrollTop = aiChatHistory.scrollHeight;
+
+            const loadingBubble = document.createElement('div');
+            loadingBubble.classList.add('ai-message-bubble', 'text-gray-500', 'italic');
+            loadingBubble.textContent = 'AI가 생각 중...';
+            aiChatHistory.appendChild(loadingBubble);
+            aiChatHistory.scrollTop = aiChatHistory.scrollTop; // Ensure scroll after adding loading message
+
+            try {
+                const payload = {
+                    contents: aiChatHistoryData
+                };
+                const apiKey = "";
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                const result = await response.json();
+                console.log("AI Chat API Response:", result);
+
+                loadingBubble.remove();
+
+                if (result.candidates && result.candidates.length > 0 &&
+                    result.candidates[0].content && result.candidates[0].content.parts &&
+                    result.candidates[0].content.parts.length > 0) {
+                    const aiResponse = result.candidates[0].content.parts[0].text;
+
+                    aiChatHistory.innerHTML += `<div class="ai-message-bubble">${aiResponse}</div>`;
+                    aiChatHistoryData.push({ role: "model", parts: [{ text: aiResponse }] });
+                    aiChatHistory.scrollTop = aiChatHistory.scrollHeight;
+                } else {
+                    aiChatHistory.innerHTML += `<div class="ai-message-bubble text-red-500">죄송합니다. AI가 응답을 생성하지 못했습니다.</div>`;
+                    aiChatHistoryData.push({ role: "model", parts: [{ text: "죄송합니다. AI가 응답을 생성하지 못했습니다." }] });
+                    aiChatHistory.scrollTop = aiChatHistory.scrollHeight;
+                }
+            } catch (error) {
+                console.error("AI Chat API 호출 중 오류 발생:", error);
+                loadingBubble.remove();
+                aiChatHistory.innerHTML += `<div class="ai-message-bubble text-red-500">AI 연결에 문제가 발생했습니다. 다시 시도해주세요.</div>`;
+                aiChatHistoryData.push({ role: "model", parts: [{ text: "AI 연결에 문제가 발생했습니다." }] });
+                aiChatHistory.scrollTop = aiChatHistory.scrollHeight;
+            }
+        });
+
+        // AI 채팅 모달에서 '공유' 버튼 클릭 시 (최근 AI 응답 공유)
+        shareAiChatButton.addEventListener('click', () => {
+            if (aiChatHistoryData.length === 0 || aiChatHistoryData[aiChatHistoryData.length - 1].role !== 'model') {
+                showCustomMessage("공유할 AI 응답이 없습니다. AI와 먼저 대화해주세요.", "warning");
+                return;
+            }
+
+            const fullConversationHtml = aiChatHistory.innerHTML; // Get current displayed history
+            const lastAiResponse = aiChatHistoryData[aiChatHistoryData.length - 1].parts[0].text;
+            const previewText = lastAiResponse.length > 50 ? lastAiResponse.substring(0, 47) + '...' : lastAiResponse;
+
+            uploadedContentPreviews.classList.remove('hidden');
+
+            const aiChatPreview = document.createElement('div');
+            aiChatPreview.classList.add('ai-chat-preview');
+            aiChatPreview.textContent = `AI챗: ${previewText}`;
+            aiChatPreview.dataset.fullContent = fullConversationHtml;
+            aiChatPreview.dataset.type = 'aichat';
+            aiChatPreview.innerHTML = `<button class="preview-close-button">x</button>${aiChatPreview.innerHTML}`; // Add close button
+
+            aiChatPreview.addEventListener('click', (e) => {
+                if (!e.target.classList.contains('preview-close-button')) {
+                    fullContentModalTitle.textContent = 'AI챗 대화 기록';
+                    fullContentDisplayArea.innerHTML = aiChatPreview.dataset.fullContent;
+                    fullContentModal.classList.remove('hidden');
+                }
+            });
+            uploadedContentPreviews.appendChild(aiChatPreview);
+
+            aiChatModal.classList.add('hidden');
+            aiMessageInput.value = '';
+            aiChatHistoryData = [{ role: "model", parts: [{ text: "안녕하세요! 무엇을 도와드릴까요?" }] }];
+            aiChatHistory.innerHTML = '<p class="font-bold mb-2 text-center">AI챗에 오신 것을 환영합니다!</p><div class="ai-message-bubble text-sm">안녕하세요! 무엇을 도와드릴까요?</div>';
+        });
+
+
+        // AI 채팅 모달에서 '닫기' 또는 'X' 버튼 클릭 시
+        const closeAiChatModal = () => {
+            aiChatModal.classList.add('hidden');
+            aiMessageInput.value = '';
+            aiChatHistoryData = [{ role: "model", parts: [{ text: "안녕하세요! 무엇을 도와드릴까요?" }] }];
+            aiChatHistory.innerHTML = '<p class="font-bold mb-2 text-center">AI챗에 오신 것을 환영합니다!</p><div class="ai-message-bubble text-sm">안녕하세요! 무엇을 도와드릴까요?</div>';
+        };
+
+        cancelAiChatButton.addEventListener('click', closeAiChatModal);
+        closeAiChatModalButton.addEventListener('click', closeAiChatModal);
+
+        // 공유 문서 모달에서 '공유' 버튼 클릭 시
+        sendSharedDocButton.addEventListener('click', () => {
+            if (sharedDocQuill) {
+                const docContent = sharedDocQuill.root.innerHTML;
+                const docTitle = sharedDocTitleInput.value.trim();
+
+                if (docContent.trim() === "<p><br></p>" && !docTitle) { // 제목도 없고 내용도 비어있을 때
+                    showCustomMessage("공유할 문서 내용이 없습니다. 제목 또는 내용을 입력해주세요.", "warning");
+                    return;
+                }
+                
+                uploadedContentPreviews.classList.remove('hidden');
+
+                const sharedDocPreview = document.createElement('div');
+                sharedDocPreview.classList.add('shared-doc-preview');
+                sharedDocPreview.textContent = docTitle ? `공유 문서: ${docTitle}` : '제목 없는 문서';
+                sharedDocPreview.dataset.fullContent = docContent; // 전체 내용을 데이터 속성에 저장
+                sharedDocPreview.dataset.type = 'shared_doc';
+                sharedDocPreview.dataset.title = docTitle;
+                sharedDocPreview.innerHTML = `<button class="preview-close-button">x</button>${sharedDocPreview.innerHTML}`; // Add close button
+
+                sharedDocPreview.addEventListener('click', (e) => {
+                    if (!e.target.classList.contains('preview-close-button')) {
+                        fullContentModalTitle.textContent = docTitle || '제목 없는 문서';
+                        fullContentDisplayArea.innerHTML = docContent;
+                        fullContentModal.classList.remove('hidden');
+                    }
+                });
+                uploadedContentPreviews.appendChild(sharedDocPreview);
+
+                sharedDocQuill.setContents([]); // 에디터 내용 초기화
+                sharedDocTitleInput.value = ''; // 제목 필드 초기화
+                sharedDocModal.classList.add('hidden'); // 모달 숨기기
+            }
+        });
+
+        // 공유 문서 모달에서 '취소' 또는 'X' 버튼 클릭 시
+        const closeAndClearSharedDoc = () => {
+            if (sharedDocQuill) {
+                sharedDocQuill.setContents([]);
+            }
+            sharedDocTitleInput.value = '';
+            sharedDocModal.classList.add('hidden');
+        };
+
+        cancelSharedDocButton.addEventListener('click', closeAndClearSharedDoc);
+        closeSharedDocModalButton.addEventListener('click', closeAndClearSharedDoc);
+
+        // 메인 전송 버튼 클릭 시 모든 미리보기 및 입력 초기화 및 전송
+        mainSendButton.addEventListener('click', async () => {
+            const mainMessageText = messageInput.value.trim();
+            const previews = Array.from(uploadedContentPreviews.children);
+
+            if (!mainMessageText && previews.length === 0) {
+                showCustomMessage("전송할 내용이 없습니다.", "warning");
+                return;
+            }
+
+            if (!currentUserId || !currentDiscussionId) {
+                showCustomMessage("채팅방에 참여하거나 로그인해야 메시지를 보낼 수 있습니다.", "error");
+                return;
+            }
+
+            const messagesToSend = [];
+
+            // Add main text message if present
+            if (mainMessageText) {
+                messagesToSend.push({
+                    type: 'text',
+                    content: mainMessageText,
+                    authorId: currentUserId,
+                    authorNickname: currentUserNickname,
+                    timestamp: serverTimestamp()
+                });
+            }
+
+            // Add content from previews
+            previews.forEach(preview => {
+                const type = preview.dataset.type;
+                let messageData = {
+                    authorId: currentUserId,
+                    authorNickname: currentUserNickname,
+                    timestamp: serverTimestamp()
+                };
+
+                if (type === 'image') {
+                    messageData.type = 'image';
+                    messageData.imageUrl = preview.dataset.imageUrl; // Placeholder or actual URL
+                    messageData.content = "사진 메시지"; // Can be extended with caption
+                } else if (type === 'richtext' || type === 'shared_doc') {
+                    messageData.type = type;
+                    messageData.title = preview.dataset.title || '';
+                    messageData.content = preview.dataset.fullContent;
+                } else if (type === 'dictionary') {
+                    messageData.type = 'dictionary';
+                    messageData.query = preview.dataset.query;
+                    messageData.htmlContent = preview.dataset.fullContent;
+                } else if (type === 'aichat') {
+                    messageData.type = 'aichat';
+                    messageData.htmlContent = preview.dataset.fullContent;
+                }
+                messagesToSend.push(messageData);
+            });
+
+            const messagesCollectionRef = collection(db, `artifacts/${appId}/public/data/discussions/${currentDiscussionId}/messages`);
+
+            for (const msg of messagesToSend) {
+                try {
+                    await addDoc(messagesCollectionRef, msg);
+                    console.log("Message sent:", msg);
+                } catch (error) {
+                    console.error("Failed to send message:", error);
+                    showCustomMessage("메시지 전송에 실패했습니다.", "error");
+                    break; // Stop sending if one fails
+                }
+            }
+
+            clearAllUploadedContent(); // Clear all inputs and previews after sending
+        });
+
+        // Custom message display function (replaces alert)
+        function showCustomMessage(message, type = "info") {
+            const messageBox = document.createElement('div');
+            messageBox.classList.add('fixed', 'top-4', 'right-4', 'p-4', 'rounded-md', 'shadow-lg', 'text-white', 'z-[2000]', 'transition-all', 'duration-300', 'ease-in-out', 'transform', 'translate-x-full', 'opacity-0');
+
+            if (type === "success") {
+                messageBox.classList.add('bg-green-500');
+            } else if (type === "error") {
+                messageBox.classList.add('bg-red-500');
+            } else if (type === "warning") {
+                messageBox.classList.add('bg-yellow-500');
+            } else {
+                messageBox.classList.add('bg-blue-500');
+            }
+
+            messageBox.textContent = message;
+            document.body.appendChild(messageBox);
+
+            // Add class after a short delay for animation
+            setTimeout(() => {
+                messageBox.classList.remove('translate-x-full', 'opacity-0');
+                messageBox.classList.add('translate-x-0', 'opacity-100');
+            }, 10);
+
+            // Hide message box after 3 seconds
+            setTimeout(() => {
+                messageBox.classList.remove('translate-x-0', 'opacity-100');
+                messageBox.classList.add('translate-x-full', 'opacity-0');
+                messageBox.addEventListener('transitionend', () => messageBox.remove());
+            }, 3000);
+        }
+
+        // Back button functionality
+        backButton.addEventListener('click', () => {
+            if (currentDiscussionId) {
+                window.location.href = `/view/${currentDiscussionId}`;
+            } else {
+                window.history.back(); // Fallback to browser history
+            }
+        });
+
+        // Adjust chat container height to fit screen, if needed. CSS handles this generally.
+        // Also scroll to bottom on initial load
+        window.addEventListener('load', () => {
+             chatMessagesContainer.scrollTop = chatMessagesContainer.scrollHeight;
+        });
+
+    </script>
+</body>
+</html>
