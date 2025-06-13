@@ -128,7 +128,7 @@
 </head>
 <body class="flex min-h-screen flex-col">
 
-    <!-- 헤더 섹션 -->
+    <!-- Header Section -->
     <header class="fixed-header flex items-center justify-between bg-white p-4 border-b border-gray-300">
         <div class="flex items-center">
             <img src="/image/logo.png" alt="UNIZ 로고" class="h-10 w-auto max-w-full">
@@ -137,16 +137,16 @@
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6 text-gray-600 cursor-pointer hover:text-blue-500 transition-colors duration-200">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
             </svg>
-            <!-- 로그인 상태에 따라 조건부 렌더링될 요소 -->
+            <!-- Conditional rendering for login status -->
             <div id="auth-status-container" class="relative">
-                <!-- 여기에 로그인 버튼 또는 닉네임/드롭다운이 들어갑니다. -->
+                <!-- Login button or nickname/dropdown will be inserted here -->
             </div>
         </div>
     </header>
 
-    <!-- 메인 콘텐츠 및 사이드바를 위한 flex 컨테이너 -->
+    <!-- Flex container for main content and sidebar -->
     <div class="flex flex-1">
-        <!-- 사이드바 섹션 -->
+        <!-- Sidebar Section -->
         <aside class="fixed-sidebar">
             <div>
                 <nav>
@@ -198,29 +198,29 @@
             </div>
         </aside>
 
-        <!-- 메인 콘텐츠 영역 -->
+        <!-- Main Content Area -->
         <main class="main-content-area">
-            <div class="max-w-6xl mx-auto w-full"> <!-- 너비를 max-w-4xl에서 max-w-6xl로 확장 -->
-                <div id="discussion-detail" class="w-full bg-white p-8 rounded-lg border border-gray-300 mb-8 relative"> <!-- relative 클래스 추가 -->
-                    <!-- 토론 상세 내용이 여기에 동적으로 로드됩니다 -->
+            <div class="max-w-6xl mx-auto w-full">
+                <div id="discussion-detail" class="w-full bg-white p-8 rounded-lg border border-gray-300 mb-8">
+                    <!-- Discussion detailed content will be dynamically loaded here -->
                     <div class="flex justify-center items-center h-48" id="loading-spinner">
                         <div class="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-blue-500"></div>
                         <p class="ml-4 text-gray-600">내용을 불러오는 중...</p>
                     </div>
-
-                    <!-- 토론 참여하기 버튼 이동 -->
-                    <div class="absolute top-4 right-4 z-10"> <!-- absolute 및 top-4, right-4 클래스 추가 -->
-                        <button id="join-discussion-btn" class="px-6 py-2 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition-colors duration-200 shadow-md hover:shadow-lg text-sm">
-                            토론 참여하기
-                        </button>
-                    </div>
                 </div>
 
-                <!-- 댓글 섹션 -->
+                <!-- Join Discussion Button - Moved outside discussion-detail div -->
+                <div class="flex justify-center mb-8">
+                    <button id="join-discussion-btn" class="px-8 py-3 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition-colors duration-200 shadow-md hover:shadow-lg">
+                        토론 참여하기
+                    </button>
+                </div>
+
+                <!-- Comments Section -->
                 <section class="bg-white p-8 rounded-lg border border-gray-300">
                     <h2 class="text-2xl font-bold text-gray-800 mb-6">댓글</h2>
                     <div id="comments-list" class="space-y-5 mb-6">
-                        <!-- 댓글이 여기에 동적으로 로드됩니다 -->
+                        <!-- Comments will be dynamically loaded here -->
                         <p class="text-gray-500 text-center py-4" id="no-comments-message">아직 댓글이 없습니다. 첫 댓글을 남겨주세요!</p>
                     </div>
                     <div class="border-t border-gray-200 pt-6">
@@ -232,7 +232,7 @@
         </main>
     </div>
 
-    <!-- 하단 내비게이션 바 (모바일 전용) -->
+    <!-- Bottom Navigation Bar (Mobile Only) -->
     <nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-300 py-0.5 px-2 shadow-lg lg:hidden z-1000">
         <ul class="flex justify-around items-center h-full">
             <li>
@@ -301,19 +301,19 @@
         const db = getFirestore(app);
 
         const authStatusContainer = document.getElementById('auth-status-container');
-        const defaultNickname = "사용자"; // 로그인하지 않은 경우의 닉네임
+        const defaultNickname = "사용자"; // Nickname if not logged in
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
 
-        let currentUserId = null; // 현재 로그인된 사용자 ID
-        let currentDiscussionId = null; // 현재 토론 ID
+        let currentUserId = null; // Current logged-in user ID
+        let currentDiscussionId = null; // Current discussion ID
 
         // Function to update header based on auth state
         function updateHeader(user) {
-            authStatusContainer.innerHTML = ''; // 기존 내용 지우기
+            authStatusContainer.innerHTML = ''; // Clear existing content
             if (user) {
-                currentUserId = user.uid; // 사용자 ID 업데이트
+                currentUserId = user.uid; // Update user ID
                 const displayName = user.displayName || user.email || defaultNickname;
-                const userNickname = displayName.split('@')[0]; // 이메일에서 @ 앞부분만 사용
+                const userNickname = displayName.split('@')[0]; // Use part before @ from email
 
                 const loggedInHtml = `
                     <button id="nickname-btn" class="cursor-pointer text-gray-700 p-2 rounded-md hover:bg-gray-100 transition-colors duration-200 flex items-center">
@@ -327,23 +327,23 @@
                 `;
                 authStatusContainer.insertAdjacentHTML('afterbegin', loggedInHtml);
 
-                // 드롭다운 메뉴 토글 기능
+                // Toggle dropdown menu
                 const nicknameBtn = document.getElementById('nickname-btn');
                 const dropdownMenu = document.getElementById('dropdown-menu');
                 nicknameBtn.addEventListener('click', (event) => {
-                    event.stopPropagation(); // 버튼 클릭 시 이벤트 전파 중지
+                    event.stopPropagation(); // Stop event propagation when button is clicked
                     dropdownMenu.classList.toggle('hidden');
                 });
 
-                // 외부 클릭 시 드롭다운 닫기
+                // Close dropdown when clicking outside
                 document.addEventListener('click', (event) => {
-                    // 클릭된 요소가 드롭다운 컨테이너 내부에 없는 경우 드롭다운 숨김
+                    // Hide dropdown if clicked element is not inside authStatusContainer
                     if (!authStatusContainer.contains(event.target)) {
                         dropdownMenu.classList.add('hidden');
                     }
                 });
 
-                // 로그아웃 버튼 기능
+                // Logout button functionality
                 const logoutBtn = document.getElementById('logout-btn');
                 logoutBtn.addEventListener('click', async (event) => {
                     event.preventDefault();
@@ -356,8 +356,8 @@
                 });
 
             } else {
-                currentUserId = null; // 사용자 ID 초기화
-                // 로그아웃 상태: 로그인 버튼 표시
+                currentUserId = null; // Reset user ID
+                // Logged out state: Display login button
                 const loggedOutHtml = `
                     <a href="/SINGIN" id="login-btn" class="cursor-pointer text-gray-700 p-2 rounded-md hover:bg-gray-100 transition-colors duration-200">
                         로그인
@@ -368,10 +368,10 @@
         }
 
         // Firebase Auth initialization and handling
-        let authReadyPromise = Promise.resolve(); // 초기화는 완료된 Promise로 시작
+        let authReadyPromise = Promise.resolve(); // Start with a resolved Promise
 
         if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-            // __initial_auth_token이 있으면 커스텀 토큰으로 로그인 시도
+            // If __initial_auth_token exists, attempt to sign in with custom token
             authReadyPromise = signInWithCustomToken(auth, __initial_auth_token)
                 .then(() => console.log("Signed in with custom token."))
                 .catch((error) => {
@@ -379,26 +379,26 @@
                 });
         }
 
-        // Firebase 인증 상태 변경 감지
+        // Listen for Firebase authentication state changes
         onAuthStateChanged(auth, (user) => {
             updateHeader(user);
         });
 
-        // URL에서 토론 ID 추출
+        // Extract discussion ID from URL
         function getDiscussionIdFromUrl() {
             const path = window.location.pathname;
             const parts = path.split('/');
-            // 예: /view/discussion_id -> parts[2]가 ID
+            // Example: /view/discussion_id -> parts[2] is the ID
             if (parts.length > 2 && parts[1] === 'view') {
                 return parts[2];
             }
             return null;
         }
 
-        // 토론 상세 정보를 가져와 렌더링
+        // Fetch and render discussion details
         async function fetchAndRenderDiscussionDetail() {
             const discussionId = getDiscussionIdFromUrl();
-            currentDiscussionId = discussionId; // 현재 토론 ID 저장
+            currentDiscussionId = discussionId; // Store current discussion ID
             const discussionDetailElement = document.getElementById('discussion-detail');
             const loadingSpinner = document.getElementById('loading-spinner');
 
@@ -410,7 +410,7 @@
                 return;
             }
 
-            // 로딩 스피너 표시
+            // Display loading spinner
             if (loadingSpinner) loadingSpinner.classList.remove('hidden');
 
             const discussionRef = doc(db, `artifacts/${appId}/public/data/discussions`, discussionId);
@@ -421,22 +421,22 @@
                 if (docSnap.exists()) {
                     const discussion = docSnap.data();
 
-                    // 조회수 증가
+                    // Increment views
                     await updateDoc(discussionRef, {
                         views: (discussion.views || 0) + 1
                     });
-                    discussion.views = (discussion.views || 0) + 1; // UI 업데이트를 위해 로컬에서 뷰 카운트 업데이트
+                    discussion.views = (discussion.views || 0) + 1; // Update view count locally for UI
 
                     const formattedDate = discussion.createdAt ? new Date(discussion.createdAt.toDate()).toLocaleDateString('ko-KR') : '날짜 미상';
                     const detailHtml = `
                         <h1 class="text-3xl font-bold text-gray-900 mb-6">${discussion.title}</h1>
                         <div class="flex items-center text-gray-600 text-sm mb-8 space-x-4">
                             <span>${discussion.authorNickname || '익명'}</span>
-                            <span>•</span> <!-- 구분자 변경 -->
+                            <span>•</span> <!-- Separator -->
                             <span>${discussion.category || '기타'}</span>
-                            <span>•</span> <!-- 구분자 변경 -->
+                            <span>•</span> <!-- Separator -->
                             <span>${formattedDate}</span>
-                            <span>•</span> <!-- 구분자 변경 -->
+                            <span>•</span> <!-- Separator -->
                             <div class="flex items-center">
                                 <svg class="w-4 h-4 mr-1 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
                                 <span>${discussion.views}</span>
@@ -444,7 +444,7 @@
                         </div>
                         <div class="prose max-w-none text-gray-800 leading-relaxed mb-10">
                             <p>${discussion.content || '내용이 없습니다.'}</p>
-                            ${discussion.thumbnailImage ? `<img src="${discussion.thumbnailImage}" alt="썸네일 이미지" class="mt-6 rounded-md w-full h-auto object-cover max-h-96 border border-gray-300">` : ''} <!-- 그림자 제거, 테두리 추가 -->
+                            ${discussion.thumbnailImage ? `<img src="${discussion.thumbnailImage}" alt="Thumbnail image" class="mt-6 rounded-md w-full h-auto object-cover max-h-96 border border-gray-300">` : ''} <!-- Remove shadow, add border -->
                         </div>
                         <div class="flex items-center justify-center space-x-8 py-4 border-t border-b border-gray-200">
                             <button id="like-btn" class="flex items-center text-gray-600 hover:text-blue-600 interactive-btn font-medium">
@@ -459,7 +459,7 @@
                     `;
                     discussionDetailElement.innerHTML = detailHtml;
 
-                    // 좋아요 버튼 기능 (예시, 실제 데이터 업데이트 필요)
+                    // Like button functionality (example, actual data update needed)
                     const likeBtn = document.getElementById('like-btn');
                     const likeCountSpan = document.getElementById('like-count');
                     let currentLikes = discussion.likes || 0;
@@ -467,7 +467,7 @@
                         likeBtn.addEventListener('click', async () => {
                             currentLikes++;
                             likeCountSpan.textContent = currentLikes;
-                            // Firestore 업데이트 로직 추가 (예: updateDoc)
+                            // Add Firestore update logic (e.g., updateDoc)
                             await updateDoc(discussionRef, { likes: currentLikes });
                         });
                     }
@@ -478,14 +478,14 @@
                     discussionDetailElement.innerHTML = '<p class="text-red-600 text-center text-lg">해당 토론을 찾을 수 없습니다.</p>';
                 }
             } catch (error) {
-                console.error("토론 상세 정보 불러오기 실패:", error);
+                console.error("Failed to load discussion details:", error);
                 discussionDetailElement.innerHTML = '<p class="text-red-600 text-center text-lg">토론을 불러오는 중 오류가 발생했습니다.</p>';
             } finally {
                 if (loadingSpinner) loadingSpinner.classList.add('hidden');
             }
         }
 
-        // 댓글 렌더링 함수
+        // Comment rendering function
         function renderComment(comment) {
             const formattedDate = comment.createdAt ? new Date(comment.createdAt.toDate()).toLocaleString('ko-KR') : '날짜 미상';
             return `
@@ -499,7 +499,7 @@
             `;
         }
 
-        // 댓글 목록 가져오기 및 렌더링
+        // Fetch and render comment list
         async function fetchAndRenderComments(discussionId) {
             const commentsListElement = document.getElementById('comments-list');
             const noCommentsMessage = document.getElementById('no-comments-message');
@@ -513,7 +513,7 @@
                     comments.push({ id: doc.id, ...doc.data() });
                 });
 
-                // 최신 댓글이 위에 오도록 정렬
+                // Sort comments by creation time, newest first
                 comments.sort((a, b) => {
                     if (a.createdAt && b.createdAt) {
                         return b.createdAt.toDate().getTime() - a.createdAt.toDate().getTime();
@@ -525,25 +525,25 @@
                     commentsListElement.innerHTML = comments.map(renderComment).join('');
                     noCommentsMessage.classList.add('hidden');
                 } else {
-                    commentsListElement.innerHTML = ''; // 기존 댓글 비우기
+                    commentsListElement.innerHTML = ''; // Clear existing comments
                     noCommentsMessage.classList.remove('hidden');
                 }
                 commentCountSpan.textContent = comments.length;
 
             }, (error) => {
-                console.error("댓글 불러오기 실패:", error);
+                console.error("Failed to load comments:", error);
                 commentsListElement.innerHTML = '<p class="text-red-600 text-center">댓글을 불러오는 중 오류가 발생했습니다.</p>';
                 noCommentsMessage.classList.add('hidden');
             });
         }
 
-        // 댓글 작성 기능
+        // Comment submission function
         async function submitComment() {
             if (!currentUserId) {
-                // 사용자에게 로그인 메시지를 표시하는 사용자 지정 모달 또는 인라인 메시지를 사용합니다.
-                console.log("댓글을 작성하려면 로그인해야 합니다.");
-                // alert("댓글을 작성하려면 로그인해야 합니다."); // 실제 앱에서는 커스텀 모달 사용
-                // 커스텀 모달 메시지로 대체
+                // Use a custom modal or inline message to display login message to the user.
+                console.log("You must be logged in to post a comment.");
+                // alert("댓글을 작성하려면 로그인해야 합니다."); // Use custom modal in actual app
+                // Replace with custom modal message
                 showCustomMessage("댓글을 작성하려면 로그인해야 합니다.", "warning");
                 return;
             }
@@ -553,8 +553,8 @@
             const commentContent = commentInput.value.trim();
 
             if (!discussionId || !commentContent) {
-                console.log("댓글 내용이 비어 있거나 토론 ID를 찾을 수 없습니다.");
-                // alert("댓글 내용을 입력해 주세요."); // 실제 앱에서는 커스텀 모달 사용
+                console.log("Comment content is empty or discussion ID not found.");
+                // alert("댓글 내용을 입력해 주세요."); // Use custom modal in actual app
                 showCustomMessage("댓글 내용을 입력해 주세요.", "warning");
                 return;
             }
@@ -567,18 +567,18 @@
                     authorId: currentUserId,
                     authorNickname: userNickname,
                     content: commentContent,
-                    createdAt: serverTimestamp() // 서버 타임스탬프 사용
+                    createdAt: serverTimestamp() // Use server timestamp
                 });
-                commentInput.value = ''; // 입력 필드 초기화
-                console.log("댓글 작성 성공!");
+                commentInput.value = ''; // Clear input field
+                console.log("Comment posted successfully!");
             } catch (error) {
-                console.error("댓글 작성 실패:", error);
-                // alert("댓글 작성에 실패했습니다. 다시 시도해 주세요."); // 실제 앱에서는 커스텀 모달 사용
+                console.error("Failed to post comment:", error);
+                // alert("댓글 작성에 실패했습니다. 다시 시도해 주세요."); // Use custom modal in actual app
                 showCustomMessage("댓글 작성에 실패했습니다. 다시 시도해 주세요.", "error");
             }
         }
 
-        // 커스텀 메시지 표시 함수 (alert 대체)
+        // Custom message display function (replaces alert)
         function showCustomMessage(message, type = "info") {
             const messageBox = document.createElement('div');
             messageBox.classList.add('fixed', 'top-4', 'right-4', 'p-4', 'rounded-md', 'shadow-lg', 'text-white', 'z-[2000]', 'transition-all', 'duration-300', 'ease-in-out', 'transform', 'translate-x-full', 'opacity-0');
@@ -596,13 +596,13 @@
             messageBox.textContent = message;
             document.body.appendChild(messageBox);
 
-            // 애니메이션을 위해 잠시 후에 클래스 추가
+            // Add class after a short delay for animation
             setTimeout(() => {
                 messageBox.classList.remove('translate-x-full', 'opacity-0');
                 messageBox.classList.add('translate-x-0', 'opacity-100');
             }, 10);
 
-            // 3초 후 메시지 박스 숨기기
+            // Hide message box after 3 seconds
             setTimeout(() => {
                 messageBox.classList.remove('translate-x-0', 'opacity-100');
                 messageBox.classList.add('translate-x-full', 'opacity-0');
@@ -610,14 +610,14 @@
             }, 3000);
         }
 
-        // DOM 로드 후 초기화
+        // Initialize after DOM is loaded
         document.addEventListener('DOMContentLoaded', () => {
-            // 인증이 준비되면 토론 상세 정보 로드
+            // Load discussion details when authentication is ready
             authReadyPromise.then(() => {
                 fetchAndRenderDiscussionDetail();
             }).catch(error => {
-                console.error("인증 설정 실패, 토론 상세 정보를 로드할 수 없습니다:", error);
-                fetchAndRenderDiscussionDetail(); // 인증 실패해도 시도
+                console.error("Auth setup failed, unable to load discussion details:", error);
+                fetchAndRenderDiscussionDetail(); // Still attempt to fetch even if auth fails
             });
 
             const submitCommentBtn = document.getElementById('submit-comment-btn');
@@ -625,7 +625,7 @@
                 submitCommentBtn.addEventListener('click', submitComment);
             }
 
-            // 토론 참여하기 버튼 클릭 이벤트
+            // Join Discussion button click event
             const joinDiscussionBtn = document.getElementById('join-discussion-btn');
             if (joinDiscussionBtn) {
                 joinDiscussionBtn.addEventListener('click', () => {
