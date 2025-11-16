@@ -3,9 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>재무 통계 미니 대시보드 (SPA)</title>
-    <!-- Google Material Icons CDN (SVG 대체) -->
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <title>재무 통계 미니 대시보드</title>
+    <!-- Google Material Icons CDN (SVG 대체) --><link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    
+    <!-- Pretendard 폰트 CDN 추가 -->
+    <link as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" rel="stylesheet" />
+    
     <style>
         /* CSS 변수를 사용하여 색상과 크기 관리의 효율성 높임 */
         :root {
@@ -18,7 +21,8 @@
 
         /* 기본 스타일 리셋 및 폰트 설정 */
         body {
-            font-family: 'Inter', Arial, sans-serif;
+            /* 수정: Pretendard 폰트 적용 */
+            font-family: 'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont, system-ui, Roboto, 'Helvetica Neue', 'Segoe UI', 'Apple SD Gothic Neo', 'Noto Sans KR', 'Malgun Gothic', 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', sans-serif;
             background-color: #ffffff;
             margin: 0;
             padding: 0;
@@ -30,17 +34,17 @@
             padding-bottom: 110px; 
         }
 
-        /* 메인 콘텐츠 영역 (이전 .container 역할) */
-        #content-area {
+        /* 메인 컨테이너 (PC/태블릿 환경에서 최대 너비 1024px) */
+        .container {
             width: 95%;
-            max-width: 700px; 
+            /* 수정: 최대 너비를 1024px로 늘려 태블릿 및 PC 화면 커버 */
+            max-width: 1024px; 
             background-color: #ffffff;
             padding: 24px;
             box-sizing: border-box;
-            transition: opacity 0.3s ease-in-out; /* 뷰 전환 시 부드러운 효과 */
         }
 
-        /* 공통 헤더 스타일 */
+        /* 헤더 스타일 */
         .header h1 {
             font-size: 24px;
             font-weight: 800;
@@ -57,6 +61,8 @@
             align-items: center;
             margin-bottom: 4px; 
         }
+        /* 로고 삭제 */
+        /* .logo { ... } */
 
         /* KPI 지표 영역 */
         .kpi-metrics {
@@ -68,7 +74,8 @@
 
         /* 개별 KPI 카드 - 공통 리플 효과 클래스 추가: .ripple-target */
         .kpi-card {
-            padding: 12px;
+            /* 수정: 상하 패딩을 12px에서 8px로 줄여 높이 축소 */
+            padding: 8px 12px; 
             border-radius: 6px;
             border: 1px solid var(--border-light);
             background-color: #ffffff; 
@@ -121,7 +128,7 @@
             color: var(--text-dark);
             margin-bottom: 12px;
         }
-        .chart-placeholder, .placeholder-content {
+        .chart-placeholder {
             height: 160px;
             background-color: #e0e0e0; 
             border-radius: 4px;
@@ -130,12 +137,8 @@
             justify-content: center;
             color: #9ca3af;
             font-size: 14px;
-            text-align: center;
         }
-        .placeholder-content {
-            height: 100px;
-            margin-top: 20px;
-        }
+
         /* 거래 목록 영역 */
         .transaction-list {
             list-style: none;
@@ -189,6 +192,7 @@
         }
 
         @keyframes ripple-animation {
+            /* 이 애니메이션은 하단 내비게이션 바가 아닌 다른 ripple-target 요소에만 적용됩니다. */
             to {
                 transform: scale(2.5);
                 opacity: 0;
@@ -198,20 +202,20 @@
         /* --- 하단 내비게이션 바 (플로팅/블러/타원형 활성화 스타일) --- */
         .bottom-nav {
             position: fixed;
-            bottom: 20px; 
+            bottom: 20px; /* 화면 하단에서 띄우기 */
             left: 50%;
             transform: translateX(-50%);
-            width: 75%; 
-            max-width: 450px; 
+            width: 75%; /* 너비는 유동적으로 */
+            max-width: 450px; /* 최대 너비 450px 유지 */
             height: 70px;
-            background-color: rgba(255, 255, 255, 0.85); 
-            backdrop-filter: blur(10px); 
+            background-color: rgba(255, 255, 255, 0.85); /* 블러를 위한 반투명 배경 (더 선명하게) */
+            backdrop-filter: blur(10px); /* 자연스러운 블러 효과 (Glassmorphism) */
             display: flex;
             justify-content: space-around;
             align-items: center;
             z-index: 1000;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1); 
-            border-radius: 50px; 
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1); /* 띄워진 느낌의 그림자 */
+            border-radius: 50px; /* 완전 둥근 캡슐 모양 */
             padding: 0 10px;
             box-sizing: border-box;
         }
@@ -222,12 +226,13 @@
             align-items: center;
             justify-content: center;
             text-decoration: none;
-            color: #9ca3af; 
+            color: #9ca3af; /* 비활성 텍스트 색상 */
             font-size: 11px;
             font-weight: 500;
             transition: color 0.3s;
             flex-grow: 1;
             position: relative;
+            /* overflow: hidden; 속성은 활성 배경을 깔끔하게 유지하기 위해 남겨둠 */
             height: 60px;
             border-radius: 25px; 
             cursor: pointer;
@@ -238,7 +243,7 @@
         .nav-item.active {
             color: var(--text-dark); 
             font-weight: 600;
-            position: relative; 
+            position: relative; /* ::before를 위한 기준점 */
         }
 
         /* 활성 상태의 부드러운 타원형 배경을 위한 가상 요소 (높이 55px 유지) */
@@ -247,20 +252,21 @@
             position: absolute;
             top: 50%;
             left: 50%;
+            /* 타원형으로 크기 조정 */
             width: 100px; 
             height: 55px;
-            background-color: #f0f0f0; 
-            border-radius: 30px; 
+            background-color: #f0f0f0; /* 색상 더 연하게 */
+            border-radius: 30px; /* 타원형 라운딩 */
             transform: translate(-50%, -50%);
-            z-index: -1; 
-            transition: all 0.3s ease-in-out; 
+            z-index: -1; /* 뒤로 보내기 */
+            transition: all 0.3s ease-in-out; /* 부드러운 애니메이션 효과 추가 */
         }
         
         /* 아이콘 색상 */
         .material-icons {
             font-size: 24px;
             margin-bottom: 2px;
-            color: inherit; 
+            color: inherit; /* nav-item의 색상 (활성/비활성)을 따라감 */
             transition: color 0.3s;
         }
 
@@ -269,327 +275,166 @@
             body {
                 padding-bottom: 110px;
             }
-            #content-area {
+            .container {
                 padding: 16px;
             }
             .kpi-metrics {
                 grid-template-columns: 1fr;
             }
             .bottom-nav {
-                width: 90%; 
-                max-width: 450px; 
+                /* 수정: 모바일에서 폭을 90% -> 85%로 축소 */
+                width: 85%; 
+                max-width: 450px; /* 450px로 유지 */
                 height: 65px;
                 bottom: 15px;
                 border-radius: 40px;
             }
             .nav-item.active::before {
-                width: 90px; 
+                width: 90px; /* 모바일 타원형 크기 조정 */
                 height: 50px;
             }
         }
     </style>
 </head>
 <body>
-    
-    <!-- 동적으로 로드될 메인 콘텐츠 영역 -->
-    <main id="content-area"></main>
+    <div class="container">
+        
+        <!-- 대시보드 헤더 --><header class="header">
+            <div class="header-main-content">
+                <!-- 로고 삭제 --><!-- <img src="https://i.postimg.cc/CM4trvZd/jemog-eul-iblyeoghaejuseyo-(6).png" alt="브랜드 로고" class="logo"> --><h1>홈</h1>
+            </div>
+            <p>2025년 11월 (현재까지)</p>
+        </header>
+
+        <!-- 1. 핵심 지표 카드 영역 (3개) --><section class="kpi-metrics">
+
+            <!-- 카드 1: 총 수입 --><div class="kpi-card income ripple-target">
+                <p class="kpi-card-title">총 수입</p>
+                <p class="kpi-card-value">₩ 45.2M</p>
+                <p class="kpi-card-change">+12.5%</p>
+            </div>
+
+            <!-- 카드 2: 총 지출 --><div class="kpi-card expense ripple-target">
+                <p class="kpi-card-title">총 지출</p>
+                <p class="kpi-card-value">₩ 18.7M</p>
+                <p class="kpi-card-change">-4.1%</p>
+            </div>
+
+            <!-- 카드 3: 순이익 --><div class="kpi-card net ripple-target">
+                <p class="kpi-card-title">순이익</p>
+                <p class="kpi-card-value">₩ 26.5M</p>
+                <p class="kpi-card-change text-blue">+8.4%</p>
+            </div>
+        </section>
+        
+        <!-- 2.1. 월별 수입/지출 추이 (차트 1) --><section class="chart-section">
+            <div class="chart-card">
+                <h2>월별 수입/지출 추이</h2>
+                
+                <!-- 꺾은선 그래프 자리 표시자 --><div class="chart-placeholder">
+                    최근 6개월 수입/지출 꺾은선 그래프
+                </div>
+            </div>
+        </section>
+
+        <!-- 2.2. 지출 분류 (차트 2) --><section class="chart-section">
+            <div class="chart-card">
+                <h2>지출 분류</h2>
+                
+                <!-- 지출 분류 도넛 그래프 자리 표시자 --><div class="chart-placeholder">
+                    지출 분류 도넛 그래프 자리 표시자
+                </div>
+            </div>
+        </section>
+        
+        <!-- 3. 최근 거래 내역 --><section class="transaction-section">
+            <h2>최근 거래 내역</h2>
+            
+            <ul class="transaction-list">
+                <!-- 항목 1: 수입 --><li class="transaction-item ripple-target">
+                    <div class="transaction-details">
+                        <span class="transaction-type">월급 입금</span>
+                        <span class="transaction-date">2025년 10월 25일</span>
+                    </div>
+                    <span class="transaction-amount text-green">+ ₩ 3,500,000</span>
+                </li>
+                <!-- 항목 2: 지출 --><li class="transaction-item ripple-target">
+                    <div class="transaction-details">
+                        <span class="transaction-type">온라인 쇼핑 (가전)</span>
+                        <span class="transaction-date">2025년 10월 28일</span>
+                    </div>
+                    <span class="transaction-amount text-red">- ₩ 850,000</span>
+                </li>
+                <!-- 항목 3: 수입 --><li class="transaction-item ripple-target">
+                    <div class="transaction-details">
+                        <span class="transaction-type">주식 배당금</span>
+                        <span class="transaction-date">2025년 11월 1일</span>
+                    </div>
+                    <span class="transaction-amount text-green">+ ₩ 150,000</span>
+                </li>
+                <!-- 항목 4: 지출 --><li class="transaction-item ripple-target">
+                    <div class="transaction-details">
+                        <span class="transaction-type">식료품 구매</span>
+                        <span class="transaction-date">2025년 11월 3일</span>
+                    </div>
+                    <span class="transaction-amount text-red">- ₩ 120,000</span>
+                </li>
+            </ul>
+        </section>
+    </div>
     
     <!-- 하단 플로팅 내비게이션 바 -->
     <nav class="bottom-nav">
-        <!-- SPA 로직에 맞춰 <a> 태그의 href를 실제 경로로 변경 -->
-        <a href="/" class="nav-item" data-path="/">
+        <!-- 1. 홈 (활성) -->
+        <a href="#" class="nav-item active">
             <span class="material-icons">home</span>
             <span>홈</span>
         </a>
-        <a href="/records" class="nav-item" data-path="/records">
+        <!-- 2. 기록 (receipt_long) -->
+        <a href="#" class="nav-item">
             <span class="material-icons">receipt_long</span>
             <span>기록</span>
         </a>
-        <a href="/goals" class="nav-item" data-path="/goals">
+        <!-- 3. 목표 (track_changes) -->
+        <a href="#" class="nav-item">
             <span class="material-icons">track_changes</span>
             <span>목표</span>
         </a>
-        <a href="/my" class="nav-item" data-path="/my">
+        <!-- 4. MY (person) -->
+        <a href="#" class="nav-item">
             <span class="material-icons">person</span>
             <span>MY</span>
         </a>
     </nav>
 
 
-    <!-- JavaScript for SPA and Ripple Effect -->
-    <script>
-        // -----------------------
-        // 1. View Templates
-        // -----------------------
-
-        // 홈 (대시보드) 템플릿 - 기존 콘텐츠 사용
-        const homeTemplate = `
-            <header class="header">
-                <div class="header-main-content">
-                    <h1>홈</h1>
-                </div>
-                <p>2025년 11월 (현재까지)</p>
-            </header>
-
-            <!-- 1. 핵심 지표 카드 영역 (3개) -->
-            <section class="kpi-metrics">
-                <div class="kpi-card income ripple-target">
-                    <p class="kpi-card-title">총 수입</p>
-                    <p class="kpi-card-value">₩ 45.2M</p>
-                    <p class="kpi-card-change">+12.5%</p>
-                </div>
-                <div class="kpi-card expense ripple-target">
-                    <p class="kpi-card-title">총 지출</p>
-                    <p class="kpi-card-value">₩ 18.7M</p>
-                    <p class="kpi-card-change">-4.1%</p>
-                </div>
-                <div class="kpi-card net ripple-target">
-                    <p class="kpi-card-title">순이익</p>
-                    <p class="kpi-card-value">₩ 26.5M</p>
-                    <p class="kpi-card-change text-blue">+8.4%</p>
-                </div>
-            </section>
-            
-            <!-- 2.1. 월별 수입/지출 추이 (차트 1) -->
-            <section class="chart-section">
-                <div class="chart-card">
-                    <h2>월별 수입/지출 추이</h2>
-                    <div class="chart-placeholder">
-                        최근 6개월 수입/지출 꺾은선 그래프
-                    </div>
-                </div>
-            </section>
-
-            <!-- 2.2. 지출 분류 (차트 2) -->
-            <section class="chart-section">
-                <div class="chart-card">
-                    <h2>지출 분류</h2>
-                    <div class="chart-placeholder">
-                        지출 분류 도넛 그래프 자리 표시자
-                    </div>
-                </div>
-            </section>
-            
-            <!-- 3. 최근 거래 내역 -->
-            <section class="transaction-section">
-                <h2>최근 거래 내역</h2>
-                
-                <ul class="transaction-list">
-                    <li class="transaction-item ripple-target">
-                        <div class="transaction-details">
-                            <span class="transaction-type">월급 입금</span>
-                            <span class="transaction-date">2025년 10월 25일</span>
-                        </div>
-                        <span class="transaction-amount text-green">+ ₩ 3,500,000</span>
-                    </li>
-                    <li class="transaction-item ripple-target">
-                        <div class="transaction-details">
-                            <span class="transaction-type">온라인 쇼핑 (가전)</span>
-                            <span class="transaction-date">2025년 10월 28일</span>
-                        </div>
-                        <span class="transaction-amount text-red">- ₩ 850,000</span>
-                    </li>
-                    <li class="transaction-item ripple-target">
-                        <div class="transaction-details">
-                            <span class="transaction-type">주식 배당금</span>
-                            <span class="transaction-date">2025년 11월 1일</span>
-                        </div>
-                        <span class="transaction-amount text-green">+ ₩ 150,000</span>
-                    </li>
-                    <li class="transaction-item ripple-target">
-                        <div class="transaction-details">
-                            <span class="transaction-type">식료품 구매</span>
-                            <span class="transaction-date">2025년 11월 3일</span>
-                        </div>
-                        <span class="transaction-amount text-red">- ₩ 120,000</span>
-                    </li>
-                </ul>
-            </section>
-        `;
-
-        // 기록 템플릿
-        const recordsTemplate = `
-            <header class="header">
-                <h1>거래 기록</h1>
-                <p>전체 수입 및 지출 내역을 검색하고 필터링하세요.</p>
-            </header>
-            <section class="chart-section">
-                <div class="chart-card">
-                    <h2>모든 거래 목록</h2>
-                    <div class="placeholder-content">
-                        전체 거래 기록 및 필터링 UI
-                    </div>
-                </div>
-            </section>
-            <section class="chart-section">
-                <div class="chart-card">
-                    <h2>월별 요약</h2>
-                    <div class="placeholder-content">
-                        월별 합계 표
-                    </div>
-                </div>
-            </section>
-        `;
-
-        // 목표 템플릿
-        const goalsTemplate = `
-            <header class="header">
-                <h1>재정 목표</h1>
-                <p>저축 및 투자 목표 진행 상황을 확인하세요.</p>
-            </header>
-            <section class="chart-section">
-                <div class="chart-card">
-                    <h2>단기 목표 (여행 자금)</h2>
-                    <div class="placeholder-content">
-                        진행률 바 및 예상 완료일
-                    </div>
-                </div>
-            </section>
-            <section class="chart-section">
-                <div class="chart-card">
-                    <h2>장기 목표 (주택 구매)</h2>
-                    <div class="placeholder-content">
-                        필요 자금 및 현재 적립액
-                    </div>
-                </div>
-            </section>
-        `;
-
-        // MY 템플릿
-        const myTemplate = `
-            <header class="header">
-                <h1>MY 페이지</h1>
-                <p>계정 설정 및 프로필을 관리하세요.</p>
-            </header>
-            <section class="chart-section">
-                <div class="chart-card">
-                    <h2>프로필 정보</h2>
-                    <div class="placeholder-content">
-                        사용자 이름, 이메일, 알림 설정
-                    </div>
-                </div>
-            </section>
-            <section class="chart-section">
-                <div class="chart-card">
-                    <h2>보안</h2>
-                    <div class="placeholder-content">
-                        비밀번호 변경 및 2단계 인증
-                    </div>
-                </div>
-            </section>
-        `;
-
-        // -----------------------
-        // 2. SPA Core Logic
-        // -----------------------
-
-        const contentArea = document.getElementById('content-area');
-        const ROUTES = {
-            '/': homeTemplate,
-            '/records': recordsTemplate,
-            '/goals': goalsTemplate,
-            '/my': myTemplate,
-        };
-        const navItems = document.querySelectorAll('.nav-item');
-
-        /**
-         * URL 경로에 따라 뷰를 로드하고 렌더링합니다.
-         * @param {string} path - 현재 URL 경로
-         * @param {boolean} pushState - history.pushState를 호출할지 여부
-         */
-        function loadView(path, pushState = true) {
-            const template = ROUTES[path] || ROUTES['/']; // 일치하는 경로가 없으면 홈으로 리디렉션
-
-            if (contentArea) {
-                // 1. 콘텐츠 전환 효과를 위해 잠시 불투명도 낮춤
-                contentArea.style.opacity = '0';
-
-                setTimeout(() => {
-                    // 2. 콘텐츠 로드
-                    contentArea.innerHTML = template;
-                    
-                    // 3. 네비게이션 활성 상태 업데이트
-                    updateNav(path);
-
-                    // 4. history.pushState를 호출 (popstate 이벤트에서는 호출하지 않음)
-                    if (pushState) {
-                        history.pushState(null, '', path);
-                    }
-
-                    // 5. 콘텐츠 전환 효과 다시 복구
-                    contentArea.style.opacity = '1';
-                    
-                    // 6. 새 콘텐츠에 리플 리스너 재할당
-                    attachRippleListeners(); 
-
-                }, 300); // CSS transition 시간과 일치
-            }
-        }
-
-        /**
-         * 내비게이션 바의 활성 상태를 업데이트합니다.
-         * @param {string} currentPath - 현재 활성 경로
-         */
-        function updateNav(currentPath) {
-            navItems.forEach(item => {
-                item.classList.remove('active');
-                if (item.getAttribute('data-path') === currentPath) {
-                    item.classList.add('active');
-                }
-            });
-            // 제목도 업데이트
-            const titleElement = document.querySelector('title');
-            if (titleElement) {
-                // 경로에 따라 제목을 간단히 업데이트
-                const titleMap = {
-                    '/': '홈',
-                    '/records': '기록',
-                    '/goals': '목표',
-                    '/my': 'MY',
-                };
-                titleElement.textContent = `재무 통계 미니 대시보드 - ${titleMap[currentPath] || '홈'}`;
-            }
-        }
-
-        /**
-         * 내비게이션 링크 클릭을 처리합니다.
-         */
-        function handleNavigation(event) {
-            // <a> 태그의 기본 동작 (페이지 새로고침) 방지
-            event.preventDefault(); 
-            
-            const targetPath = event.currentTarget.getAttribute('data-path');
-            if (targetPath && targetPath !== location.pathname) {
-                // 현재 경로와 다를 경우에만 로드
-                loadView(targetPath, true);
-            }
-        }
-        
-        // -----------------------
-        // 3. Ripple Effect Logic
-        // -----------------------
-
+    <!-- JavaScript for Ripple Effect --><script>
+        // 리플 효과를 생성하고 애니메이션을 적용하는 함수
         function createRipple(event) {
             const button = event.currentTarget;
+
+            // 기존 리플 제거
             const oldRipple = button.querySelector('.ripple');
             if (oldRipple) {
                 oldRipple.remove();
             }
 
+            // 새 리플 요소 생성
             const circle = document.createElement('span');
+            // 리플 크기를 버튼의 최대 크기로 설정
             const diameter = Math.max(button.clientWidth, button.clientHeight);
             const radius = diameter / 2;
 
+            // 크기와 클릭 위치를 기반으로 리플 위치 설정
             circle.style.width = circle.style.height = `${diameter}px`;
             circle.style.left = `${event.clientX - button.getBoundingClientRect().left - radius}px`;
             circle.style.top = `${event.clientY - button.getBoundingClientRect().top - radius}px`;
             circle.classList.add('ripple');
-            
-            // 내비게이션 항목의 ripple-target이 아닌 nav-item 자체에 리플 효과 추가
-            if (!button.classList.contains('nav-item')) {
-                 button.appendChild(circle);
-            }
 
+            // 리플을 요소에 추가
+            button.appendChild(circle);
+            
+            // 애니메이션 종료 후 리플 요소 정리 (0.6초 후)
             setTimeout(() => {
                 if (circle.parentNode === button) {
                     circle.remove();
@@ -597,39 +442,13 @@
             }, 600);
         }
 
-        /**
-         * 새로 로드된 콘텐츠에 리플 리스너를 재할당합니다.
-         */
-        function attachRippleListeners() {
+        // DOM 로드 후 클릭 리스너 적용 (효율화된 리스너 할당)
+        window.onload = function () {
             // 하단 내비게이션 바를 제외한 모든 리플 대상(.ripple-target)에 대해 리스너를 한 번에 할당
             const rippleTargets = document.querySelectorAll('.ripple-target');
             rippleTargets.forEach(target => {
-                // 기존 리스너가 중복 할당되지 않도록 주의
-                target.removeEventListener('click', createRipple);
                 target.addEventListener('click', createRipple);
             });
-        }
-
-
-        // -----------------------
-        // 4. Initialization
-        // -----------------------
-
-        window.onload = function () {
-            // 1. 내비게이션 리스너 할당
-            navItems.forEach(item => {
-                item.addEventListener('click', handleNavigation);
-            });
-
-            // 2. popstate 이벤트 (뒤로가기/앞으로가기) 리스너 할당
-            window.onpopstate = () => {
-                // pushState를 호출하지 않도록 false 전달
-                loadView(location.pathname, false); 
-            };
-            
-            // 3. 초기 뷰 로드
-            // 새로고침 시 현재 URL 경로를 기반으로 콘텐츠를 로드
-            loadView(location.pathname, false);
         };
     </script>
 </body>
