@@ -3,724 +3,634 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>디리토 웹사이트 뼈대</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <title>재무 통계 미니 대시보드 (SPA)</title>
+    <!-- Google Material Icons CDN (SVG 대체) -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <style>
-        @font-face {
-            font-family: 'Pretendard-Regular';
-            src: url('https://fastly.jsdelivr.net/gh/Project-Noonnu/noonfonts_2107@1.1/Pretendard-Regular.woff') format('woff');
-            font-weight: 400;
-            font-style: normal;
+        /* CSS 변수를 사용하여 색상과 크기 관리의 효율성 높임 */
+        :root {
+            --primary-blue: #3b82f6;
+            --text-dark: #1f2937;
+            --text-gray: #6b7280;
+            --border-light: #e5e7eb;
+            --ripple-color: rgba(0, 0, 0, 0.1);
         }
+
+        /* 기본 스타일 리셋 및 폰트 설정 */
         body {
-            font-family: 'Pretendard-Regular', 'Inter', sans-serif; /* Pretendard 폰트 적용 */
-            background-color: #f0f2f5; /* 밝은 회색 배경 */
-        }
-        /* 고정 헤더를 위한 스타일 */
-        .fixed-header {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 64px; /* 헤더 높이 고정 */
-            z-index: 1000; /* 다른 요소 위에 오도록 설정 */
-        }
-        /* 고정 사이드바를 위한 스타일 */
-        .fixed-sidebar {
-            position: fixed;
-            top: 64px; /* 헤더 높이만큼 아래로 시작 */
-            left: 0;
-            bottom: 0;
-            width: 16rem; /* w-64 (256px)와 동일 */
+            font-family: 'Inter', Arial, sans-serif;
             background-color: #ffffff;
-            border-right: 1px solid #d1d5db;
-            z-index: 999; /* 헤더보다 약간 아래 */
-            display: none; /* 모바일에서는 기본 숨김 */
+            margin: 0;
+            padding: 0;
+            display: flex;
             flex-direction: column;
-            justify-content: space-between;
-            padding: 1.5rem; /* p-6과 동일 */
-        }
-        /* 대형 화면 (lg)에서 사이드바 표시 */
-        @media (min-width: 1024px) {
-            .fixed-sidebar {
-                display: flex;
-            }
+            align-items: center;
+            padding-top: 20px;
+            /* 플로팅 내비게이션 바 높이와 하단 여백을 고려하여 충분한 공간 확보 */
+            padding-bottom: 110px; 
         }
 
-        /* 메인 콘텐츠 영역이 헤더와 사이드바/하단 내비게이션 바를 피하도록 조정 */
-        .main-content-area {
-            margin-top: 64px; /* 헤더 높이만큼 위쪽 마진 */
-            flex: 1;
-            overflow-y: auto;
+        /* 메인 콘텐츠 영역 (이전 .container 역할) */
+        #content-area {
+            width: 95%;
+            max-width: 700px; 
             background-color: #ffffff;
-            padding-left: 0; /* 모바일에서 좌우 패딩을 0으로 완전히 제거 */
-            padding-right: 0; /* 모바일에서 좌우 패딩을 0으로 완전히 제거 */
-            margin-left: 0; /* 모바일에서는 왼쪽 마진 없음 */
-            padding-bottom: 4rem; /* 하단 내비게이션 바 높이에 맞춰 패딩 조정 */
-        }
-        /* 대형 화면 (lg)에서 메인 콘텐츠 영역 왼쪽 마진 조정 */
-        @media (min-width: 1024px) {
-            .main-content-area {
-                margin-left: 16rem; /* 사이드바 너비만큼 왼쪽 마진 */
-                padding: 2rem; /* 데스크톱에서는 패딩을 2rem (32px)으로 유지 */
-                padding-bottom: 2rem; /* 데스크톱에서는 하단 패딩 줄임 */
-            }
+            padding: 24px;
+            box-sizing: border-box;
+            transition: opacity 0.3s ease-in-out; /* 뷰 전환 시 부드러운 효과 */
         }
 
-        /* 캐러셀 아이템이 줄바꿈되지 않도록 */
-        .carousel-item {
-            flex: 0 0 auto; /* 아이템이 축소되거나 확장되지 않도록 고정 */
-            width: 140px; /* 모바일: 아이템 너비 고정 */
-            margin-right: 16px; /* 아이템 간 간격 */
+        /* 공통 헤더 스타일 */
+        .header h1 {
+            font-size: 24px;
+            font-weight: 800;
+            color: var(--text-dark);
+            margin-bottom: 0;
         }
-        .carousel-item:last-child {
-            margin-right: 0; /* 마지막 아이템에는 마진 없음 */
+        .header p {
+            font-size: 14px;
+            color: var(--text-gray);
+            margin-bottom: 20px;
         }
-        .carousel-item img {
-            width: 140px; /* 모바일: 이미지 너비 고정 */
-            height: 180px; /* 모바일: 이미지 높이 고정 */
-            object-fit: cover;
-            border-radius: 0.375rem; /* rounded-md */
-            margin-bottom: 0.5rem; /* mb-2 */
-            margin-left: auto;
-            margin-right: auto;
-        }
-
-        /* PC (lg) 화면에서 캐러셀 아이템 크기 */
-        @media (min-width: 1024px) {
-            .carousel-item {
-                width: 160px; /* PC: 아이템 너비 원래대로 */
-            }
-            .carousel-item img {
-                width: 160px; /* PC: 이미지 너비 원래대로 */
-                height: 224px; /* PC: 이미지 높이 원래대로 */
-            }
+        .header-main-content {
+            display: flex;
+            align-items: center;
+            margin-bottom: 4px; 
         }
 
-        /* 캐러셀 버튼 위치 및 크기 조정 */
-        .carousel-nav-button {
-            position: absolute;
-            top: 90px; /* 모바일: 이미지 높이(180px)의 절반 */
-            transform: translateY(-50%); /* 정확한 중앙 정렬을 위해 버튼 자체 높이의 절반만큼 위로 이동 */
-            background-color: #ffffff; /* 불투명 흰색 배경 */
-            border: 1px solid #d1d5db; /* 회색 테두리 */
-            border-radius: 9999px; /* 완전한 원형 */
-            padding: 0.625rem; /* 10px */
+        /* KPI 지표 영역 */
+        .kpi-metrics {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr); 
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        /* 개별 KPI 카드 - 공통 리플 효과 클래스 추가: .ripple-target */
+        .kpi-card {
+            padding: 12px;
+            border-radius: 6px;
+            border: 1px solid var(--border-light);
+            background-color: #ffffff; 
             cursor: pointer;
-            transition: background-color 0.2s ease-in-out, opacity 0.3s ease-in-out; /* 불투명도 전환 추가 */
-            width: 48px; /* 32px(svg) + 8px(padding) * 2 = 48px */
-            height: 48px; /* 동일하게 설정 */
-            display: none; /* 모바일에서는 기본 숨김 */
+            position: relative;
+            overflow: hidden;
+        }
+        .kpi-card:hover {
+            background-color: rgba(0, 0, 0, 0.015); 
+        }
+        .kpi-card-title {
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--text-gray);
+            margin-bottom: 4px;
+        }
+        .kpi-card-value {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text-dark);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .kpi-card-change {
+            font-size: 11px;
+            margin-top: 4px;
+        }
+        /* 색상 클래스 */
+        .text-green { color: #10b981; } 
+        .text-red { color: #ef4444; } 
+        .text-blue { color: var(--primary-blue); } 
+        .kpi-card.income .kpi-card-change { color: #10b981; }
+        .kpi-card.expense .kpi-card-change { color: #ef4444; }
+        .kpi-card.net .kpi-card-change { color: var(--primary-blue); }
+        
+        /* 차트 및 거래 섹션 공통 스타일 */
+        .chart-section, .transaction-section {
+            margin-bottom: 20px;
+        }
+        .chart-card {
+            background-color: #ffffff;
+            padding: 16px;
+            border-radius: 6px;
+            border: 1px solid var(--border-light);
+        }
+        .chart-card h2, .transaction-section h2 {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 12px;
+        }
+        .chart-placeholder, .placeholder-content {
+            height: 160px;
+            background-color: #e0e0e0; 
+            border-radius: 4px;
+            display: flex;
             align-items: center;
             justify-content: center;
-            pointer-events: auto; /* 기본적으로 클릭 가능 */
+            color: #9ca3af;
+            font-size: 14px;
+            text-align: center;
         }
-        /* 대형 화면 (lg)에서 캐러셀 버튼 표시 및 위치 조정 */
-        @media (min-width: 1024px) {
-            .carousel-nav-button {
-                display: flex;
-                top: 112px; /* PC: 이미지 높이(224px)의 절반 */
+        .placeholder-content {
+            height: 100px;
+            margin-top: 20px;
+        }
+        /* 거래 목록 영역 */
+        .transaction-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        /* 개별 거래 항목 - 공통 리플 효과 클래스 추가: .ripple-target */
+        .transaction-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 12px;
+            border-bottom: 1px solid #eeeeee;
+            font-size: 13px;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            margin: 2px 0;
+        }
+        .transaction-item:last-child {
+            border-bottom: none;
+        }
+        .transaction-item:hover {
+            background-color: rgba(0, 0, 0, 0.015);
+        }
+        .transaction-details {
+            display: flex;
+            flex-direction: column;
+        }
+        .transaction-type {
+            font-weight: 500;
+            color: #374151;
+        }
+        .transaction-date {
+            font-size: 10px;
+            color: #9ca3af;
+            margin-top: 2px;
+        }
+        .transaction-amount {
+            font-weight: 700;
+        }
+        
+        /* RIPPLE EFFECT CSS */
+        .ripple {
+            position: absolute;
+            border-radius: 50%;
+            transform: scale(0);
+            animation: ripple-animation 0.6s linear;
+            background-color: var(--ripple-color); 
+            pointer-events: none; 
+        }
+
+        @keyframes ripple-animation {
+            to {
+                transform: scale(2.5);
+                opacity: 0;
             }
         }
 
-        .carousel-nav-button.left-2 {
-            left: -24px; /* 버튼 너비(48px)의 절반만큼 왼쪽으로 이동 */
-        }
-        .carousel-nav-button.right-2 {
-            right: -24px; /* 버튼 너비(48px)의 절반만큼 오른쪽으로 이동 */
-        }
-        .carousel-nav-button:hover {
-            background-color: #f3f4f6; /* hover 시 약간 어둡게 */
-        }
-        .carousel-nav-button svg {
-            width: 1.75rem; /* 28px */
-            height: 1.75rem; /* 동일하게 설정 */
-            color: #4b5563; /* text-gray-600과 동일 */
-        }
-        /* 스크롤 불가능 시 버튼 숨김 */
-        .carousel-nav-button.hidden-button {
-            opacity: 0;
-            pointer-events: none; /* 클릭 불가능하게 */
-        }
-        /* 선택된 사이드바 항목 스타일 */
-        .selected-nav-item {
-            color: #2563eb; /* text-blue-600 */
-            background-color: #eff6ff; /* bg-blue-50 */
-        }
-        /* 선택된 항목의 호버 효과는 없애거나 다르게 설정 (선택된 상태 유지) */
-        .selected-nav-item:hover {
-            background-color: #eff6ff; /* 선택된 상태의 배경색 유지 */
-            color: #2563eb; /* 선택된 상태의 텍스트 색상 유지 */
+        /* --- 하단 내비게이션 바 (플로팅/블러/타원형 활성화 스타일) --- */
+        .bottom-nav {
+            position: fixed;
+            bottom: 20px; 
+            left: 50%;
+            transform: translateX(-50%);
+            width: 75%; 
+            max-width: 450px; 
+            height: 70px;
+            background-color: rgba(255, 255, 255, 0.85); 
+            backdrop-filter: blur(10px); 
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            z-index: 1000;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1); 
+            border-radius: 50px; 
+            padding: 0 10px;
+            box-sizing: border-box;
         }
 
-        /* 캐러셀 스크롤바 숨기기 */
-        .flex.overflow-x-scroll::-webkit-scrollbar {
-            display: none; /* Webkit (Chrome, Safari) */
-        }
-
-        .flex.overflow-x-scroll {
-            -ms-overflow-style: none;  /* IE and Edge */
-            scrollbar-width: none;  /* Firefox */
-        }
-
-        /* 사이드바 항목 호버 효과 제거 */
-        .sidebar-nav-item:hover {
-            background-color: transparent; /* 호버 시 배경색 변경 없음 */
-            color: inherit; /* 호버 시 텍스트 색상 변경 없음 */
-        }
-
-        /* 로그인 텍스트 링크 스타일 */
-        #login-btn {
-            color: #4b5563; /* 기본 텍스트 색상 */
-            padding: 0.5rem 1rem; /* 상하 0.5rem, 좌우 1rem 패딩 */
-            border-radius: 0.375rem; /* rounded-md */
-            font-weight: 500; /* font-medium */
-            transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out; /* 부드러운 전환 효과 */
-        }
-
-        #login-btn:hover {
-            background-color: #f3f4f6; /* 호버 시 투명한 배경처럼 보이는 밝은 회색 */
-            color: #1f2937; /* 호버 시 텍스트 색상 약간 진하게 */
-        }
-
-        /* 드롭다운 메뉴 스타일 */
-        .dropdown-menu {
-            position: absolute;
-            top: 100%; /* 헤더 바로 아래 */
-            right: 0;
-            background-color: white;
-            border: 1px solid #d1d5db;
-            border-radius: 0.375rem;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            min-width: 160px;
-            z-index: 1001; /* 헤더보다 위에 */
-            padding: 0.5rem 0;
-        }
-
-        .dropdown-menu a {
-            display: block;
-            padding: 0.75rem 1rem;
-            color: #374151;
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            color: #9ca3af; 
+            font-size: 11px;
             font-weight: 500;
-            transition: background-color 0.2s ease-in-out;
+            transition: color 0.3s;
+            flex-grow: 1;
+            position: relative;
+            height: 60px;
+            border-radius: 25px; 
+            cursor: pointer;
+            z-index: 10;
         }
 
-        .dropdown-menu a:hover {
-            background-color: #f3f4f6;
+        /* 활성 상태 스타일 (큰 타원형 배경) */
+        .nav-item.active {
+            color: var(--text-dark); 
+            font-weight: 600;
+            position: relative; 
+        }
+
+        /* 활성 상태의 부드러운 타원형 배경을 위한 가상 요소 (높이 55px 유지) */
+        .nav-item.active::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 100px; 
+            height: 55px;
+            background-color: #f0f0f0; 
+            border-radius: 30px; 
+            transform: translate(-50%, -50%);
+            z-index: -1; 
+            transition: all 0.3s ease-in-out; 
+        }
+        
+        /* 아이콘 색상 */
+        .material-icons {
+            font-size: 24px;
+            margin-bottom: 2px;
+            color: inherit; 
+            transition: color 0.3s;
+        }
+
+        /* 반응형 */
+        @media (max-width: 600px) {
+            body {
+                padding-bottom: 110px;
+            }
+            #content-area {
+                padding: 16px;
+            }
+            .kpi-metrics {
+                grid-template-columns: 1fr;
+            }
+            .bottom-nav {
+                width: 90%; 
+                max-width: 450px; 
+                height: 65px;
+                bottom: 15px;
+                border-radius: 40px;
+            }
+            .nav-item.active::before {
+                width: 90px; 
+                height: 50px;
+            }
         }
     </style>
 </head>
-<body class="flex min-h-screen flex-col">
-
-    <header class="fixed-header flex items-center justify-between bg-white p-4 border-b border-gray-300">
-        <div class="flex items-center">
-            <!-- 로고 이미지를 헤더 높이에 적절히 맞추고 너비는 비율에 따라 자동 조절 -->
-            <img src="/image/logo.png" alt="UNIZ 로고" class="h-10 w-auto max-w-full">
-        </div>
-        <div class="flex items-center space-x-4 relative">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6 text-gray-600 cursor-pointer hover:text-blue-500 transition-colors duration-200">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
-            </svg>
-            <!-- 로그인 상태에 따라 조건부 렌더링될 요소 -->
-            <div id="auth-status-container" class="relative">
-                <!-- 여기에 로그인 버튼 또는 닉네임/드롭다운이 들어갑니다. -->
-            </div>
-        </div>
-    </header>
-
-    <div class="flex flex-1">
-        <aside class="fixed-sidebar">
-            <div>
-                <nav>
-                    <ul>
-                        <li class="mb-2">
-                            <a href="#" class="flex items-center p-3 rounded-lg transition-colors duration-200 selected-nav-item">
-                                <svg class="w-6 h-6 mr-3" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M4 23V9.66667L13 3L22 9.66667V23H14.125V16.3333H11.875V23H4Z" />
-                                </svg>
-                                <span class="font-normal">홈</span>
-                            </a>
-                        </li>
-                        <li class="mb-2">
-                            <a href="#" class="flex items-center text-gray-700 p-3 rounded-lg transition-colors duration-200 sidebar-nav-item">
-                                <svg class="w-6 h-6 mr-3" fill="currentColor" viewBox="0 0 26 26" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M7.21474 18.7853L15.0995 15.1267L18.7581 7.24187L10.8733 10.9005L7.21474 18.7853ZM13 14.0834C12.693 14.0834 12.4357 13.9795 12.2281 13.7719C12.0205 13.5643 11.9166 13.307 11.9166 13C11.9166 12.6931 12.0205 12.4358 12.2281 12.2282C12.4357 12.0205 12.693 11.9167 13 11.9167C13.3069 11.9167 13.5642 12.0205 13.7719 12.2282C13.9795 12.4358 14.0833 12.6931 14.0833 13C14.0833 13.307 13.9795 13.5643 13.7719 13.7719C13.5642 13.9795 13.3069 14.0834 13 14.0834ZM13.0021 24.2161C11.4589 24.2161 10.0054 23.9236 8.64152 23.3387C7.27767 22.7538 6.08623 21.9518 5.06719 20.9328C4.04817 19.9138 3.24621 18.723 2.6613 17.3606C2.07639 15.9982 1.78394 14.5453 1.78394 13.0021C1.78394 11.4409 2.07639 9.97834 2.6613 8.61448C3.24621 7.25063 4.04738 6.06344 5.06481 5.05291C6.08222 4.04238 7.27253 3.24237 8.63572 2.65289C9.99892 2.06342 11.4525 1.76868 12.9966 1.76868C14.5587 1.76868 16.0223 2.06302 17.3873 2.6517C18.7524 3.24039 19.9398 4.03932 20.9496 5.0485C21.9594 6.05767 22.7588 7.24439 23.3478 8.60865C23.9368 9.97291 24.2313 11.4367 24.2313 13C24.2313 14.5446 23.9366 15.9988 23.3471 17.3625C22.7576 18.7262 21.9576 19.9169 20.9471 20.9347C19.9366 21.9524 18.7501 22.7538 17.3876 23.3387C16.0252 23.9236 14.5633 24.2161 13.0021 24.2161ZM13 22.0706C15.523 22.0706 17.6656 21.1883 19.4276 19.4237C21.1896 17.6591 22.0705 15.5179 22.0705 13C22.0705 10.477 21.1896 8.33443 19.4276 6.57245C17.6656 4.81046 15.5205 3.92947 12.9923 3.92947C10.4822 3.92947 8.3442 4.81046 6.57828 6.57245C4.81238 8.33443 3.92942 10.4795 3.92942 13.0077C3.92942 15.5178 4.81173 17.6558 6.57633 19.4217C8.34094 21.1876 10.4822 22.0706 13 22.0706Z" />
-                                </svg>
-                                <span class="font-normal">탐색</span>
-                            </a>
-                        </li>
-                        <li class="mb-2">
-                            <a href="#" class="flex items-center text-gray-700 p-3 rounded-lg transition-colors duration-200 sidebar-nav-item">
-                                <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.691h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.324 1.118l1.519 4.674c.3.921-.755 1.688-1.539 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.784.57-1.838-.197-1.539-1.118l1.519-4.674a1 1 0 00-.324-1.118L2.05 10.102c-.783-.57-.381-1.81.588-1.81h4.915a1 1 0 00.95-.691l1.519-4.674z" />
-                                </svg>
-                                <span class="font-normal">베스트</span>
-                            </a>
-                        </li>
-                        <li class="mb-2">
-                            <a href="#" class="flex items-center text-gray-700 p-3 rounded-lg transition-colors duration-200 sidebar-nav-item">
-                                <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M17 3H7a2 2 0 00-2 2v16l7-3.5 7 3.5V5a2 2 0 00-2-2z" />
-                                </svg>
-                                <span class="font-normal">저장됨</span>
-                            </a>
-                        </li>
-                        <li class="mb-2">
-                            <a href="/create" class="flex items-center text-gray-700 p-3 rounded-lg transition-colors duration-200 sidebar-nav-item">
-                                <svg class="w-6 h-6 mr-3" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M14 2H6C4.9 2 4 2.9 4 4V20C4 21.1 4.9 22 6 22H18C19.1 22 20 21.1 20 20V8L14 2ZM18 20H6V4H13V9H18V20ZM12 11C10.34 11 9 12.34 9 14C9 15.66 10.34 17 12 17C13.66 17 15 15.66 15 14C15 12.34 13.66 11 12 11ZM12 15.5C11.17 15.5 10.5 14.83 10.5 14C10.5 13.17 11.17 12.5 12 12.5C12.83 12.5 13.5 13.17 13.5 14C13.5 14.83 12.83 15.5 12 15.5Z" />
-                                </svg>
-                                <span class="font-normal">만들기</span>
-                            </a>
-                        </li>
-                    </ul>
-                </nav>
-            </div>
-            <div>
-            </div>
-        </aside>
-
-        <main class="main-content-area">
-            <section class="mb-8 pt-6">
-                <div class="px-4 flex justify-between items-center mb-6">
-                    <h2 class="text-xl font-semibold text-gray-800">따끈따끈 신작이 왔어요 (*´▽`*)ﾉ</h2>
-                    <a href="#" class="text-gray-600 hover:text-gray-800 font-normal">더보기</a>
-                </div>
-                <div class="relative">
-                    <div id="new-releases-carousel" class="flex overflow-x-scroll scroll-smooth pb-4 px-4">
-                        <!-- Discussions will be dynamically loaded here -->
-                    </div>
-                    <button id="new-releases-carousel-prev" class="carousel-nav-button left-2">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
-                    </button>
-                    <button id="new-releases-carousel-next" class="carousel-nav-button right-2">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
-                    </button>
-                </div>
-            </section>
-
-            <section class="mb-8 pt-6">
-                <div class="px-4 flex justify-between items-center mb-6">
-                    <h2 class="text-xl font-semibold text-gray-800">지난주 독자들의 ♥ 가 듬뿍!</h2>
-                    <a href="#" class="text-gray-600 hover:text-gray-800 font-normal">더보기</a>
-                </div>
-                <div class="relative">
-                    <div id="popular-carousel" class="flex overflow-x-scroll scroll-smooth pb-4 px-4">
-                        <!-- Discussions will be dynamically loaded here -->
-                    </div>
-                    <button id="popular-carousel-prev" class="carousel-nav-button left-2">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
-                    </button>
-                    <button id="popular-carousel-next" class="carousel-nav-button right-2">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
-                    </button>
-                </div>
-            </section>
-
-            <section class="mb-8 pt-6">
-                <div class="px-4 flex justify-between items-center mb-6">
-                    <h2 class="text-xl font-semibold text-gray-800">실시간 인기 주제</h2>
-                    <a href="#" class="text-gray-600 hover:text-gray-800 font-normal">더보기</a>
-                </div>
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 px-4" id="popular-topics-grid">
-                    <!-- Dynamic popular topics here or keep static for now -->
-                     <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-200 flex items-center">
-                        <span class="text-lg font-bold text-blue-600 mr-3">1</span>
-                        <div>
-                            <h3 class="font-medium text-gray-900 text-base"># 로맨스 판타지</h3>
-                            <p class="text-sm text-gray-600 font-normal">지금 가장 뜨거운 장르!</p>
-                        </div>
-                    </div>
-                    <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-200 flex items-center">
-                        <span class="text-lg font-bold text-blue-600 mr-3">2</span>
-                        <div>
-                            <h3 class="font-medium text-gray-900 text-base"># 현대 로맨스</h3>
-                            <p class="text-sm text-gray-600 font-normal">현실 공감 100%</p>
-                        </div>
-                    </div>
-                    <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-200 flex items-center">
-                        <span class="text-lg font-bold text-blue-600 mr-3">3</span>
-                        <div>
-                            <h3 class="font-medium text-gray-900 text-base"># BL (Boys Love)</h3>
-                            <p class="text-sm text-gray-600 font-normal">매니아층 열광!</p>
-                        </div>
-                    </div>
-                    <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-200 flex items-center">
-                        <span class="text-lg font-bold text-blue-600 mr-3">4</span>
-                        <div>
-                            <h3 class="font-medium text-gray-900 text-base"># 스릴러/미스터리</h3>
-                            <p class="text-sm text-gray-600 font-normal">손에 땀을 쥐는 전개</p>
-                        </div>
-                    </div>
-                    <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-200 flex items-center">
-                        <span class="text-lg font-bold text-blue-600 mr-3">5</span>
-                        <div>
-                            <h3 class="font-medium text-gray-900 text-base"># 판타지 모험</h3>
-                            <p class="text-sm text-gray-600 font-normal">새로운 세계로 떠나요</p>
-                        </div>
-                    </div>
-                    <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-200 flex items-center">
-                        <span class="text-lg font-bold text-blue-600 mr-3">6</span>
-                        <div>
-                            <h3 class="font-medium text-gray-900 text-base"># 무협</h3>
-                            <p class="text-sm text-gray-600 font-normal">강호의 세계</p>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <section class="mb-8 pt-6">
-                <div class="px-4 flex justify-between items-center mb-6">
-                    <h2 class="text-xl font-semibold text-gray-800">새롭게 떠오르는 작품</h2>
-                    <a href="#" class="text-gray-600 hover:text-gray-800 font-normal">더보기</a>
-                </div>
-                <div class="relative">
-                    <div id="rising-stars-carousel" class="flex overflow-x-scroll scroll-smooth pb-4 px-4">
-                        <!-- Discussions will be dynamically loaded here -->
-                    </div>
-                    <button id="rising-stars-carousel-prev" class="carousel-nav-button left-2">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
-                    </button>
-                    <button id="rising-stars-carousel-next" class="carousel-nav-button right-2">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
-                    </button>
-                </div>
-            </section>
-
-            <section class="mb-8 pt-6">
-                <div class="px-4 flex justify-between items-center mb-6">
-                    <h2 class="text-xl font-semibold text-gray-800">에디터의 추천작</h2>
-                    <a href="#" class="text-gray-600 hover:text-gray-800 font-normal">더보기</a>
-                </div>
-                <div class="relative">
-                    <div id="editors-pick-carousel" class="flex overflow-x-scroll scroll-smooth pb-4 px-4">
-                        <!-- Discussions will be dynamically loaded here -->
-                    </div>
-                    <button id="editors-pick-carousel-prev" class="carousel-nav-button left-2">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
-                    </button>
-                    <button id="editors-pick-carousel-next" class="carousel-nav-button right-2">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
-                    </button>
-                </div>
-            </section>
-        </main>
-    </div>
-
-    <nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-300 py-0.5 px-2 shadow-lg lg:hidden z-1000">
-        <ul class="flex justify-around items-center h-full">
-            <li>
-                <a href="#" class="flex flex-col items-center p-2 rounded-lg text-blue-600">
-                    <svg class="w-6 h-6 mb-1" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M4 23V9.66667L13 3L22 9.66667V23H14.125V16.3333H11.875V23H4Z" />
-                    </svg>
-                    <span class="text-xs font-normal">홈</span>
-                </a>
-            </li>
-            <li>
-                <a href="#" class="flex flex-col items-center p-2 rounded-lg text-gray-700">
-                    <svg class="w-6 h-6 mb-1" fill="currentColor" viewBox="0 0 26 26" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M7.21474 18.7853L15.0995 15.1267L18.7581 7.24187L10.8733 10.9005L7.21474 18.7853ZM13 14.0834C12.693 14.0834 12.4357 13.9795 12.2281 13.7719C12.0205 13.5643 11.9166 13.307 11.9166 13C11.9166 12.6931 12.0205 12.4358 12.2281 12.2282C12.4357 12.0205 12.693 11.9167 13 11.9167C13.3069 11.9167 13.5642 12.0205 13.7719 12.2282C13.9795 12.4358 14.0833 12.6931 14.0833 13C14.0833 13.307 13.9795 13.5643 13.7719 13.7719C13.5642 13.9795 13.3069 14.0834 13 14.0834ZM13.0021 24.2161C11.4589 24.2161 10.0054 23.9236 8.64152 23.3387C7.27767 22.7538 6.08623 21.9518 5.06719 20.9328C4.04817 19.9138 3.24621 18.723 2.6613 17.3606C2.07639 15.9982 1.78394 14.5453 1.78394 13.0021C1.78394 11.4409 2.07639 9.97834 2.6613 8.61448C3.24621 7.25063 4.04738 6.06344 5.06481 5.05291C6.08222 4.04238 7.27253 3.24237 8.63572 2.65289C9.99892 2.06342 11.4525 1.76868 12.9966 1.76868C14.5587 1.76868 16.0223 2.06302 17.3873 2.6517C18.7524 3.24039 19.9398 4.03932 20.9496 5.0485C21.9594 6.05767 22.7588 7.24439 23.3478 8.60865C23.9368 9.97291 24.2313 11.4367 24.2313 13C24.2313 14.5446 23.9366 15.9988 23.3471 17.3625C22.7576 18.7262 21.9576 19.9169 20.9471 20.9347C19.9366 21.9524 18.7501 22.7538 17.3876 23.3387C16.0252 23.9236 14.5633 24.2161 13.0021 24.2161ZM13 22.0706C15.523 22.0706 17.6656 21.1883 19.4276 19.4237C21.1896 17.6591 22.0705 15.5179 22.0705 13C22.0705 10.477 21.1896 8.33443 19.4276 6.57245C17.6656 4.81046 15.5205 3.92947 12.9923 3.92947C10.4822 3.92947 8.3442 4.81046 6.57828 6.57245C4.81238 8.33443 3.92942 10.4795 3.92942 13.0077C3.92942 15.5178 4.81173 17.6558 6.57633 19.4217C8.34094 21.1876 10.4822 22.0706 13 22.0706Z" />
-                                </svg>
-                                <span class="text-xs font-normal">탐색</span>
-                            </a>
-                        </li>
-            <li>
-                <a href="#" class="flex flex-col items-center p-2 rounded-lg text-gray-700">
-                    <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.691h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.324 1.118l1.519 4.674c.3.921-.755 1.688-1.539 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.784.57-1.838-.197-1.539-1.118l1.519-4.674a1 1 0 00-.324-1.118L2.05 10.102c-.783-.57-.381-1.81.588-1.81h4.915a1 1 0 00.95-.691l1.519-4.674z" />
-                    </svg>
-                    <span class="text-xs font-normal">베스트</span>
-                </a>
-            </li>
-            <li>
-                <a href="#" class="flex flex-col items-center p-2 rounded-lg text-gray-700">
-                    <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M17 3H7a2 2 0 00-2 2v16l7-3.5 7 3.5V5a2 2 0 00-2-2z" />
-                    </svg>
-                    <span class="text-xs font-normal">저장됨</span>
-                </a>
-            </li>
-            <li>
-                <a href="#" class="flex flex-col items-center p-2 rounded-lg text-gray-700">
-                    <svg class="w-6 h-6 mb-1" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M14 2H6C4.9 2 4 2.9 4 4V20C4 21.1 4.9 22 6 = 22H18C19.1 22 20 21.1 20 20V8L14 2ZM18 20H6V4H13V9H18V20ZM12 11C10.34 11 9 12.34 9 14C9 15.66 10.34 17 12 17C13.66 17 15 15.66 15 14C15 12.34 13.66 11 12 11ZM12 15.5C11.17 15.5 10.5 = 14.83 10.5 = 14C10.5 = 13.17 11.17 = 12.5 12 = 12.5C12.83 = 12.5 13.5 = 13.17 13.5 = 14C13.5 = 14.83 12.83 = 15.5 12 = 15.5Z" />
-                    </svg>
-                    <span class="text-xs font-normal">퀘스트</span>
-                </a>
-            </li>
-        </ul>
+<body>
+    
+    <!-- 동적으로 로드될 메인 콘텐츠 영역 -->
+    <main id="content-area"></main>
+    
+    <!-- 하단 플로팅 내비게이션 바 -->
+    <nav class="bottom-nav">
+        <!-- SPA 로직에 맞춰 <a> 태그의 href를 실제 경로로 변경 -->
+        <a href="/" class="nav-item" data-path="/">
+            <span class="material-icons">home</span>
+            <span>홈</span>
+        </a>
+        <a href="/records" class="nav-item" data-path="/records">
+            <span class="material-icons">receipt_long</span>
+            <span>기록</span>
+        </a>
+        <a href="/goals" class="nav-item" data-path="/goals">
+            <span class="material-icons">track_changes</span>
+            <span>목표</span>
+        </a>
+        <a href="/my" class="nav-item" data-path="/my">
+            <span class="material-icons">person</span>
+            <span>MY</span>
+        </a>
     </nav>
 
-    <script type="module">
-        // Firebase SDK imports
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, onAuthStateChanged, signOut, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, onSnapshot, query, orderBy, limit } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
+    <!-- JavaScript for SPA and Ripple Effect -->
+    <script>
+        // -----------------------
+        // 1. View Templates
+        // -----------------------
 
-        // Firebase configuration (사용자가 제공한 실제 Firebase config로 교체됨)
-        const firebaseConfig = {
-            apiKey: "AIzaSyDLzrMR2QVK4rWNDIg4bQv4rlYTkchnU58",
-            authDomain: "uniz-a.firebaseapp.com",
-            projectId: "uniz-a",
-            storageBucket: "uniz-a.firebasestorage.app",
-            messagingSenderId: "389183402425",
-            appId: "1:389183402425:web:1272bcca61cdf9720c0668",
-            measurementId: "G-RTWDXH8GKQ"
+        // 홈 (대시보드) 템플릿 - 기존 콘텐츠 사용
+        const homeTemplate = `
+            <header class="header">
+                <div class="header-main-content">
+                    <h1>홈</h1>
+                </div>
+                <p>2025년 11월 (현재까지)</p>
+            </header>
+
+            <!-- 1. 핵심 지표 카드 영역 (3개) -->
+            <section class="kpi-metrics">
+                <div class="kpi-card income ripple-target">
+                    <p class="kpi-card-title">총 수입</p>
+                    <p class="kpi-card-value">₩ 45.2M</p>
+                    <p class="kpi-card-change">+12.5%</p>
+                </div>
+                <div class="kpi-card expense ripple-target">
+                    <p class="kpi-card-title">총 지출</p>
+                    <p class="kpi-card-value">₩ 18.7M</p>
+                    <p class="kpi-card-change">-4.1%</p>
+                </div>
+                <div class="kpi-card net ripple-target">
+                    <p class="kpi-card-title">순이익</p>
+                    <p class="kpi-card-value">₩ 26.5M</p>
+                    <p class="kpi-card-change text-blue">+8.4%</p>
+                </div>
+            </section>
+            
+            <!-- 2.1. 월별 수입/지출 추이 (차트 1) -->
+            <section class="chart-section">
+                <div class="chart-card">
+                    <h2>월별 수입/지출 추이</h2>
+                    <div class="chart-placeholder">
+                        최근 6개월 수입/지출 꺾은선 그래프
+                    </div>
+                </div>
+            </section>
+
+            <!-- 2.2. 지출 분류 (차트 2) -->
+            <section class="chart-section">
+                <div class="chart-card">
+                    <h2>지출 분류</h2>
+                    <div class="chart-placeholder">
+                        지출 분류 도넛 그래프 자리 표시자
+                    </div>
+                </div>
+            </section>
+            
+            <!-- 3. 최근 거래 내역 -->
+            <section class="transaction-section">
+                <h2>최근 거래 내역</h2>
+                
+                <ul class="transaction-list">
+                    <li class="transaction-item ripple-target">
+                        <div class="transaction-details">
+                            <span class="transaction-type">월급 입금</span>
+                            <span class="transaction-date">2025년 10월 25일</span>
+                        </div>
+                        <span class="transaction-amount text-green">+ ₩ 3,500,000</span>
+                    </li>
+                    <li class="transaction-item ripple-target">
+                        <div class="transaction-details">
+                            <span class="transaction-type">온라인 쇼핑 (가전)</span>
+                            <span class="transaction-date">2025년 10월 28일</span>
+                        </div>
+                        <span class="transaction-amount text-red">- ₩ 850,000</span>
+                    </li>
+                    <li class="transaction-item ripple-target">
+                        <div class="transaction-details">
+                            <span class="transaction-type">주식 배당금</span>
+                            <span class="transaction-date">2025년 11월 1일</span>
+                        </div>
+                        <span class="transaction-amount text-green">+ ₩ 150,000</span>
+                    </li>
+                    <li class="transaction-item ripple-target">
+                        <div class="transaction-details">
+                            <span class="transaction-type">식료품 구매</span>
+                            <span class="transaction-date">2025년 11월 3일</span>
+                        </div>
+                        <span class="transaction-amount text-red">- ₩ 120,000</span>
+                    </li>
+                </ul>
+            </section>
+        `;
+
+        // 기록 템플릿
+        const recordsTemplate = `
+            <header class="header">
+                <h1>거래 기록</h1>
+                <p>전체 수입 및 지출 내역을 검색하고 필터링하세요.</p>
+            </header>
+            <section class="chart-section">
+                <div class="chart-card">
+                    <h2>모든 거래 목록</h2>
+                    <div class="placeholder-content">
+                        전체 거래 기록 및 필터링 UI
+                    </div>
+                </div>
+            </section>
+            <section class="chart-section">
+                <div class="chart-card">
+                    <h2>월별 요약</h2>
+                    <div class="placeholder-content">
+                        월별 합계 표
+                    </div>
+                </div>
+            </section>
+        `;
+
+        // 목표 템플릿
+        const goalsTemplate = `
+            <header class="header">
+                <h1>재정 목표</h1>
+                <p>저축 및 투자 목표 진행 상황을 확인하세요.</p>
+            </header>
+            <section class="chart-section">
+                <div class="chart-card">
+                    <h2>단기 목표 (여행 자금)</h2>
+                    <div class="placeholder-content">
+                        진행률 바 및 예상 완료일
+                    </div>
+                </div>
+            </section>
+            <section class="chart-section">
+                <div class="chart-card">
+                    <h2>장기 목표 (주택 구매)</h2>
+                    <div class="placeholder-content">
+                        필요 자금 및 현재 적립액
+                    </div>
+                </div>
+            </section>
+        `;
+
+        // MY 템플릿
+        const myTemplate = `
+            <header class="header">
+                <h1>MY 페이지</h1>
+                <p>계정 설정 및 프로필을 관리하세요.</p>
+            </header>
+            <section class="chart-section">
+                <div class="chart-card">
+                    <h2>프로필 정보</h2>
+                    <div class="placeholder-content">
+                        사용자 이름, 이메일, 알림 설정
+                    </div>
+                </div>
+            </section>
+            <section class="chart-section">
+                <div class="chart-card">
+                    <h2>보안</h2>
+                    <div class="placeholder-content">
+                        비밀번호 변경 및 2단계 인증
+                    </div>
+                </div>
+            </section>
+        `;
+
+        // -----------------------
+        // 2. SPA Core Logic
+        // -----------------------
+
+        const contentArea = document.getElementById('content-area');
+        const ROUTES = {
+            '/': homeTemplate,
+            '/records': recordsTemplate,
+            '/goals': goalsTemplate,
+            '/my': myTemplate,
         };
+        const navItems = document.querySelectorAll('.nav-item');
 
-        // Initialize Firebase
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
+        /**
+         * URL 경로에 따라 뷰를 로드하고 렌더링합니다.
+         * @param {string} path - 현재 URL 경로
+         * @param {boolean} pushState - history.pushState를 호출할지 여부
+         */
+        function loadView(path, pushState = true) {
+            const template = ROUTES[path] || ROUTES['/']; // 일치하는 경로가 없으면 홈으로 리디렉션
 
-        const authStatusContainer = document.getElementById('auth-status-container');
-        const defaultNickname = "사용자"; // 로그인하지 않은 경우의 닉네임
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+            if (contentArea) {
+                // 1. 콘텐츠 전환 효과를 위해 잠시 불투명도 낮춤
+                contentArea.style.opacity = '0';
 
+                setTimeout(() => {
+                    // 2. 콘텐츠 로드
+                    contentArea.innerHTML = template;
+                    
+                    // 3. 네비게이션 활성 상태 업데이트
+                    updateNav(path);
 
-        // Function to update header based on auth state
-        function updateHeader(user) {
-            authStatusContainer.innerHTML = ''; // 기존 내용 지우기
-
-            if (user) {
-                // 로그인 상태: 닉네임과 드롭다운 메뉴 표시
-                const displayName = user.displayName || user.email || defaultNickname;
-                const userNickname = displayName.split('@')[0]; // 이메일에서 @ 앞부분만 사용
-
-                const loggedInHtml = `
-                    <button id="nickname-btn" class="cursor-pointer text-gray-700 p-2 rounded-md hover:bg-gray-100 transition-colors duration-200 flex items-center">
-                        <span class="mr-1">${userNickname}</span>
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-                    </button>
-                    <div id="dropdown-menu" class="dropdown-menu hidden">
-                        <a href="#" class="dropdown-item">프로필</a>
-                        <a href="#" id="logout-btn" class="dropdown-item">로그아웃</a>
-                    </div>
-                `;
-                authStatusContainer.insertAdjacentHTML('afterbegin', loggedInHtml);
-
-                // 드롭다운 메뉴 토글 기능
-                const nicknameBtn = document.getElementById('nickname-btn');
-                const dropdownMenu = document.getElementById('dropdown-menu');
-                nicknameBtn.addEventListener('click', (event) => {
-                    event.stopPropagation(); // 버튼 클릭 시 이벤트 전파 중지
-                    dropdownMenu.classList.toggle('hidden');
-                });
-
-                // 외부 클릭 시 드롭다운 닫기
-                document.addEventListener('click', (event) => {
-                    // 클릭된 요소가 드롭다운 컨테이너 내부에 없는 경우 드롭다운 숨김
-                    if (!authStatusContainer.contains(event.target)) {
-                        dropdownMenu.classList.add('hidden');
+                    // 4. history.pushState를 호출 (popstate 이벤트에서는 호출하지 않음)
+                    if (pushState) {
+                        history.pushState(null, '', path);
                     }
-                });
 
-                // 로그아웃 버튼 기능
-                const logoutBtn = document.getElementById('logout-btn');
-                logoutBtn.addEventListener('click', async (event) => {
-                    event.preventDefault();
-                    try {
-                        await signOut(auth);
-                        console.log("로그아웃 성공!");
-                    } catch (error) {
-                        console.error("로그아웃 실패:", error);
-                    }
-                });
+                    // 5. 콘텐츠 전환 효과 다시 복구
+                    contentArea.style.opacity = '1';
+                    
+                    // 6. 새 콘텐츠에 리플 리스너 재할당
+                    attachRippleListeners(); 
 
-            } else {
-                // 로그아웃 상태: 로그인 버튼 표시
-                const loggedOutHtml = `
-                    <a href="/SINGIN" id="login-btn" class="cursor-pointer text-gray-700 p-2 rounded-md hover:bg-gray-100 transition-colors duration-200">
-                        로그인
-                    </a>
-                `;
-                authStatusContainer.insertAdjacentHTML('afterbegin', loggedOutHtml);
+                }, 300); // CSS transition 시간과 일치
             }
         }
 
-        // Firebase Auth initialization and handling
-        let authReadyPromise = Promise.resolve(); // 초기화는 완료된 Promise로 시작
-
-        if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-            // __initial_auth_token이 있으면 커스텀 토큰으로 로그인 시도
-            authReadyPromise = signInWithCustomToken(auth, __initial_auth_token)
-                .then(() => console.log("Signed in with custom token."))
-                .catch((error) => {
-                    console.error("Custom token sign-in failed:", error);
-                    // 익명 로그인으로 폴백하지 않음.
-                    // onAuthStateChanged가 null 사용자를 처리하도록 둠.
-                });
-        }
-        // __initial_auth_token이 정의되지 않은 경우, 여기서 로그인 시도는 없음.
-        // onAuthStateChanged가 null 사용자로 트리거될 것임.
-
-        // Firebase 인증 상태 변경 감지
-        onAuthStateChanged(auth, (user) => {
-            updateHeader(user);
-        });
-
-        // authReadyPromise를 사용하여 Firestore 작업이 인증 준비 후에 실행되도록 함
-        // (public 데이터 읽기는 인증이 필수는 아니지만, 일관성을 위해)
-        authReadyPromise.then(() => {
-            // 로그인 상태와 관계없이 공개 토론 목록을 로드
-            carousels.forEach(carousel => {
-                setupCarouselNavigation(carousel.id, carousel.prev, carousel.next);
-                fetchAndRenderDiscussions(carousel.id, carousel.sortBy, carousel.limit);
+        /**
+         * 내비게이션 바의 활성 상태를 업데이트합니다.
+         * @param {string} currentPath - 현재 활성 경로
+         */
+        function updateNav(currentPath) {
+            navItems.forEach(item => {
+                item.classList.remove('active');
+                if (item.getAttribute('data-path') === currentPath) {
+                    item.classList.add('active');
+                }
             });
-        }).catch(error => {
-            console.error("Authentication setup failed, discussions might not load correctly if auth was required for other parts:", error);
-            // 인증 설정 실패 시에도 공개 토론 로드를 시도
-            carousels.forEach(carousel => {
-                setupCarouselNavigation(carousel.id, carousel.prev, carousel.next);
-                fetchAndRenderDiscussions(carousel.id, carousel.sortBy, carousel.limit);
-            });
-        });
-
-
-        // 캐러셀 기능
-        const carousels = [{
-            id: 'new-releases-carousel',
-            prev: 'new-releases-carousel-prev',
-            next: 'new-releases-carousel-next',
-            sortBy: 'createdAt',
-            limit: 10
-        }, {
-            id: 'popular-carousel',
-            prev: 'popular-carousel-prev',
-            next: 'popular-carousel-next',
-            sortBy: 'likes',
-            limit: 10
-        }, {
-            id: 'rising-stars-carousel',
-            prev: 'rising-stars-carousel-prev',
-            next: 'rising-stars-carousel-next',
-            sortBy: 'views',
-            limit: 10
-        }, {
-            id: 'editors-pick-carousel',
-            prev: 'editors-pick-carousel-prev',
-            next: 'editors-pick-carousel-next',
-            sortBy: 'createdAt', // Default for now, could be manual picks
-            limit: 10
-        }];
-
-        // 캐러셀 아이템 렌더링 함수
-        function renderCarouselItem(discussion) {
-            const defaultImageUrl = `https://placehold.co/150x200/F0F2F5/6B7280?text=No+Image`;
-            const imageUrl = discussion.thumbnailImage || defaultImageUrl;
-            const categoryText = discussion.category || '기타';
-            const viewsCount = discussion.views !== undefined ? discussion.views : 0; // Ensure views exists
-
-            return `
-                <a href="/view/${discussion.id}" class="carousel-item">
-                    <img src="${imageUrl}" alt="${discussion.title}" onerror="this.onerror=null;this.src='${defaultImageUrl}';" loading="lazy">
-                    <h3 class="font-medium text-gray-900 text-sm mb-1 text-left">${discussion.title}</h3>
-                    <p class="text-xs text-gray-600 text-left font-normal">${discussion.authorNickname || '익명'} - ${categoryText}</p>
-                    <div class="flex items-center text-xs text-gray-500 mt-1 justify-start font-normal">
-                        <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
-                        <span>${viewsCount}</span>
-                    </div>
-                </a>
-            `;
+            // 제목도 업데이트
+            const titleElement = document.querySelector('title');
+            if (titleElement) {
+                // 경로에 따라 제목을 간단히 업데이트
+                const titleMap = {
+                    '/': '홈',
+                    '/records': '기록',
+                    '/goals': '목표',
+                    '/my': 'MY',
+                };
+                titleElement.textContent = `재무 통계 미니 대시보드 - ${titleMap[currentPath] || '홈'}`;
+            }
         }
 
-        // 캐러셀 탐색 버튼 설정 함수
-        function setupCarouselNavigation(carouselId, prevBtnId, nextBtnId) {
-            const carousel = document.getElementById(carouselId);
-            const prevBtn = document.getElementById(prevBtnId);
-            const nextBtn = document.getElementById(nextBtnId);
+        /**
+         * 내비게이션 링크 클릭을 처리합니다.
+         */
+        function handleNavigation(event) {
+            // <a> 태그의 기본 동작 (페이지 새로고침) 방지
+            event.preventDefault(); 
+            
+            const targetPath = event.currentTarget.getAttribute('data-path');
+            if (targetPath && targetPath !== location.pathname) {
+                // 현재 경로와 다를 경우에만 로드
+                loadView(targetPath, true);
+            }
+        }
+        
+        // -----------------------
+        // 3. Ripple Effect Logic
+        // -----------------------
 
-            if (!carousel || !prevBtn || !nextBtn) {
-                console.warn(`Carousel elements not found for ID: ${carouselId}`);
-                return;
+        function createRipple(event) {
+            const button = event.currentTarget;
+            const oldRipple = button.querySelector('.ripple');
+            if (oldRipple) {
+                oldRipple.remove();
             }
 
-            const scrollAmount = 200; // 스크롤할 양 (px)
+            const circle = document.createElement('span');
+            const diameter = Math.max(button.clientWidth, button.clientHeight);
+            const radius = diameter / 2;
 
-            prevBtn.addEventListener('click', () => {
-                carousel.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
+            circle.style.width = circle.style.height = `${diameter}px`;
+            circle.style.left = `${event.clientX - button.getBoundingClientRect().left - radius}px`;
+            circle.style.top = `${event.clientY - button.getBoundingClientRect().top - radius}px`;
+            circle.classList.add('ripple');
+            
+            // 내비게이션 항목의 ripple-target이 아닌 nav-item 자체에 리플 효과 추가
+            if (!button.classList.contains('nav-item')) {
+                 button.appendChild(circle);
+            }
+
+            setTimeout(() => {
+                if (circle.parentNode === button) {
+                    circle.remove();
+                }
+            }, 600);
+        }
+
+        /**
+         * 새로 로드된 콘텐츠에 리플 리스너를 재할당합니다.
+         */
+        function attachRippleListeners() {
+            // 하단 내비게이션 바를 제외한 모든 리플 대상(.ripple-target)에 대해 리스너를 한 번에 할당
+            const rippleTargets = document.querySelectorAll('.ripple-target');
+            rippleTargets.forEach(target => {
+                // 기존 리스너가 중복 할당되지 않도록 주의
+                target.removeEventListener('click', createRipple);
+                target.addEventListener('click', createRipple);
+            });
+        }
+
+
+        // -----------------------
+        // 4. Initialization
+        // -----------------------
+
+        window.onload = function () {
+            // 1. 내비게이션 리스너 할당
+            navItems.forEach(item => {
+                item.addEventListener('click', handleNavigation);
             });
 
-            nextBtn.addEventListener('click', () => {
-                carousel.scrollBy({ left: scrollAmount, behavior: 'smooth' });
-            });
-
-            // 스크롤 위치에 따라 버튼 가시성 업데이트
-            const updateButtonVisibility = () => {
-                // 이전에 'hidden-button' 클래스를 제거하여 버튼을 다시 보이게 합니다.
-                prevBtn.classList.remove('hidden-button');
-                nextBtn.classList.remove('hidden-button');
-
-                if (carousel.scrollLeft <= 0) {
-                    prevBtn.classList.add('hidden-button');
-                }
-                // 스크롤 가능한 최대 폭과 현재 스크롤 위치를 비교하여 다음 버튼 가시성 제어
-                // 오차 범위(1px)를 두어 스크롤이 끝까지 도달했을 때도 정확히 숨겨지도록 합니다.
-                if (carousel.scrollLeft + carousel.clientWidth >= carousel.scrollWidth - 1) {
-                    nextBtn.classList.add('hidden-button');
-                }
+            // 2. popstate 이벤트 (뒤로가기/앞으로가기) 리스너 할당
+            window.onpopstate = () => {
+                // pushState를 호출하지 않도록 false 전달
+                loadView(location.pathname, false); 
             };
-
-            carousel.addEventListener('scroll', updateButtonVisibility);
-            // 초기 로드 시 버튼 가시성 설정
-            // setTimeout을 사용하여 이미지 로드 및 레이아웃 계산 후 실행되도록 합니다.
-            // 모든 이미지가 로드되기 전에 scrollWidth가 정확하지 않을 수 있기 때문입니다.
-            window.addEventListener('load', () => {
-                setTimeout(updateButtonVisibility, 500); // 0.5초 지연
-            });
-            // 창 크기 변경 시에도 버튼 가시성 업데이트 (반응형 대응)
-            window.addEventListener('resize', updateButtonVisibility);
-        }
-
-        // Firestore에서 토론을 가져와 캐러셀에 렌더링하는 함수
-        async function fetchAndRenderDiscussions(carouselId, sortByField, limitCount) {
-            const carouselElement = document.getElementById(carouselId);
-            if (!carouselElement) {
-                console.error(`Carousel element not found: ${carouselId}`);
-                return;
-            }
-
-            const discussionsCollectionRef = collection(db, `artifacts/${appId}/public/data/discussions`);
-
-            // Firestore 보안 규칙에 따라 orderBy를 직접 사용하지 않고, 모든 문서를 가져와 클라이언트에서 정렬합니다.
-            onSnapshot(discussionsCollectionRef, (snapshot) => {
-                let discussions = [];
-                snapshot.forEach((doc) => {
-                    discussions.push({ id: doc.id, ...doc.data() });
-                });
-
-                // 데이터 정렬 (클라이언트 측)
-                if (sortByField) {
-                    discussions.sort((a, b) => {
-                        const valA = a[sortByField];
-                        const valB = b[sortByField];
-
-                        // Timestamp 필드 처리
-                        if (valA && valA.toDate && valB && valB.toDate) {
-                            return valB.toDate().getTime() - valA.toDate().getTime(); // 최신순 (내림차순)
-                        }
-                        // 숫자 필드 (좋아요, 조회수 등) 처리
-                        if (typeof valA === 'number' && typeof valB === 'number') {
-                            return valB - valA; // 높은 값 순 (내림차순)
-                        }
-                        // 그 외 (문자열 등)
-                        if (valA < valB) return -1;
-                        if (valA > valB) return 1;
-                        return 0;
-                    });
-                }
-
-                // 제한된 수량만 표시
-                const limitedDiscussions = discussions.slice(0, limitCount);
-
-                carouselElement.innerHTML = limitedDiscussions.map(renderCarouselItem).join('');
-            }, (error) => {
-                console.error("Error fetching discussions: ", error);
-            });
-        }
+            
+            // 3. 초기 뷰 로드
+            // 새로고침 시 현재 URL 경로를 기반으로 콘텐츠를 로드
+            loadView(location.pathname, false);
+        };
     </script>
 </body>
 </html>
