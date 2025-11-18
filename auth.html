@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>로그인 / 회원가입</title>
+    
+    <!-- Pretendard 폰트 불러오기 -->
+    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+    <!-- Google Material Symbols (아이콘) 불러오기 -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+    <style>
+        /* CSS 초기화 및 기본 설정 */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Pretendard', sans-serif;
+        }
+
+        body, html {
+            height: 100%;
+            background-color: #ffffff;
+            color: #1a1a1a;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            overflow: hidden;
+        }
+
+        /* 로딩 화면 스타일 */
+        #loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #ffffff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 3000;
+            transition: opacity 0.3s;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #007aff;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* 1. 메인 컨테이너 */
+        .auth-app {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            display: none; /* 초기에는 숨김 */
+            flex-direction: column;
+            background: #ffffff;
+            z-index: 1000;
+        }
+
+        /* 2. 헤더 */
+        .app-header {
+            height: 50px;
+            display: flex;
+            align-items: center;
+            padding: 0 16px;
+            flex-shrink: 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .app-header .material-symbols-outlined {
+            font-size: 24px;
+            cursor: pointer;
+            padding-right: 15px;
+        }
+        .header-title {
+            font-weight: 600;
+            flex-grow: 1;
+        }
+
+        .header-action {
+            cursor: pointer;
+            padding: 5px;
+            opacity: 0.6;
+            transition: opacity 0.2s;
+        }
+        .header-action:hover {
+            opacity: 1;
+        }
+
+        /* 3. 단계별 화면 슬라이딩 컨테이너 */
+        .step-wrapper {
+            flex-grow: 1;
+            width: 100%;
+            display: block;
+            overflow: hidden;
+            padding-bottom: 80px; /* 고정 버튼 공간 확보 */
+        }
+
+        .step-container {
+            display: flex;
+            width: 200%; /* 2단계 */
+            height: 100%;
+            transition: transform 0.3s cubic-bezier(0.3, 0.7, 0.4, 0.9);
+        }
+
+        .step-page {
+            width: calc(100% / 2);
+            flex-shrink: 0;
+            padding: 20px 16px;
+            overflow-y: auto;
+            background-color: #ffffff;
+        }
+        
+        /* 4. 고정된 다음 버튼 영역 */
+        .next-button-fixed {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            padding: 10px 16px;
+            background: #ffffff;
+            box-shadow: none;
+            z-index: 100;
+        }
+
+        .next-button {
+            width: 100%;
+            padding: 15px;
+            background-color: #007aff;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s, transform 0.1s;
+        }
+        .next-button:disabled {
+            background-color: #a8cfff;
+            cursor: not-allowed;
+        }
+        .next-button:active:not(:disabled) {
+            transform: scale(0.98);
+            background-color: #005bb5;
+        }
+
+        /* 5. 입력 필드 스타일 */
+        .input-group {
+            margin-bottom: 25px;
+        }
+        .input-group label {
+            display: block;
+            font-weight: 500;
+            margin-bottom: 5px;
+            color: #555;
+            font-size: 1.1rem;
+        }
+        .text-input {
+            width: 100%;
+            padding: 12px 10px;
+            border: none;
+            border-bottom: 2px solid #ccc;
+            font-size: 1.2rem;
+            font-weight: 600;
+            transition: border-bottom-color 0.2s;
+        }
+        .text-input:focus {
+            outline: none;
+            border-bottom-color: #007aff;
+        }
+        
+        /* 6. 모드 선택 버튼 스타일 (수입/지출 토글 재활용) */
+        .mode-toggle {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 30px;
+        }
+        .mode-btn {
+            flex-grow: 1;
+            padding: 12px;
+            border: 1px solid #eee;
+            border-radius: 10px;
+            text-align: center;
+            font-weight: 600;
+            cursor: pointer;
+            color: #1a1a1a;
+            background-color: #f7f7f7;
+            transition: all 0.2s;
+        }
+        .mode-btn.selected-mode {
+            color: #1a1a1a;
+            background-color: #ffffff;
+            border-color: #1a1a1a;
+            font-weight: 700;
+        }
+        .mode-btn:active {
+            transform: scale(0.99);
+        }
+
+        /* Google Icons 설정 */
+        .material-symbols-outlined {
+            font-variation-settings:
+                'FILL' 0,
+                'wght' 400,
+                'GRAD' 0,
+                'opsz' 24
+        }
+
+        /* 7. Step 2 (폼) 관련 스타일 */
+        .form-content {
+            display: none;
+        }
+        .form-content.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 0. 로딩 오버레이: Firebase 인증 상태 확인 동안 표시 -->
+    <div id="loading-overlay">
+        <div class="spinner"></div>
+    </div>
+
+    <!-- 1. 전체 화면 단계형 앱 컨테이너 (초기에 display: none) -->
+    <div id="authApp" class="auth-app">
+        <div class="app-header">
+            <!-- 뒤로가기/닫기 아이콘 -->
+            <span class="material-symbols-outlined" id="backButton" onclick="handleBack()">
+                arrow_back_ios
+            </span>
+            <div class="header-title" id="appTitle">로그인/가입 선택 (1/2)</div>
+            <!-- 확인 버튼 (마지막 단계에서 활성화) -->
+            <div class="header-action" id="authActionButton" onclick="authenticateUser()" style="visibility: hidden;">
+                <span class="material-symbols-outlined" style="font-weight: 600;">
+                    check
+                </span>
+            </div>
+        </div>
+        
+        <!-- 단계별 페이지를 담는 래퍼 -->
+        <div class="step-wrapper">
+            <!-- 내부 슬라이딩 컨테이너 -->
+            <div id="stepContainer" class="step-container">
+            
+                <!-- 3-1. Step 1: 모드 선택 (로그인 / 회원가입) -->
+                <div class="step-page" id="step1">
+                    <h3 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 10px;">환영합니다! 어떤 작업을 원하세요?</h3>
+                    <p style="color: #888; margin-bottom: 30px;">원하는 인증 방식을 선택하세요.</p>
+                    
+                    <!-- 모드 선택 토글 -->
+                    <div class="mode-toggle">
+                        <div class="mode-btn selected-mode" id="modeLogin" onclick="selectMode('login')">로그인</div>
+                        <div class="mode-btn" id="modeSignup" onclick="selectMode('signup')">회원가입</div>
+                    </div>
+
+                    <div style="margin-top: 50px; padding: 15px; background: #f9f9f9; border-radius: 12px;">
+                        <p style="font-weight: 600; margin-bottom: 5px;">선택 정보</p>
+                        <p id="selectedModeText" style="color: #007aff; font-weight: 700;">로그인</p>
+                    </div>
+                </div>
+                
+                <!-- 3-2. Step 2: 정보 입력 및 실행 -->
+                <div class="step-page" id="step2">
+                    <h3 id="step2Title" style="font-size: 1.5rem; font-weight: 700; margin-bottom: 10px;">로그인 정보를 입력하세요.</h3>
+                    <p style="color: #888; margin-bottom: 30px;">계정 정보를 정확히 입력해주세요.</p>
+                    
+                    <!-- 로그인/회원가입 공통 필드 -->
+                    <div class="input-group">
+                        <label for="emailInput">이메일</label>
+                        <input type="email" id="emailInput" class="text-input" placeholder="이메일 주소" oninput="validateStep2()">
+                    </div>
+
+                    <div class="input-group">
+                        <label for="passwordInput">비밀번호</label>
+                        <input type="password" id="passwordInput" class="text-input" placeholder="6자 이상 비밀번호" oninput="validateStep2()">
+                    </div>
+
+                    <!-- 회원가입 전용 필드 -->
+                    <div id="signupOnlyFields" class="form-content" style="display: none;">
+                        <div class="input-group">
+                            <label for="passwordConfirmInput">비밀번호 확인</label>
+                            <input type="password" id="passwordConfirmInput" class="text-input" placeholder="비밀번호를 한 번 더 입력" oninput="validateStep2()">
+                        </div>
+                        <div class="input-group">
+                            <label for="nicknameInput">닉네임</label>
+                            <input type="text" id="nicknameInput" class="text-input" placeholder="사용할 닉네임" oninput="validateStep2()">
+                        </div>
+                    </div>
+
+                    <div id="authErrorMsg" style="color: #e74c3c; margin-top: 20px; font-weight: 600;"></div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- 4. 하단 고정 버튼 영역 -->
+        <div class="next-button-fixed">
+            <button class="next-button" id="nextButton" onclick="nextStep()" disabled>다음</button>
+        </div>
+    </div>
+    
+    <!-- Custom Message Box (alert() 대체) -->
+    <div id="custom-message" style="
+        position: fixed;
+        bottom: -100px;
+        left: 50%;
+        transform: translateX(-50%);
+        padding: 10px 20px;
+        background-color: #333;
+        color: white;
+        border-radius: 8px;
+        z-index: 2000;
+        opacity: 0;
+        transition: bottom 0.3s ease-out, opacity 0.3s;
+        text-align: center;
+        max-width: 80%;
+    "></div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { 
+            getAuth, 
+            signInAnonymously, 
+            signInWithCustomToken, 
+            onAuthStateChanged, 
+            signInWithEmailAndPassword, 
+            createUserWithEmailAndPassword,
+            updateProfile,
+            setPersistence, 
+            browserSessionPersistence 
+        } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        
+        const $ = (id) => document.getElementById(id);
+        
+        // 환경 변수를 사용하거나, 제공된 Config를 사용합니다. (Canvas 환경을 위한 설정)
+        const userProvidedConfig = {
+             // 실제 Firebase 프로젝트의 설정으로 대체해야 합니다. (데모용 기본값)
+            apiKey: "AIzaSyBwn6nH3yiscgy5Oa2pbqJ83Nx7YwFjlJI",
+            authDomain: "pocketbly.firebaseapp.com",
+            projectId: "pocketbly",
+            storageBucket: "pocketbly.firebasestorage.app",
+            messagingSenderId: "535063683428",
+            appId: "1:535063683428:web:7308c878e7c486ca305a71",
+            measurementId: "G-PK1YGPMFYF"
+        };
+        
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : JSON.stringify(userProvidedConfig));
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+
+        let auth;
+        
+        // ------------------ Firebase 초기화 및 인증 ------------------
+        
+        async function initFirebase() {
+            try {
+                const app = initializeApp(firebaseConfig);
+                auth = getAuth(app);
+                
+                await setPersistence(auth, browserSessionPersistence);
+
+                if (initialAuthToken) {
+                    await signInWithCustomToken(auth, initialAuthToken);
+                    console.log("Custom token sign-in successful.");
+                } else {
+                    // 익명 로그인은 이미 메인 앱에서 처리될 수 있으므로, 
+                    // 여기서는 인증이 필요한 경우를 위해 익명 로그인을 시도하지 않습니다.
+                    // 대신, onAuthStateChanged에서 상태를 확인합니다.
+                }
+
+                // onAuthStateChanged는 초기 로드 시 한 번 실행됩니다.
+                onAuthStateChanged(auth, (user) => {
+                    $('loading-overlay').style.display = 'none';
+                    $('authApp').style.display = 'flex';
+
+                    if (user && !user.isAnonymous) {
+                        // 일반 사용자 로그인 상태 -> 메인 앱으로 이동 시뮬레이션
+                        console.log("User already logged in:", user.uid);
+                        showMessage("이미 로그인되어 있습니다. 메인 화면으로 이동합니다.");
+                        // 실제 앱에서는 window.location.href = '/main';
+                        // 데모를 위해 초기화면(Step 1)을 보여줍니다.
+                    } else if (user && user.isAnonymous) {
+                         console.log("Anonymous user detected:", user.uid);
+                         showMessage("익명 사용자로 접속했습니다. 이메일/비밀번호 로그인이 필요합니다.");
+                         // 익명 사용자에게 로그인/회원가입 옵션 제공
+                    } else {
+                        // 로그인 안 됨
+                        console.log("No user logged in. Showing Auth screen.");
+                    }
+                    renderStep(); // UI 렌더링 시작
+                });
+
+            } catch (error) {
+                console.error("Firebase initialization or sign-in failed:", error);
+                showMessage("Firebase 연결 또는 초기 인증에 실패했습니다.");
+            }
+        }
+        
+        // ------------------ 앱 로직 시작 함수 ------------------
+
+        let authState = {
+            currentStep: 1,
+            authMode: 'login', // 'login' 또는 'signup'
+            email: '',
+            password: '',
+            passwordConfirm: '',
+            nickname: ''
+        };
+
+        const STEP_TITLES = [
+            '로그인/가입 선택 (1/2)',
+            '정보 입력 (2/2)'
+        ];
+        
+        // 윈도우 로드 시 Firebase 초기화 시작
+        initFirebase();
+        
+        /**
+         * 현재 단계에 따라 헤더 및 컨테이너 위치를 업데이트합니다.
+         */
+        function renderStep() {
+            const stepIndex = authState.currentStep - 1; // 0, 1
+            
+            // 1. 헤더 제목 업데이트
+            $('appTitle').textContent = STEP_TITLES[stepIndex];
+            
+            // 2. 컨테이너 슬라이드
+            $('stepContainer').style.transform = `translateX(-${stepIndex * (100 / 2)}%)`;
+
+            // 3. 버튼 텍스트 및 가시성 제어
+            const actionText = authState.authMode === 'login' ? '로그인' : '가입하기';
+            $('authActionButton').style.visibility = authState.currentStep === 2 ? 'visible' : 'hidden';
+            $('nextButton').textContent = authState.currentStep === 2 ? actionText + ' 실행' : '다음';
+            
+            // 4. 스텝별 추가 업데이트
+            if (authState.currentStep === 1) {
+                validateStep1();
+                $('nextButton').textContent = '다음';
+            } else if (authState.currentStep === 2) {
+                // Step 2 렌더링
+                const isSignup = authState.authMode === 'signup';
+                
+                $('step2Title').textContent = isSignup ? '회원가입 정보를 입력하세요.' : '로그인 정보를 입력하세요.';
+                $('signupOnlyFields').style.display = isSignup ? 'block' : 'none';
+
+                // 입력 값 복원
+                $('emailInput').value = authState.email;
+                $('passwordInput').value = authState.password;
+                $('passwordConfirmInput').value = authState.passwordConfirm;
+                $('nicknameInput').value = authState.nickname;
+                
+                validateStep2();
+            }
+
+            // 에러 메시지 초기화
+            $('authErrorMsg').textContent = '';
+        }
+
+        /**
+         * 다음 단계로 이동합니다.
+         */
+        function nextStep() {
+            if (authState.currentStep === 1) {
+                // Step 1에서는 모드만 선택됨
+            } else if (authState.currentStep === 2) {
+                authenticateUser();
+                return;
+            }
+
+            if (authState.currentStep < STEP_TITLES.length) {
+                authState.currentStep++;
+                renderStep();
+                if (authState.currentStep === 2) {
+                    $('emailInput').focus();
+                }
+            }
+        }
+
+        /**
+         * 이전 단계로 이동합니다.
+         */
+        function handleBack() {
+            if (authState.currentStep > 1) {
+                authState.currentStep--;
+                renderStep();
+            } else {
+                showMessage('인증 페이지를 닫는 기능은 데모에서 비활성화됩니다.');
+                // 실제 앱에서는 window.history.back();
+            }
+        }
+        
+        /**
+         * 로그인 또는 회원가입 모드를 선택하고 UI를 업데이트합니다.
+         */
+        function selectMode(mode) {
+            authState.authMode = mode;
+            const loginBtn = $('modeLogin');
+            const signupBtn = $('modeSignup');
+            const selectedText = $('selectedModeText');
+            
+            if (mode === 'login') {
+                loginBtn.classList.add('selected-mode');
+                signupBtn.classList.remove('selected-mode');
+                selectedText.textContent = '로그인';
+            } else {
+                signupBtn.classList.add('selected-mode');
+                loginBtn.classList.remove('selected-mode');
+                selectedText.textContent = '회원가입';
+            }
+            // Step 1에서는 항상 '다음' 버튼 활성화 상태 유지
+            validateStep1(); 
+        }
+
+        // ------------------ 유효성 검사 (버튼 활성화) ------------------
+
+        function validateEmail(email) {
+            // 간단한 이메일 형식 검사
+            const re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+            return re.test(String(email).toLowerCase());
+        }
+
+        function validateStep1() {
+            // Step 1은 모드만 선택하면 되므로 항상 활성화
+            $('nextButton').disabled = false;
+        }
+
+        function validateStep2() {
+            // 입력 상태를 authState에 업데이트
+            authState.email = $('emailInput').value.trim();
+            authState.password = $('passwordInput').value;
+            authState.passwordConfirm = $('passwordConfirmInput').value;
+            authState.nickname = $('nicknameInput').value.trim();
+
+            const isLogin = authState.authMode === 'login';
+            let isValid = true;
+
+            // 1. 이메일 및 비밀번호 필수 검사
+            if (!validateEmail(authState.email)) {
+                isValid = false;
+            }
+            if (authState.password.length < 6) {
+                isValid = false;
+            }
+
+            if (isLogin) {
+                // 로그인 모드: 이메일, 비밀번호만 필요
+                // 추가 조건 없음
+            } else {
+                // 회원가입 모드: 비밀번호 확인, 닉네임 필수
+                if (authState.password !== authState.passwordConfirm || authState.password.length === 0) {
+                    isValid = false;
+                }
+                if (authState.nickname.length < 2) {
+                    isValid = false;
+                }
+            }
+
+            $('nextButton').disabled = !isValid;
+        }
+        
+        // ------------------ 최종 인증 실행 ------------------
+
+        async function authenticateUser() {
+            $('nextButton').disabled = true;
+            $('authActionButton').style.opacity = 0.5;
+            $('authErrorMsg').textContent = '';
+            showMessage(`${authState.authMode === 'login' ? '로그인' : '회원가입'} 진행 중...`);
+
+            try {
+                if (authState.authMode === 'login') {
+                    // 로그인 실행
+                    const userCredential = await signInWithEmailAndPassword(auth, authState.email, authState.password);
+                    const user = userCredential.user;
+
+                    showMessage(`🎉 로그인 성공! 환영합니다, ${user.displayName || '사용자'}!`);
+                    console.log("Login Successful:", user.uid);
+                    // 실제 앱에서는 window.location.href = '/main';
+                
+                } else {
+                    // 회원가입 실행
+                    const userCredential = await createUserWithEmailAndPassword(auth, authState.email, authState.password);
+                    const user = userCredential.user;
+                    
+                    // 닉네임 업데이트
+                    await updateProfile(user, { displayName: authState.nickname });
+
+                    showMessage(`✨ 회원가입 성공! ${authState.nickname}님, 환영합니다!`);
+                    console.log("Signup Successful:", user.uid);
+                    // 실제 앱에서는 window.location.href = '/main';
+
+                    // 가입 후 상태 초기화 (옵션: 로그인 상태로 전환된 채로 유지)
+                }
+
+                // 성공 시 2초 후 초기 상태로 복귀 (데모용)
+                setTimeout(() => {
+                    authState.currentStep = 1;
+                    selectMode('login');
+                    authState.email = '';
+                    authState.password = '';
+                    authState.stateConfirm = '';
+                    authState.nickname = '';
+                    renderStep();
+                }, 2000);
+
+            } catch (error) {
+                console.error("Authentication Error:", error);
+                
+                let errorMessage = '인증 중 알 수 없는 오류가 발생했습니다.';
+                
+                // Firebase 에러 코드 기반 메시지
+                switch (error.code) {
+                    case 'auth/user-not-found':
+                    case 'auth/wrong-password':
+                        errorMessage = '이메일 또는 비밀번호가 올바르지 않습니다.';
+                        break;
+                    case 'auth/email-already-in-use':
+                        errorMessage = '이미 사용 중인 이메일 주소입니다.';
+                        break;
+                    case 'auth/weak-password':
+                        errorMessage = '비밀번호는 최소 6자 이상이어야 합니다.';
+                        break;
+                    case 'auth/invalid-email':
+                        errorMessage = '유효하지 않은 이메일 형식입니다.';
+                        break;
+                    default:
+                        errorMessage = `오류 발생: ${error.message}`;
+                }
+                
+                $('authErrorMsg').textContent = errorMessage;
+                showMessage(`❌ ${errorMessage}`);
+                validateStep2(); // 에러 발생 시 버튼 비활성화 해제
+            } finally {
+                $('nextButton').disabled = false;
+                $('authActionButton').style.opacity = 1;
+            }
+        }
+        
+        // ------------------ 유틸리티 ------------------
+        
+        /**
+         * alert() 대신 사용할 사용자 정의 메시지 박스를 표시합니다.
+         */
+        function showMessage(message) {
+            const msgBox = $('custom-message');
+            msgBox.textContent = message;
+            
+            msgBox.style.bottom = '20px';
+            msgBox.style.opacity = '1';
+
+            setTimeout(() => {
+                msgBox.style.bottom = '-100px';
+                msgBox.style.opacity = '0';
+            }, 2000);
+        }
+    </script>
+</body>
+</html>
