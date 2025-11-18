@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>로그인/회원가입</title>
+    <title>로그인 및 회원가입</title>
     
     <!-- Pretendard 폰트 불러오기 -->
     <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
@@ -36,7 +36,6 @@
             height: 100%;
             background-color: #ffffff;
             display: flex;
-            flex-direction: column;
             justify-content: center;
             align-items: center;
             z-index: 3000;
@@ -50,7 +49,6 @@
             width: 40px;
             height: 40px;
             animation: spin 1s linear infinite;
-            margin-bottom: 10px;
         }
 
         @keyframes spin {
@@ -88,17 +86,14 @@
         .header-title {
             font-weight: 600;
             flex-grow: 1;
+            text-align: center; /* 제목을 중앙 정렬 */
+            margin-right: 24px; /* 뒤로가기 버튼 공간 확보 */
+        }
+        /* Step 3에서 제목 중앙 정렬을 위해 back button padding을 0으로 설정 */
+        .app-header .material-symbols-outlined[style*="visibility: hidden"] {
+             padding-right: 0;
         }
 
-        .header-action {
-            cursor: pointer;
-            padding: 5px;
-            opacity: 0.6;
-            transition: opacity 0.2s;
-        }
-        .header-action:hover {
-            opacity: 1;
-        }
 
         /* 3. 단계별 화면 슬라이딩 컨테이너 */
         .step-wrapper {
@@ -111,18 +106,20 @@
 
         .step-container {
             display: flex;
-            width: 300%;
+            /* 3단계이므로 300% */
+            width: 300%; 
             height: 100%;
             transition: transform 0.3s cubic-bezier(0.3, 0.7, 0.4, 0.9);
         }
 
         .step-page {
             width: calc(100% / 3);
-            height: 100%; /* 수정: Step 3가 흰 화면으로 보이는 현상 방지 */
             flex-shrink: 0;
             padding: 20px 16px;
             overflow-y: auto;
             background-color: #ffffff;
+            display: flex;
+            flex-direction: column;
         }
         
         /* 4. 고정된 다음 버튼 영역 */
@@ -133,14 +130,14 @@
             width: 100%;
             padding: 10px 16px;
             background: #ffffff;
-            box-shadow: none; /* 그림자 제거 */
+            box-shadow: none;
             z-index: 100;
         }
 
         .next-button {
             width: 100%;
             padding: 15px;
-            background-color: #007aff; /* 파란색으로 통일 */
+            background-color: #007aff;
             color: white;
             border: none;
             border-radius: 12px;
@@ -150,7 +147,7 @@
             transition: background-color 0.2s, transform 0.1s;
         }
         .next-button:disabled {
-            background-color: #a8cfff; /* 비활성화 시 연한 파란색 */
+            background-color: #a8cfff;
             cursor: not-allowed;
         }
         .next-button:active:not(:disabled) {
@@ -183,6 +180,67 @@
             border-bottom-color: #007aff;
         }
         
+        /* 유효성 검사 피드백 */
+        .input-feedback {
+            font-size: 0.85rem;
+            color: #ff3b30; /* 빨간색 경고 */
+            margin-top: 5px;
+            display: none;
+        }
+
+        /* 6. 모드 선택 버튼 스타일 */
+        .mode-toggle {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-top: 50px;
+        }
+        .mode-btn {
+            padding: 25px;
+            border: 1px solid #eee;
+            border-radius: 15px;
+            text-align: center;
+            font-size: 1.2rem;
+            font-weight: 700;
+            cursor: pointer;
+            color: #1a1a1a;
+            background-color: #f7f7f7;
+            transition: all 0.2s;
+        }
+        .mode-btn.selected-mode {
+            background-color: #e6f0ff; 
+            border-color: #007aff;
+            color: #007aff;
+        }
+        .mode-btn:active {
+            transform: scale(0.98);
+        }
+
+        /* 7. Step 3 (완료) 화면 스타일 */
+        #step3.step-page {
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+        .success-icon {
+            font-size: 64px;
+            color: #34c759; /* 녹색 */
+            margin-bottom: 20px;
+            font-variation-settings: 'FILL' 1;
+        }
+        .success-message h3 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+        .success-message p {
+            color: #888;
+            font-size: 1.1rem;
+        }
+        .header-action {
+             visibility: hidden; /* 저장 버튼은 인증 페이지에서는 필요 없음 */
+        }
+
         /* Google Icons 설정 */
         .material-symbols-outlined {
             font-variation-settings:
@@ -198,7 +256,6 @@
     <!-- 0. 로딩 오버레이: Firebase 인증 상태 확인 동안 표시 -->
     <div id="loading-overlay">
         <div class="spinner"></div>
-        <p id="loading-text" style="color: #555; font-size: 0.9rem;">인증 상태 확인 중...</p>
     </div>
 
     <!-- 1. 전체 화면 단계형 앱 컨테이너 (초기에 display: none) -->
@@ -206,15 +263,11 @@
         <div class="app-header">
             <!-- 뒤로가기/닫기 아이콘 -->
             <span class="material-symbols-outlined" id="backButton" onclick="handleBack()">
-                close
+                arrow_back_ios
             </span>
-            <div class="header-title" id="appTitle">이메일 입력 (1/3)</div>
-            <!-- 저장 버튼 (인증에서는 사용하지 않으므로 숨김) -->
-            <div class="header-action" id="actionButton" onclick="handleAction()" style="visibility: hidden;">
-                <span class="material-symbols-outlined" style="font-weight: 600;">
-                    check
-                </span>
-            </div>
+            <div class="header-title" id="appTitle">모드 선택 (1/3)</div>
+            <!-- 빈 공간 유지 (헤더 액션) -->
+            <div class="header-action" id="headerAction"></div>
         </div>
         
         <!-- 단계별 페이지를 담는 래퍼 -->
@@ -222,45 +275,62 @@
             <!-- 내부 슬라이딩 컨테이너 -->
             <div id="stepContainer" class="step-container">
             
-                <!-- 3-1. Step 1: 이메일 입력 -->
+                <!-- 3-1. Step 1: 로그인/회원가입 모드 선택 -->
                 <div class="step-page" id="step1">
-                    <h3 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 10px;">시작하려면 이메일을 입력하세요.</h3>
-                    <p style="color: #888; margin-bottom: 30px;">기존 계정으로 로그인하거나 새 계정을 만듭니다.</p>
+                    <h3 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 10px;">서비스 이용을 위한 첫 단계입니다.</h3>
+                    <p style="color: #888; margin-bottom: 30px;">기존 사용자인가요? 새로운 계정을 만들까요?</p>
+                    
+                    <div class="mode-toggle">
+                        <div class="mode-btn" id="modeLogin" data-mode="login" onclick="selectMode('login')">
+                            로그인
+                        </div>
+                        <div class="mode-btn" id="modeSignup" data-mode="signup" onclick="selectMode('signup')">
+                            회원가입 (새 계정 만들기)
+                        </div>
+                    </div>
+
+                    <!-- Step 1 유효성 검사 (버튼 활성화를 위한 dummy input) -->
+                    <input type="hidden" id="modeSelection" onchange="validateStep1()">
+                </div>
+                
+                <!-- 3-2. Step 2: 사용자 정보 입력 (모드에 따라 내용 변경) -->
+                <div class="step-page" id="step2">
+                    <h3 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 10px;" id="step2Title">정보를 입력해주세요.</h3>
+                    <p style="color: #888; margin-bottom: 30px;" id="step2Subtitle">안전한 서비스 이용을 위해 정확하게 입력해주세요.</p>
                     
                     <div class="input-group">
-                        <label for="emailInput">이메일 주소</label>
-                        <input type="email" id="emailInput" class="text-input" placeholder="example@email.com" oninput="validateStep1()" autocomplete="email">
+                        <label for="emailInput">이메일</label>
+                        <input type="email" id="emailInput" class="text-input" placeholder="example@email.com" 
+                                oninput="validateStep2()" autocomplete="off">
+                        <div id="emailFeedback" class="input-feedback">이메일 형식이 올바르지 않습니다.</div>
                     </div>
-                </div>
-                
-                <!-- 3-2. Step 2: 로그인 (이메일 확인 후 기존 사용자일 때) -->
-                <div class="step-page" id="step2">
-                    <h3 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 10px;">비밀번호를 입력하여 로그인하세요.</h3>
-                    <p id="loginEmailDisplay" style="color: #007aff; font-weight: 600; margin-bottom: 30px;">
-                        <!-- 이메일 표시 영역 -->
-                    </p>
 
                     <div class="input-group">
-                        <label for="passwordLogin">비밀번호</label>
-                        <input type="password" id="passwordLogin" class="text-input" placeholder="비밀번호" oninput="validateStep2()">
+                        <label for="passwordInput">비밀번호</label>
+                        <input type="password" id="passwordInput" class="text-input" placeholder="8자 이상" 
+                                oninput="validateStep2()" autocomplete="off">
+                        <div id="passwordFeedback" class="input-feedback">비밀번호는 8자 이상이어야 합니다.</div>
+                    </div>
+
+                    <!-- 회원가입 모드에서만 보이는 필드 -->
+                    <div class="input-group" id="confirmPasswordGroup" style="display: none;">
+                        <label for="confirmPasswordInput">비밀번호 확인</label>
+                        <input type="password" id="confirmPasswordInput" class="text-input" placeholder="비밀번호를 다시 입력하세요" 
+                                oninput="validateStep2()" autocomplete="off">
+                        <div id="confirmPasswordFeedback" class="input-feedback">비밀번호가 일치하지 않습니다.</div>
                     </div>
                 </div>
                 
-                <!-- 3-3. Step 3: 회원가입 (이메일 확인 후 신규 사용자일 때) -->
+                <!-- 3-3. Step 3: 완료 화면 -->
                 <div class="step-page" id="step3">
-                    <h3 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 10px;">새 계정을 만듭니다.</h3>
-                    <p id="signupEmailDisplay" style="color: #007aff; font-weight: 600; margin-bottom: 30px;">
-                        <!-- 이메일 표시 영역 -->
-                    </p>
-
-                    <div class="input-group">
-                        <label for="passwordSignup">비밀번호 (6자 이상)</label>
-                        <input type="password" id="passwordSignup" class="text-input" placeholder="새 비밀번호" oninput="validateStep3()" autocomplete="new-password">
+                    <div class="success-icon">
+                        <span class="material-symbols-outlined" style="font-size: 64px;">
+                            check_circle
+                        </span>
                     </div>
-
-                    <div class="input-group">
-                        <label for="nameInput">이름 (선택 사항)</label>
-                        <input type="text" id="nameInput" class="text-input" placeholder="이름을 입력하세요 (선택 사항)" oninput="validateStep3()">
+                    <div class="success-message">
+                        <h3 id="completionMessage">로그인이 완료되었습니다!</h3>
+                        <p id="completionSubmessage">이제 서비스를 자유롭게 이용하실 수 있습니다.</p>
                     </div>
                 </div>
             </div>
@@ -290,91 +360,119 @@
     "></div>
 
     <script type="module">
+        // Firebase Auth 및 App 모듈만 필요
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInWithCustomToken, onAuthStateChanged, 
-                 fetchSignInMethodsForEmail, signInWithEmailAndPassword, 
-                 createUserWithEmailAndPassword, updateProfile, 
-                 signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { 
+            getAuth, 
+            signInAnonymously, 
+            signInWithCustomToken, 
+            onAuthStateChanged, 
+            setPersistence, 
+            browserSessionPersistence,
+            signInWithEmailAndPassword,
+            createUserWithEmailAndPassword,
+        } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         
+        // 유틸리티 함수
         const $ = (id) => document.getElementById(id);
         
-        // Firebase 설정 (환경 변수가 제공되지 않을 경우를 대비한 대체값 사용)
+        // 사용자 제공 설정 (환경 변수가 없을 경우 대비한 Mock Config)
         const userProvidedConfig = {
-            apiKey: "AIzaSyBwn6nH3yiscgy5Oa2pbqJ83Nx7YwFjlJI",
-            authDomain: "pocketbly.firebaseapp.com",
-            projectId: "pocketbly",
-            storageBucket: "pocketbly.firebasestorage.app",
-            messagingSenderId: "535063683428",
-            appId: "1:535063683428:web:7308c878e7c486ca305a71",
-            measurementId: "G-PK1YGPMFYF"
+             // 이 설정은 Canvas 환경에서 자동 주입되며, 여기서는 예시용입니다.
+             apiKey: "AIzaSyBwn6nH3yiscgy5Oa2pbqJ83Nx7YwFjlJI",
+             authDomain: "pocketbly.firebaseapp.com",
+             projectId: "pocketbly",
+             storageBucket: "pocketbly.firebasestorage.app",
+             messagingSenderId: "535063683428",
+             appId: "1:535063683428:web:7308c878e7c486ca305a71",
+             measurementId: "G-PK1YGPMFYF"
         };
         
-        // Canvas 환경 변수 사용 및 파싱
+        // 환경 변수 로드
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
         const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : JSON.stringify(userProvidedConfig));
         const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
 
         let auth;
-        
-        // ------------------ Firebase 초기화 및 인증 관리 ------------------
+        let authStateChecked = false; // 인증 상태 확인 플래그
+
+        // ------------------ Firebase 초기화 및 인증 ------------------
         
         async function initFirebase() {
             try {
                 const app = initializeApp(firebaseConfig);
                 auth = getAuth(app);
                 
-                // Custom Token 로그인 시도
-                if (initialAuthToken) {
-                    try {
-                        await signInWithCustomToken(auth, initialAuthToken);
-                        console.log("Custom Token으로 로그인 성공.");
-                    } catch (error) {
-                        console.error("Custom Token 로그인 오류:", error);
-                        $('loading-text').textContent = '인증 토큰 오류. 이메일/비밀번호 로그인이 필요합니다.';
-                        // 익명 로그인 사용 안 함 (요구사항)
-                    }
-                }
-                
-                // 인증 상태 리스너: 인증 여부에 따라 UI 표시
-                onAuthStateChanged(auth, (user) => {
-                    $('loading-overlay').style.display = 'none';
+                await setPersistence(auth, browserSessionPersistence);
 
-                    if (user && user.email) {
-                        // Custom Token 또는 이메일/비밀번호로 로그인된 경우
-                        showMessage(`로그인됨: ${user.email} (${user.uid})`);
-                        // 인증이 완료되면 앱 UI를 숨기고, 메인 앱으로 리디렉션하는 로직이 필요함.
-                        // 이 데모에서는 일단 UI를 숨깁니다.
-                        $('authApp').style.display = 'none';
-                    } else {
-                        // 인증되지 않은 경우에만 로그인 UI 표시
-                        $('authApp').style.display = 'flex';
-                        startAuthFlow();
+                // 초기 인증 상태 확인 리스너 설정
+                onAuthStateChanged(auth, (user) => {
+                    if (!authStateChecked) {
+                        authStateChecked = true;
+                        if (user) {
+                            // 이미 로그인된 사용자 -> 메인 앱으로 리디렉션 (데모)
+                            console.log("Existing user authenticated:", user.uid);
+                            showMessage("이미 로그인되어 있습니다. 메인 앱으로 이동합니다. (데모)");
+                            // 실제 앱에서는 window.location.href = '/main';
+                            startApp();
+                        } else {
+                            // 로그인 토큰으로 로그인 시도
+                            if (initialAuthToken) {
+                                signInWithCustomToken(auth, initialAuthToken)
+                                    .then(() => console.log("Custom token sign-in successful."))
+                                    .catch((error) => {
+                                        console.error("Custom token sign-in failed:", error);
+                                        // 토큰 로그인 실패 시 익명 로그인 시도
+                                        signInAnonymously(auth);
+                                    });
+                            } else {
+                                // 익명 로그인 시도 (인증 페이지가 익명 로그인 허용 시)
+                                signInAnonymously(auth);
+                            }
+                            
+                            // 로딩 제거 및 앱 화면 표시
+                            startApp();
+                        }
                     }
                 });
 
             } catch (error) {
-                console.error("Firebase 초기화 실패:", error);
-                showMessage("Firebase 연결에 실패했습니다.");
-                $('loading-overlay').style.display = 'none';
+                console.error("Firebase initialization failed:", error);
+                showMessage("Firebase 연결 또는 초기화에 실패했습니다.");
+                // 에러 발생 시에도 앱을 표시하여 사용자 상호작용 가능하게 함
+                startApp();
             }
         }
         
-        // ------------------ 앱 상태 및 로직 ------------------
+        // ------------------ 앱 로직 시작 함수 ------------------
+
+        function startApp() {
+            // 로딩 오버레이 제거 및 앱 화면 표시
+            $('loading-overlay').style.display = 'none';
+            $('authApp').style.display = 'flex';
+            
+            // 첫 단계 렌더링
+            renderStep();
+        }
+
+        // ------------------ 단계 관리 상태 ------------------
 
         let authState = {
-            currentStep: 1, // 1: Email, 2: Login, 3: Signup
+            currentStep: 1,
+            mode: null, // 'login' 또는 'signup'
             email: '',
+            password: '',
+            confirmPassword: '',
         };
 
         const STEP_TITLES = [
-            '이메일 입력 (1/3)',
-            '로그인 (2/3)',
-            '회원가입 (3/3)'
+            '모드 선택 (1/3)',
+            '정보 입력 (2/3)',
+            '인증 완료 (3/3)'
         ];
-        
-        function startAuthFlow() {
-            renderStep();
-            $('emailInput').focus();
-        }
+
+        // ------------------ 초기화 호출 ------------------
+        initFirebase();
 
         /**
          * 현재 단계에 따라 헤더 및 컨테이너 위치를 업데이트합니다.
@@ -388,79 +486,105 @@
             // 2. 컨테이너 슬라이드
             $('stepContainer').style.transform = `translateX(-${stepIndex * (100 / 3)}%)`;
 
-            // 3. 버튼 텍스트 및 유효성 검사
-            let buttonText = '다음';
-            
-            if (authState.currentStep === 2) {
-                buttonText = '로그인';
-                $('loginEmailDisplay').textContent = authState.email;
-                validateStep2();
-                $('passwordLogin').focus();
-            } else if (authState.currentStep === 3) {
-                buttonText = '가입하기';
-                $('signupEmailDisplay').textContent = authState.email;
-                validateStep3();
-                $('passwordSignup').focus();
-            } else {
-                validateStep1();
-                $('emailInput').focus();
-            }
+            // 3. 버튼 텍스트 및 가시성 제어
+            $('nextButton').textContent = authState.currentStep === 1 ? '다음' : 
+                                         (authState.currentStep === 2 ? (authState.mode === 'login' ? '로그인' : '회원가입 완료') : '메인으로 이동');
 
-            $('nextButton').textContent = buttonText;
+            // Step 3에서는 뒤로가기 버튼 숨김
+            $('backButton').style.visibility = authState.currentStep === 3 ? 'hidden' : 'visible';
+
+            // 4. 스텝별 추가 업데이트
+            if (authState.currentStep === 1) {
+                validateStep1();
+            } else if (authState.currentStep === 2) {
+                // 모드에 따라 Step 2 UI 조정
+                const isSignup = authState.mode === 'signup';
+                $('confirmPasswordGroup').style.display = isSignup ? 'block' : 'none';
+                $('step2Title').textContent = isSignup ? '새 계정 정보를 입력해주세요.' : '로그인 정보를 입력해주세요.';
+
+                // 이전 입력 값 복원
+                $('emailInput').value = authState.email;
+                $('passwordInput').value = authState.password;
+                $('confirmPasswordInput').value = authState.confirmPassword;
+                
+                validateStep2();
+            }
         }
 
         /**
-         * 다음 단계로 이동하거나 최종 인증 작업을 실행합니다.
+         * 다음 단계로 이동하거나 인증을 시도합니다.
          */
         async function nextStep() {
-            // 버튼 활성화가 되어 있다면, 다음 버튼 클릭은 유효하다고 가정하고 진행
-            // 다만, 로딩 시작 시 비활성화는 필수
-            $('nextButton').disabled = true; 
-            
             if (authState.currentStep === 1) {
-                const email = $('emailInput').value.trim();
-                if (!isValidEmail(email)) {
-                    showMessage('올바른 이메일 형식이 아닙니다.');
-                    $('nextButton').disabled = false;
+                if (authState.mode) {
+                    authState.currentStep++;
+                    renderStep();
+                }
+            } else if (authState.currentStep === 2) {
+                // Step 2: 인증 처리 로직
+                if (!validateStep2(true)) {
+                    showMessage('필수 정보를 확인해주세요.');
                     return;
                 }
-                authState.email = email;
                 
-                try {
-                    $('loading-text').textContent = '이메일 확인 중...';
-                    $('loading-overlay').style.display = 'flex';
-                    
-                    // Firebase: 이메일이 이미 사용 중인지 확인
-                    const methods = await fetchSignInMethodsForEmail(auth, email);
+                // 버튼 비활성화 (로딩 중 표시)
+                $('nextButton').disabled = true;
+                $('nextButton').textContent = '처리 중...';
+                
+                const email = authState.email;
+                const password = authState.password;
 
-                    if (methods.length > 0) {
-                        // 기존 사용자: 로그인 단계로 이동
-                        authState.currentStep = 2; 
-                        showMessage('기존 계정이 확인되었습니다. 로그인해주세요.');
-                    } else {
-                        // 신규 사용자: 회원가입 단계로 이동
-                        authState.currentStep = 3; 
-                        showMessage('새 계정을 만듭니다.');
+                try {
+                    if (authState.mode === 'login') {
+                        await signInWithEmailAndPassword(auth, email, password);
+                        $('completionMessage').textContent = '로그인이 완료되었습니다!';
+                        $('completionSubmessage').textContent = '이제 서비스를 자유롭게 이용하실 수 있습니다.';
+                    } else { // signup
+                        await createUserWithEmailAndPassword(auth, email, password);
+                        $('completionMessage').textContent = '회원가입이 완료되었습니다!';
+                        $('completionSubmessage').textContent = '환영합니다! 지금 바로 로그인되었습니다.';
                     }
                     
-                    $('loading-overlay').style.display = 'none';
+                    // 성공 시 Step 3로 이동
+                    authState.currentStep++;
                     renderStep();
-
+                    showMessage('✅ 인증 성공!');
+                    
                 } catch (error) {
-                    console.error("이메일 확인 오류:", error);
-                    showMessage(`오류: ${error.message.substring(0, 50)}...`);
-                    $('loading-overlay').style.display = 'none';
-                } finally {
+                    console.error("Authentication Error:", error);
+                    let errorMessage = '인증 중 알 수 없는 오류가 발생했습니다.';
+                    
+                    switch (error.code) {
+                        case 'auth/invalid-email':
+                            errorMessage = '잘못된 이메일 형식입니다.';
+                            break;
+                        case 'auth/user-disabled':
+                            errorMessage = '사용이 정지된 계정입니다.';
+                            break;
+                        case 'auth/user-not-found':
+                        case 'auth/wrong-password':
+                            errorMessage = '이메일 또는 비밀번호가 일치하지 않습니다.';
+                            break;
+                        case 'auth/email-already-in-use':
+                            errorMessage = '이미 사용 중인 이메일입니다.';
+                            break;
+                        case 'auth/weak-password':
+                            errorMessage = '비밀번호는 최소 6자 이상이어야 합니다.';
+                            break;
+                        default:
+                            errorMessage = `오류: ${error.message}`;
+                    }
+                    showMessage(`🚨 ${errorMessage}`);
+                    
+                    // 에러 발생 시 버튼 다시 활성화
                     $('nextButton').disabled = false;
+                    $('nextButton').textContent = authState.mode === 'login' ? '로그인' : '회원가입 완료';
                 }
-                
-            } else if (authState.currentStep === 2) {
-                // Firebase 로그인 실행 (Step 2)
-                await executeLogin();
-                
+
             } else if (authState.currentStep === 3) {
-                // Firebase 회원가입 실행 (Step 3)
-                await executeSignup();
+                // Step 3: 메인 페이지로 이동 (데모에서는 메시지 표시)
+                showMessage('메인 페이지로 이동합니다. (데모)');
+                // window.location.href = '/main'; // 실제 앱에서 사용
             }
         }
 
@@ -468,110 +592,95 @@
          * 이전 단계로 이동하거나 앱을 닫는 동작을 처리합니다.
          */
         function handleBack() {
-            if (authState.currentStep === 1) {
-                // 닫기 로직 (데모에서는 메시지만 표시)
-                showMessage('인증 페이지를 닫는 기능이 실행됩니다.');
-            } else if (authState.currentStep === 2 || authState.currentStep === 3) {
-                // 로그인/회원가입 페이지에서 뒤로가면 이메일 입력 단계로 돌아감
-                authState.currentStep = 1;
+            if (authState.currentStep > 1) {
+                authState.currentStep--;
                 renderStep();
+            } else {
+                showMessage('앱을 닫고 메인 화면으로 돌아갑니다. (데모)');
+                // 실제 앱에서는 window.history.back();
             }
         }
         
+        /**
+         * 로그인 또는 회원가입 모드를 선택하고 UI를 업데이트합니다.
+         */
+        function selectMode(mode) {
+            authState.mode = mode;
+            
+            // 모든 버튼에서 선택 클래스 제거
+            document.querySelectorAll('.mode-btn').forEach(btn => btn.classList.remove('selected-mode'));
+
+            // 선택된 버튼에 클래스 추가
+            if (mode === 'login') {
+                $('modeLogin').classList.add('selected-mode');
+            } else if (mode === 'signup') {
+                $('modeSignup').classList.add('selected-mode');
+            }
+            
+            // Step 1 유효성 검사 트리거
+            $('modeSelection').dispatchEvent(new Event('change'));
+        }
+
         // ------------------ 유효성 검사 (버튼 활성화) ------------------
 
         function isValidEmail(email) {
+            // 간단한 이메일 형식 검사 (더 강력한 정규식도 가능)
             return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
         }
 
         function validateStep1() {
+            $('nextButton').disabled = authState.mode === null;
+        }
+
+        function validateStep2(isSubmit = false) {
             const email = $('emailInput').value.trim();
-            $('nextButton').disabled = !isValidEmail(email);
-        }
-
-        function validateStep2() {
-            // 로그인: 비밀번호만 6자 이상인지 확인
-            const password = $('passwordLogin').value;
-            $('nextButton').disabled = password.length < 6;
-        }
-        
-        function validateStep3() {
-            // 회원가입: 비밀번호(6자 이상) 확인 (이름은 선택 사항이므로 필수가 아님)
-            const password = $('passwordSignup').value;
-            $('nextButton').disabled = password.length < 6;
-        }
-        
-        // ------------------ 최종 Firebase 인증 로직 ------------------
-
-        async function executeLogin() {
-            const email = authState.email;
-            const password = $('passwordLogin').value;
+            const password = $('passwordInput').value;
+            const confirmPassword = $('confirmPasswordInput').value;
+            const isSignup = authState.mode === 'signup';
             
-            $('nextButton').disabled = true;
-            $('nextButton').textContent = '로그인 중...';
+            // 상태 업데이트
+            authState.email = email;
+            authState.password = password;
+            authState.confirmPassword = confirmPassword;
 
-            try {
-                await signInWithEmailAndPassword(auth, email, password);
-                showMessage(`✅ 로그인 성공! (${email})`);
-                // onAuthStateChanged 리스너가 리디렉션/UI 처리를 담당함
-            } catch (error) {
-                console.error("로그인 오류:", error);
-                let errorMessage = '로그인 실패. 이메일 또는 비밀번호를 확인해주세요.';
-                if (error.code === 'auth/invalid-credential') {
-                    errorMessage = '잘못된 인증 정보입니다. 다시 시도해주세요.';
-                }
-                showMessage(errorMessage);
-            } finally {
-                $('nextButton').disabled = false;
-                $('nextButton').textContent = '로그인';
-            }
-        }
+            let isValid = true;
 
-        async function executeSignup() {
-            const email = authState.email;
-            // 비밀번호 입력 필드의 값을 명시적으로 가져옵니다. 
-            const password = $('passwordSignup').value; 
-            const displayName = $('nameInput').value.trim();
-            
-            $('nextButton').disabled = true;
-            $('nextButton').textContent = '가입 중...';
-
-            // Firebase createUserWithEmailAndPassword 호출 전에 비밀번호 유효성을 한 번 더 검사합니다.
-            if (password.length < 6) {
-                 showMessage('비밀번호는 6자 이상이어야 합니다.');
-                 $('nextButton').disabled = false;
-                 $('nextButton').textContent = '가입하기';
-                 return;
+            // 1. 이메일 검증
+            const emailValid = isValidEmail(email);
+            if (emailValid) {
+                $('emailFeedback').style.display = 'none';
+            } else if (isSubmit || email.length > 0) {
+                $('emailFeedback').style.display = 'block';
+                isValid = false;
             }
 
-            try {
-                // 비밀번호 변수를 사용
-                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-                
-                // 이름이 있다면 사용자 프로필 업데이트 (선택 사항)
-                if (displayName) {
-                    await updateProfile(userCredential.user, {
-                        displayName: displayName
-                    });
+            // 2. 비밀번호 길이 검증
+            const passwordValid = password.length >= 8;
+            if (passwordValid) {
+                $('passwordFeedback').style.display = 'none';
+            } else if (isSubmit || password.length > 0) {
+                $('passwordFeedback').style.display = 'block';
+                isValid = false;
+            }
+
+            // 3. 회원가입 모드일 경우 비밀번호 일치 검증
+            if (isSignup) {
+                const confirmPasswordValid = password === confirmPassword && password.length > 0;
+                if (confirmPasswordValid) {
+                    $('confirmPasswordFeedback').style.display = 'none';
+                } else if (isSubmit || confirmPassword.length > 0) {
+                    $('confirmPasswordFeedback').style.display = 'block';
+                    isValid = false;
                 }
                 
-                showMessage(`🎉 회원가입 성공! ${displayName || email}님, 환영합니다!`);
-                // onAuthStateChanged 리스너가 리디렉션/UI 처리를 담당함
-            } catch (error) {
-                console.error("회원가입 오류:", error);
-                let errorMessage = '회원가입 실패.';
-                if (error.code === 'auth/email-already-in-use') {
-                    errorMessage = '이미 사용 중인 이메일입니다. 로그인해주세요.';
-                } else if (error.code === 'auth/weak-password') {
-                    errorMessage = '비밀번호는 6자 이상이어야 합니다.';
-                } else if (error.code === 'auth/missing-password') { 
-                    errorMessage = '비밀번호를 입력해주세요.';
-                }
-                showMessage(errorMessage);
-            } finally {
-                $('nextButton').disabled = false;
-                $('nextButton').textContent = '가입하기';
+                // 회원가입은 세 가지 조건 모두 충족해야 함
+                $('nextButton').disabled = !(emailValid && passwordValid && confirmPasswordValid);
+            } else {
+                // 로그인 모드는 이메일과 비밀번호 길이만 충족하면 됨
+                $('nextButton').disabled = !(emailValid && passwordValid);
             }
+            
+            return isValid;
         }
 
         // ------------------ 유틸리티 ------------------
@@ -592,15 +701,12 @@
             }, 3000);
         }
 
-        // 전역 범위에서 함수 접근 가능하도록 설정
+        // 전역 스코프에 함수 노출 (HTML 인라인 이벤트 핸들러용)
         window.handleBack = handleBack;
         window.nextStep = nextStep;
+        window.selectMode = selectMode;
         window.validateStep1 = validateStep1;
         window.validateStep2 = validateStep2;
-        window.validateStep3 = validateStep3;
-        
-        // 앱 초기화
-        initFirebase();
     </script>
 </body>
 </html>
